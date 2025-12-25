@@ -1,0 +1,1197 @@
+/* aboutcss.css */
+
+/* --- Main Wrapper & Scoped Variables --- */
+.about-page {
+  /* Updated Variables to match the design palette */
+  --bg-page: #f0f9ff;           /* Light Sky Blue Background */
+  --bg-card: #ffffff;           /* White */
+  --primary: #0ea5e9;           /* Sky Blue 500 */
+  --primary-dark: #0284c7;      /* Sky Blue 600 */
+  --text-main: #0f172a;         /* Slate 900 */
+  --text-muted: #64748b;        /* Slate 500 */
+  --border-light: #e2e8f0;      /* Slate 200 */
+  --accent-gradient: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+
+  /* Base Styles */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text-muted);
+  background-color: var(--bg-page);
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- Scoped Reset --- */
+.about-page *, 
+.about-page *::before, 
+.about-page *::after {
+  box-sizing: border-box;
+}
+
+.about-page h1, .about-page h2, .about-page h3, 
+.about-page h4, .about-page h5, .about-page h6,
+.about-page p, .about-page ul, .about-page li,
+.about-page figure, .about-page blockquote, .about-page dl, .about-page dd {
+  margin: 0;
+  padding: 0;
+}
+
+/* --- Layout Containers --- */
+.about-page .container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.about-page .container-narrow {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* --- Shared Section Styles --- */
+.about-page section {
+  /* CHANGED: Reduced from 8rem to 4rem */
+  padding: 4rem 0;
+  width: 100%;
+}
+
+.about-page .center-text { text-align: center; }
+
+.about-page .section-title {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.03em;
+  position: relative;
+  display: inline-block;
+}
+
+.about-page .center-text .section-title::after {
+  content: '';
+  display: block;
+  width: 80px;
+  height: 6px;
+  background: linear-gradient(90deg, #0ea5e9 0%, #38bdf8 100%);
+  margin: 1.5rem auto 0 auto;
+  border-radius: 10px;
+  opacity: 0.8;
+}
+
+.about-page .section-subtitle {
+  font-size: 1.25rem;
+  max-width: 45rem;
+  /* CHANGED: Reduced margin bottom from 5rem to 3rem */
+  margin: 0 auto 3rem auto;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* --- Hero Section --- */
+.about-page .hero-section {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 50%, #e0f2fe 0%, #ffffff 70%); 
+  text-align: center;
+  padding: 4rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.about-page .hero-section::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.05) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.about-page .hero-section::after {
+  content: '';
+  position: absolute;
+  bottom: -20%;
+  left: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.05) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.about-page .hero-content {
+  max-width: 65rem;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.about-page .hero-title {
+  font-size: clamp(3.5rem, 5vw, 5rem);
+  font-weight: 900;
+  color: #0c4a6e;
+  margin-bottom: 1.5rem;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  text-align: center;
+  width: 100%;
+}
+
+.about-page .hero-description {
+  font-size: 1.35rem;
+  color: #475569;
+  max-width: 48rem;
+  margin: 0 auto;
+  font-weight: 400;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* --- Mission Section --- */
+.about-page .mission-section { 
+  background-color: var(--bg-card);
+  position: relative;
+}
+
+.about-page .mission-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  /* CHANGED: Reduced gap from 5rem to 3rem */
+  gap: 3rem;
+  align-items: center;
+}
+
+.about-page .mission-text .text-paragraph {
+  margin-bottom: 2rem;
+  font-size: 1.2rem;
+  color: #475569;
+  border-left: 4px solid #bae6fd;
+  padding-left: 1.5rem;
+}
+
+.about-page .mission-image {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 2rem; 
+  padding: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+  border: 1px solid #bae6fd;
+}
+
+.about-page .mission-icon {
+  width: 10rem;
+  height: 10rem;
+  color: var(--primary-dark);
+  filter: drop-shadow(0 20px 30px rgba(14, 165, 233, 0.2));
+  transform: rotate(-10deg);
+  transition: transform 0.5s ease;
+}
+
+.about-page .mission-image:hover .mission-icon {
+  transform: rotate(0deg) scale(1.05);
+}
+
+/* --- Features Grid --- */
+.about-page .features-section { background-color: var(--bg-page); }
+
+.about-page .features-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.about-page .feature-card {
+  background: var(--bg-card);
+  padding: 3rem 2.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+}
+
+.about-page .feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+
+.about-page .feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.15);
+  border-color: #bae6fd;
+}
+
+.about-page .feature-card:hover::before {
+  transform: scaleX(1);
+}
+
+.about-page .card-icon {
+  width: 4rem;
+  height: 4rem;
+  color: var(--primary-dark);
+  margin-bottom: 1.5rem;
+  background: #f0f9ff;
+  padding: 1rem;
+  border-radius: 1rem;
+  display: inline-block;
+}
+
+.about-page .card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.about-page .card-description {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+}
+
+/* --- How It Works --- */
+.about-page .process-section { background-color: var(--bg-card); }
+
+.about-page .process-list {
+  display: flex;
+  flex-direction: column;
+  max-width: 50rem;
+  margin: 0 auto;
+}
+
+.about-page .process-step {
+  display: flex;
+  /* CHANGED: Reduced gap from 3rem to 2rem */
+  gap: 2rem;
+  position: relative;
+  /* CHANGED: Reduced bottom padding from 5rem to 3rem */
+  padding-bottom: 3rem;
+}
+
+/* FIXED: Line alignment */
+.about-page .process-step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 2.25rem; 
+  transform: translateX(-50%);
+  top: 4.5rem;
+  bottom: 0;
+  width: 3px;
+  background: var(--border-light);
+}
+
+.about-page .step-number {
+  width: 4.5rem;
+  height: 4.5rem;
+  background-color: var(--primary);
+  color: white;
+  font-weight: 800;
+  font-size: 1.75rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 2;
+  box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.3);
+}
+
+.about-page .step-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 0.75rem;
+  padding-top: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.about-page .step-description {
+  font-size: 1.15rem;
+  color: var(--text-muted);
+}
+
+/* --- Disclaimer: Modern Soft UI --- */
+.about-page .disclaimer-section {
+  background-color: #ffffff;
+  /* subtle orange border all around instead of just left */
+  border: 1px solid #fed7aa; 
+  /* soft glow shadow */
+  box-shadow: 0 10px 30px -5px rgba(249, 115, 22, 0.1); 
+  border-radius: 1rem; /* softer, larger radius */
+  padding: 2.5rem;
+  margin: 3rem auto;
+  width: 100%;
+  max-width: 1280px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Optional: Adds a subtle accent bar at the top */
+.about-page .disclaimer-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #f97316, #fb923c);
+}
+
+.about-page .disclaimer-content {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.about-page .disclaimer-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  /* Icon sits in a soft circle background now */
+  background-color: #fff7ed;
+  color: #ea580c;
+  padding: 0.75rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 0; /* Alignment handled by padding */
+}
+
+.about-page .disclaimer-title {
+  color: #ea580c;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.about-page .disclaimer-text {
+  color: #52525b; /* Darker grey for better readability than orange */
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+/* FORCE LEFT ALIGNMENT */
+.about-page .disclaimer-title,
+.about-page .disclaimer-text {
+  text-align: left;
+  display: block; /* Ensures they take up the full width to align properly */
+}
+/* --- Team Section --- */
+.about-page .team-section { background-color: var(--bg-page); }
+
+.about-page .team-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+}
+
+.about-page .team-card {
+  background: var(--bg-card);
+  padding: 3rem 2rem;
+  border-radius: 1rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid transparent;
+}
+
+.about-page .team-card:hover {
+  transform: translateY(-5px);
+  border-color: #bae6fd;
+  box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.15);
+}
+
+.about-page .team-avatar {
+  width: 9rem;
+  height: 9rem;
+  border-radius: 50%;
+  margin: 0 auto 1.5rem auto;
+  border: 4px solid white;
+  box-shadow: 0 0 0 3px var(--border-light);
+  object-fit: cover;
+}
+
+.about-page .team-name { font-size: 1.5rem; font-weight: 800; color: var(--text-main); }
+
+.about-page .team-role {
+  color: var(--primary-dark);
+  font-weight: 600;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #f0f9ff;
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 2rem;
+  margin-top: 0.5rem;
+}
+
+.about-page .team-bio { font-size: 1rem; color: var(--text-muted); }
+
+/* =========================================
+   1. TECHNOLOGY SECTION (Now Light by Default)
+   ========================================= */
+
+/* --- LIGHT MODE (Default) --- */
+.about-page .technology-section {
+  background-color: #ffffff; /* White Background */
+  background-image: none;    /* Remove dark gradient */
+  color: #0f172a;            /* Dark Text */
+  padding: 4rem 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.about-page .technology-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 3rem;
+}
+
+.about-page .column-title {
+  font-size: 1.5rem;
+  font-weight: 700; /* Made slightly bolder for light mode */
+  color: #1e293b;   /* Dark Slate Title */
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.about-page .column-title::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 24px;
+  background: #3b82f6; /* Blue accent */
+  border-radius: 4px;
+}
+
+.about-page .check-list { list-style: none; padding: 0; }
+
+.about-page .check-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-weight: 500;
+  color: #64748b; /* Grey text for items */
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+  padding: 1rem;
+  
+  /* Light Mode Card Style */
+  background: #f8fafc; /* Very light grey card */
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.about-page .check-item:hover {
+  transform: translateY(-3px);
+  background: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  color: #3b82f6;
+}
+
+.about-page .check-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+/* --- DARK MODE (.dark-theme) --- */
+/* This restores the Dark Slate look when dark mode is active */
+.dark-theme .technology-section {
+  background-color: #0f172a; 
+  background-image: radial-gradient(circle at top right, #1e293b, #0f172a); 
+  color: white;
+}
+
+.dark-theme .column-title {
+  color: #f1f5f9;
+}
+
+.dark-theme .check-item {
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid #1e293b;
+  color: #94a3b8;
+  box-shadow: none;
+}
+
+.dark-theme .check-item:hover {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: #38bdf8;
+  color: white;
+}
+
+.dark-theme .check-icon {
+  color: #38bdf8;
+}
+
+
+/* =========================================
+   2. COMPACT BENEFITS SECTION
+   ========================================= */
+
+/* --- SHARED STRUCTURE --- */
+.benefits-section {
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.benefit-card {
+  padding: 1rem 0.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 0.75rem;
+  transition: transform 0.2s ease;
+}
+
+.card-icon {
+  width: 24px !important;
+  height: 24px !important;
+  margin-bottom: 0.4rem !important;
+}
+
+.benefit-title {
+  margin: 0 0 0.2rem 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.benefit-card p {
+  font-size: 0.75rem !important;
+  line-height: 1.2;
+  margin: 0;
+}
+
+/* --- LIGHT MODE (Default) --- */
+/* Pure white background for a clean light look */
+.benefits-section {
+  background-color: #ffffff; 
+  border: 1px solid #e2e8f0;
+}
+
+.benefit-card {
+  background-color: #f8fafc; /* Slight contrast for cards */
+  border: 1px solid #e2e8f0;
+}
+
+.benefit-card:hover {
+  background-color: #ffffff;
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+.card-icon { color: #3bcaf6; }
+.benefit-title { color: #1e293b; }
+.benefit-card p { color: #ffffff !important; }
+
+/* --- DARK MODE (.dark-theme) --- */
+/* Switches to Blue Glass Gradient */
+.dark-theme .benefits-section {
+  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+  border: none;
+}
+
+.dark-theme .benefit-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: none;
+}
+
+.dark-theme .benefit-card:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark-theme .card-icon { color: white; }
+.dark-theme .benefit-title { color: white; }
+.dark-theme .benefit-card p { color: #e0f2fe !important; }
+/* --- Benefits --- */
+.about-page .benefits-section {
+  background: var(--accent-gradient);
+  padding: 4rem;
+  border-radius: 2rem;
+  color: white;
+}
+
+.about-page .benefits-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.about-page .benefit-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.about-page .benefit-title {
+  color: #ffffff;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+  font-size: 1.35rem;
+}
+
+.about-page .benefit-card p { color: rgba(255,255,255,0.9); }
+
+/* --- FAQ --- */
+.about-page .faq-section { background-color: var(--bg-page); }
+
+.about-page .faq-list { display: flex; flex-direction: column; gap: 1.5rem; max-width: 60rem; margin: 0 auto; }
+
+.about-page .faq-item {
+  background: var(--bg-card);
+  border: 1px solid transparent;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border-radius: 1rem;
+  padding: 2.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.about-page .faq-item:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+}
+
+.about-page .faq-question {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.sympto-footer {
+  background-color: #f8f9fa; /* Light Grey Background */
+  color: #1f2937; /* Dark Grey Text */
+  /* CHANGED: Reduced padding */
+  padding: 40px 20px 20px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  border-top: 1px solid #e5e7eb;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sympto-footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Container Wrapper (Added for structural integrity) */
+.sympto-footer {
+  background-color: #f9fafb; /* Light gray background */
+  padding: 40px 20px 20px;
+  font-family: system-ui, -apple-system, sans-serif;
+  border-top: 1px solid #e5e7eb;
+}
+
+.sympto-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* =========================================
+   Top Section: Layout (Switched to Grid)
+   ========================================= */
+.sympto-footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr; 
+  /* CHANGED: Reduced gap from 40px to 30px */
+  gap: 30px;
+  margin-bottom: 40px;
+  align-items: start;
+}
+
+/* Brand Section */
+.footer-brand {
+  max-width: 350px; 
+}
+
+.footer-brand img {
+  height: 36px;
+  width: auto;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.footer-brand p {
+  color: #6b7280;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Links Groups */
+.footer-links-group {
+  justify-self: start; 
+}
+
+.footer-links-group h4 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 20px;
+  margin-top: 5px; 
+}
+
+.footer-links-group ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links-group li {
+  margin-bottom: 12px;
+}
+
+.footer-links-group a {
+  text-decoration: none;
+  color: #4b5563;
+  font-size: 0.95rem;
+  transition: color 0.2s ease;
+}
+
+.footer-links-group a:hover {
+  color: #2563eb;
+}
+/* =========================================
+   SCOPED DARK THEME (Won't affect other pages)
+   Usage: <div class="about-page dark-theme">
+   ========================================= */
+
+/* Apply variables when .about-page HAS .dark-theme class */
+.about-page.dark-theme {
+  --bg-page: #020617;
+  --bg-card: #0f172a;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-light: #1e293b;
+  --primary: #38bdf8;
+  --primary-dark: #7dd3fc;
+  --accent-gradient: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+}
+
+/* Scoped Overrides */
+.about-page.dark-theme .hero-section {
+  background: radial-gradient(circle at 50% 50%, #1e293b 0%, #020617 80%);
+}
+
+.about-page.dark-theme .hero-section::before,
+.about-page.dark-theme .hero-section::after {
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
+}
+
+.about-page.dark-theme .hero-title {
+  color: #f0f9ff;
+  text-shadow: 0 0 25px rgba(56, 189, 248, 0.35);
+}
+
+.about-page.dark-theme .mission-section,
+.about-page.dark-theme .testimonials-section,
+.about-page.dark-theme .faq-section {
+  background-color: var(--bg-page);
+}
+
+.about-page.dark-theme .feature-card,
+.about-page.dark-theme .testimonial-card,
+.about-page.dark-theme .faq-item {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-light);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5);
+}
+
+.about-page.dark-theme .feature-card:hover,
+.about-page.dark-theme .faq-item:hover {
+  border-color: var(--primary);
+  box-shadow: 0 10px 30px -10px rgba(56, 189, 248, 0.2);
+}
+
+.about-page.dark-theme .text-paragraph,
+.about-page.dark-theme .hero-description,
+.about-page.dark-theme .card-description,
+.about-page.dark-theme .step-description,
+.about-page.dark-theme .testimonial-text,
+.about-page.dark-theme .faq-answer-wrapper {
+  color: #cbd5e1 !important;
+}
+
+.about-page.dark-theme .card-title,
+.about-page.dark-theme .step-title,
+.about-page.dark-theme .testimonial-name,
+.about-page.dark-theme .faq-question {
+  color: #f8fafc !important;
+}
+
+.about-page.dark-theme .card-icon {
+  background: #1e293b;
+  color: var(--primary);
+}
+
+.about-page.dark-theme .step-number {
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+  color: #0f172a;
+}
+
+.about-page.dark-theme .testimonial-quote-icon,
+.about-page.dark-theme .chevron-icon {
+  color: #cbd5e1 !important;
+}
+
+/* Footer Specifics in Dark Mode */
+.about-page.dark-theme .sympto-footer {
+  background-color: #0b1120;
+  border-top-color: #1e293b;
+  color: #94a3b8;
+}
+/* =========================================
+   DARK THEME CLASS OVERRIDES
+   Usage: Add class="dark-theme" to your <body> tag
+   ========================================= */
+
+/* 1. Global Transition (Makes the toggle smooth) */
+.about-page, .about-page *, 
+.sympto-footer, .sympto-footer * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 2. Redefine Variables for .dark-theme */
+.dark-theme .about-page {
+  /* Backgrounds: Deep Slate & Navy */
+  --bg-page: #020617;      /* Slate 950 */
+  --bg-card: #0f172a;      /* Slate 900 */
+  
+  /* Text: High contrast off-whites */
+  --text-main: #f8fafc;    /* Slate 50 */
+  --text-muted: #94a3b8;   /* Slate 400 */
+  
+  /* Borders */
+  --border-light: #1e293b; /* Slate 800 */
+  
+  /* Accents: Lighter blue to glow against dark */
+  --primary: #38bdf8;      /* Sky Blue 400 */
+  --primary-dark: #7dd3fc; /* Sky Blue 300 */
+  
+  /* Update Gradient to be darker */
+  --accent-gradient: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+}
+
+/* 3. Hero Section - Spotlight Effect */
+.dark-theme .about-page .hero-section {
+  background: radial-gradient(circle at 50% 50%, #1e293b 0%, #020617 80%);
+}
+
+.dark-theme .about-page .hero-section::before,
+.dark-theme .about-page .hero-section::after {
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
+}
+
+.dark-theme .about-page .hero-title {
+  color: #f0f9ff; 
+  text-shadow: 0 0 25px rgba(56, 189, 248, 0.35); /* Glow effect */
+}
+
+.dark-theme .about-page .hero-description {
+  color: #cbd5e1;
+}
+
+/* 4. Mission Section */
+.dark-theme .about-page .mission-section {
+  background-color: #0b1120;
+}
+
+.dark-theme .about-page .mission-text .text-paragraph {
+  color: #cbd5e1;
+  border-left-color: var(--primary);
+}
+
+.dark-theme .about-page .mission-image {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-color: #334155;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+}
+
+/* 5. Feature Cards */
+.dark-theme .about-page .feature-card {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+}
+
+.dark-theme .about-page .feature-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 10px 30px -10px rgba(56, 189, 248, 0.2); /* Blue glow */
+}
+
+.dark-theme .about-page .card-icon {
+  background: #1e293b;
+  color: var(--primary);
+}
+
+/* 6. Process Steps */
+.dark-theme .about-page .step-number {
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+  color: #0f172a; /* Dark text on the blue box for contrast */
+}
+
+/* 7. Disclaimer Section (High Contrast) */
+.dark-theme .about-page .disclaimer-section {
+  background-color: #431407; /* Deep Brown/Orange */
+  border-left-color: #fb923c;
+}
+
+.dark-theme .about-page .disclaimer-title {
+  color: #fdba74;
+}
+
+.dark-theme .about-page .disclaimer-text {
+  color: #fed7aa;
+}
+
+/* 8. Team Section */
+.dark-theme .about-page .team-avatar {
+  border-color: var(--bg-card);
+}
+
+.dark-theme .about-page .team-role {
+  background: #1e293b;
+  color: var(--primary);
+}
+
+/* 9. Glassmorphism adjustments */
+.dark-theme .about-page .benefit-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark-theme .about-page .benefit-title {
+  color: #fff;
+}
+
+/* 10. FAQ */
+.dark-theme .about-page .faq-item:hover {
+  border-color: var(--primary);
+}
+
+/* 11. Footer Styling */
+.dark-theme .sympto-footer {
+  background-color: #0b1120;
+  border-top-color: #1e293b;
+  color: #94a3b8;
+}
+
+.dark-theme .footer-links-group h4 {
+  color: #f8fafc;
+}
+
+.dark-theme .footer-links-group a {
+  color: #94a3b8;
+}
+
+.dark-theme .footer-links-group a:hover {
+  color: var(--primary);
+}
+
+.dark-theme .footer-brand p {
+  color: #64748b;
+}
+/* =========================================
+   ADDITIONS FOR REACT COMPONENTS
+   (Paste at the bottom of aboutcss.css)
+   ========================================= */
+
+/* --- Testimonials Section --- */
+.testimonials-section {
+  /* CHANGED: Reduced padding */
+  padding: 4rem 0;
+  background-color: #f8fafc; /* Light mode bg */
+  transition: background-color 0.3s ease;
+}
+
+/* FIXED: Grid Alignment */
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+  align-items: stretch; /* Cards will be same height */
+}
+
+/* FIXED: Testimonial Card Layout */
+.testimonial-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  position: relative;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  display: flex;         /* Added */
+  flex-direction: column; /* Added */
+  height: 100%;          /* Added */
+}
+
+.testimonial-quote-icon {
+  color: #e2e8f0;
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+}
+
+.testimonial-text {
+  color: #334155;
+  font-style: italic;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.testimonial-name {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.testimonial-location {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+/* --- FAQ Specifics --- */
+.faq-answer-wrapper {
+  margin-top: 1rem;
+  color: #475569;
+  line-height: 1.6;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1rem;
+}
+
+/* --- DARK THEME OVERRIDES --- */
+.dark-theme .testimonials-section {
+  background-color: var(--bg-page); /* Matches main dark bg */
+}
+
+.dark-theme .testimonial-card {
+  background-color: var(--bg-card);
+  border-color: var(--border-light);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5);
+}
+
+.dark-theme .testimonial-text { color: #cbd5e1; }
+.dark-theme .testimonial-name { color: #f8fafc; }
+.dark-theme .testimonial-location { color: #94a3b8; }
+.dark-theme .testimonial-quote-icon { color: #1e293b; } /* Darker quote mark */
+
+.dark-theme .faq-item {
+  background-color: var(--bg-card) !important; /* Override inline if stuck */
+  border-color: var(--border-light);
+}
+
+.dark-theme .faq-question { color: #f8fafc !important; }
+.dark-theme .faq-answer-wrapper {
+  color: #cbd5e1 !important;
+  border-top-color: #1e293b !important;
+}
+
+/* Fix SVG colors in dark mode */
+.dark-theme .chevron-icon { color: #cbd5e1 !important; }
+/* Optional: Invert Brand Logo in Footer if it's black */
+/* .dark-theme .footer-brand img { filter: invert(1) brightness(2); } */
+
+.about-page.dark-theme .footer-links-group h4 { color: #f8fafc; }
+.about-page.dark-theme .footer-links-group a { color: #94a3b8; }
+.about-page.dark-theme .footer-links-group a:hover { color: var(--primary); }
+/* =========================================
+   Mobile Responsiveness (Update this part too)
+   ========================================= */
+@media (max-width: 768px) {
+  .sympto-footer-top {
+    display: flex;       /* Switch back to flex stack on mobile */
+    flex-direction: column;
+    gap: 40px;
+  }
+  
+  .footer-brand, 
+  .footer-links-group {
+    text-align: left; /* Keep left align usually looks better than center for lists */
+    width: 100%;
+  }
+
+  /* Optional: Indent links slightly on mobile */
+  .footer-links-group {
+    border-left: 2px solid #e5e7eb;
+    padding-left: 20px;
+  }
+}
+
+/* --- Responsive --- */
+@media (min-width: 1024px) {
+  .about-page .mission-grid { grid-template-columns: 1fr 1fr; }
+  .about-page .features-grid { grid-template-columns: repeat(3, 1fr); }
+  .about-page .team-grid { grid-template-columns: repeat(3, 1fr); }
+  .about-page .technology-grid { grid-template-columns: 1fr 1fr; }
+  .about-page .benefits-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  .about-page .hero-title { font-size: 3rem; }
+  .about-page .section-title { font-size: 2.25rem; }
+  .about-page .mission-image { order: -1; padding: 3rem; }
+  .about-page .step-number { width: 3.5rem; height: 3.5rem; font-size: 1.25rem; }
+  .about-page .process-step { gap: 1.5rem; }
+  .about-page .technology-section { padding: 4rem 0; }
+  .about-page .benefits-section { padding: 2rem; }
+}

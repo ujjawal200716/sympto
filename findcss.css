@@ -1,0 +1,197 @@
+/* File: src/findcss.css */
+
+/* =========================================
+   1. LIGHT MODE (DEFAULT)
+   ========================================= */
+
+/* The outer container (for z-index context) */
+.find-modal-overlay {
+    z-index: 1000; 
+}
+
+.find-modal-content {
+    /* Positioning */
+    position: fixed; 
+    
+    /* Appearance */
+    display: flex;
+    align-items: center;
+    gap: 10px; 
+    padding: 8px 12px;
+    
+    /* Light Mode Colors */
+    background-color: #ffffff; 
+    border: 1px solid #cceeff; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+    color: #333333; 
+    
+    /* Interactions */
+    cursor: grab; 
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    border-radius: 8px;
+}
+
+/* Input Field */
+.find-input {
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 180px; 
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    cursor: text; 
+
+    /* Light Mode Input Colors */
+    border: 1px solid #dddddd; 
+    background-color: #f7f7f7; 
+    color: #333333;
+}
+
+.find-input::placeholder {
+    color: #999999; 
+}
+
+.find-input:focus {
+    border-color: #3498db; 
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+/* Controls Container */
+.find-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Navigation and Close Buttons */
+.find-modal-content button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; 
+    transition: background-color 0.15s;
+    color: #333333; 
+}
+
+.find-modal-content button svg path {
+    fill: currentColor;
+}
+
+.find-modal-content button:disabled {
+    cursor: not-allowed;
+    color: #bbbbbb; 
+    opacity: 1; 
+}
+
+.find-modal-content button:not(:disabled):hover {
+    background-color: #e8f0fe; 
+    color: #3498db; 
+}
+
+/* Match Count Text */
+.match-count {
+    font-size: 14px;
+    color: #333333; 
+    min-width: 60px; 
+    text-align: center;
+    padding: 0 5px;
+}
+
+.match-count.no-match {
+    color: #e74c3c; /* Red alert */
+    font-weight: 600;
+}
+
+
+/* --- Highlight Styles --- */
+
+/* Standard found instance */
+.highlight-find {
+    background-color: #ffff99; 
+    color: #000; /* Force black text for contrast on yellow */
+    padding: 1px 0;
+    line-height: inherit;
+    display: inline;
+}
+
+/* Currently selected instance */
+.active-highlight {
+    background-color: #3498db; 
+    color: white; 
+    box-shadow: 0 0 4px rgba(52, 152, 219, 0.5);
+    border-radius: 2px;
+    outline: none;
+    transition: background-color 0.3s;
+}
+
+/* =========================================
+   2. DARK MODE OVERRIDES
+   ========================================= */
+/* Applies when .dark-theme contains the modal */
+
+.dark-theme .find-modal-content {
+    background-color: #0f172a; /* Dark Slate Background */
+    border-color: #334155;     /* Dark Slate Border */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); 
+    color: #f1f5f9;            /* Off-white text */
+}
+
+/* Dark Input Field */
+.dark-theme .find-input {
+    background-color: #1e293b; /* Darker Slate */
+    border-color: #475569;     /* Slate Gray Border */
+    color: #f1f5f9;            /* White Text */
+}
+
+.dark-theme .find-input::placeholder {
+    color: #94a3b8; /* Dimmed Gray Placeholder */
+}
+
+.dark-theme .find-input:focus {
+    border-color: #60a5fa; /* Lighter Blue Focus */
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+/* Dark Buttons */
+.dark-theme .find-modal-content button {
+    color: #cbd5e1; /* Light Gray Icon */
+}
+
+.dark-theme .find-modal-content button:not(:disabled):hover {
+    background-color: #1e293b; /* Dark Hover BG */
+    color: #60a5fa;            /* Light Blue Icon */
+}
+
+.dark-theme .find-modal-content button:disabled {
+    color: #475569; /* Disabled Gray */
+}
+
+/* Dark Text Counters */
+.dark-theme .match-count {
+    color: #e2e8f0;
+}
+
+.dark-theme .match-count.no-match {
+    color: #f87171; /* Light Red for dark mode visibility */
+}
+
+/* Dark Mode Highlights */
+/* Note: We generally keep the yellow highlight but ensure text is black 
+   so it remains readable even on a dark page background */
+
+.dark-theme .highlight-find {
+    background-color: #fbbf24; /* Amber-400 (Slightly darker yellow/orange) */
+    color: #000000;            /* Always black text inside highlight */
+}
+
+.dark-theme .active-highlight {
+    background-color: #3b82f6; /* Blue-500 */
+    color: #ffffff;
+    box-shadow: 0 0 4px rgba(59, 130, 246, 0.6);
+}

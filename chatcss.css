@@ -1,0 +1,236 @@
+/* =========================================
+   1. RESET & BASE
+   ========================================= */
+.cw-widget-wrapper * {
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+}
+
+/* =========================================
+   2. MAIN WIDGET WRAPPER & VARIABLES
+   ========================================= */
+.cw-widget-wrapper {
+  /* --- VARIABLES (Scoped locally, not in :root) --- */
+  --primary-blue: #2563eb;
+  --emergency-red: #dc2626;
+  --bg-gray: #f9fafb;
+  --border-color: #e5e7eb;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+
+  /* --- POSITIONING --- */
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  z-index: 9999 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none; /* Allows clicks to pass through */
+}
+
+/* =========================================
+   3. THE POPUP WINDOW
+   ========================================= */
+.cw-popup {
+  width: 360px !important;
+  max-height: 600px;
+  background-color: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  margin-bottom: 16px;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  transform-origin: bottom right;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cw-popup.cw-hidden {
+  opacity: 0;
+  transform: scale(0.9) translateY(20px);
+  visibility: hidden;
+}
+
+/* =========================================
+   4. CONTENT & HEADER
+   ========================================= */
+.cw-content {
+  flex: 1;
+  overflow-y: auto;
+  background-color: var(--bg-gray);
+}
+
+.cw-header-item {
+  padding: 20px;
+  background: white;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cw-header-item h3 { margin: 0; font-size: 18px; color: var(--text-main); }
+.cw-header-item p { margin: 4px 0 0 0; font-size: 14px; color: var(--text-muted); }
+
+/* =========================================
+   5. LIST ITEMS
+   ========================================= */
+.cw-list { 
+  list-style: none; 
+  padding: 12px; 
+  margin: 0; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 8px; 
+}
+
+.cw-list-item {
+  background: white;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.cw-list-item:hover { 
+  border-color: var(--primary-blue); 
+  transform: translateY(-1px); 
+}
+
+/* Emergency Category Red Text */
+.cw-list-item[data-id="2"] h4 { color: var(--emergency-red); }
+
+.cw-list-item div { flex: 1; }
+.cw-list-item h4 { margin: 0; font-size: 15px; font-weight: 600; color: var(--text-main); }
+.cw-list-item p { margin: 2px 0 0 0; font-size: 13px; color: var(--text-muted); }
+
+/* =========================================
+   6. Q&A DRILL DOWN
+   ========================================= */
+.cw-qa-header {
+  padding: 12px;
+  background: white;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cw-back-btn {
+  background: none; border: none; cursor: pointer; color: var(--primary-blue);
+  display: flex; align-items: center; font-size: 14px; font-weight: 500;
+}
+
+.cw-question-btn {
+  width: 100%; text-align: left; background: white; border: none;
+  padding: 14px; display: flex; justify-content: space-between; align-items: center;
+  cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-main);
+}
+
+.cw-answer {
+  max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;
+  background: #f3f4f6; padding: 0 14px;
+}
+
+.cw-answer-open { max-height: 200px; padding: 12px 14px; border-top: 1px solid #e5e7eb; }
+.cw-answer p { margin: 0; font-size: 13.5px; line-height: 1.5; color: #4b5563; }
+
+/* =========================================
+   7. FAB TOGGLE BUTTON
+   ========================================= */
+.cw-fab {
+  width: 56px !important; height: 56px !important; border-radius: 50%;
+  background-color: var(--primary-blue) !important; color: white; border: none;
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; pointer-events: auto;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cw-fab:active { transform: scale(0.9); }
+
+/* =========================================
+   8. MOBILE RESPONSIVENESS
+   ========================================= */
+@media (max-width: 480px) {
+  .cw-widget-wrapper {
+    bottom: 0 !important; right: 0 !important; width: 100%;
+  }
+  .cw-popup {
+    width: 100vw !important; height: 100vh !important; max-height: 100vh !important;
+    border-radius: 0; margin-bottom: 0;
+  }
+  .cw-fab {
+    position: absolute; bottom: 20px; right: 20px; z-index: 10000;
+  }
+  .cw-popup.cw-visible { transform: translateY(0); }
+}
+
+/* =========================================
+   9. DARK MODE OVERRIDES
+   ========================================= */
+
+/* Main Containers */
+.dark-theme .cw-popup {
+    background-color: #0f172a; /* Dark Slate */
+    border-color: #1e293b;
+}
+
+.dark-theme .cw-content {
+    background-color: #020617; /* Very dark background */
+}
+
+/* Text Colors */
+.dark-theme h3, 
+.dark-theme h4, 
+.dark-theme span {
+    color: #f8fafc; /* Off-white text */
+}
+
+.dark-theme p {
+    color: #94a3b8; /* Slate gray text */
+}
+
+/* Header & List Items */
+.dark-theme .cw-header-item {
+    background-color: #0f172a;
+    border-bottom-color: #1e293b;
+}
+
+.dark-theme .cw-list-item {
+    background-color: #0f172a;
+    border-color: #1e293b;
+}
+
+.dark-theme .cw-list-item:hover {
+    border-color: #3b82f6; /* Blue border on hover */
+    background-color: #1e293b;
+}
+
+/* Drill Down & Answers */
+.dark-theme .cw-qa-header {
+    background-color: #0f172a;
+    border-bottom-color: #1e293b;
+}
+
+.dark-theme .cw-question-btn {
+    background-color: #0f172a;
+    color: #f8fafc;
+}
+
+.dark-theme .cw-answer {
+    background-color: #020617;
+    border-top-color: #1e293b;
+}
+
+.dark-theme .cw-answer p {
+    color: #cbd5e1;
+}
+
+/* Icons */
+.dark-theme .cw-icon-arrow,
+.dark-theme .cw-chevron {
+    color: #64748b;
+}

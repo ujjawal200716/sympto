@@ -1,0 +1,599 @@
+/* ===========================
+   1. MAIN DASHBOARD / GLOBAL STYLES
+   (Your Health Tech Theme)
+   =========================== */
+
+/* WRAPPER (Main Container) */
+.app-wrapper {
+  /* FIX FOR FULL DISPLAY: Absolute positioning to cover body margins */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  
+  /* Color Palette */
+  --primary: #0284c7;       /* Sky 600 */
+  --primary-light: #38bdf8; /* Sky 400 */
+  --primary-dark: #0369a1;  /* Sky 700 */
+  --accent: #f0f9ff;        /* Sky 50 */
+  
+  --bg-color: #f8fafc;      /* Slate 50 */
+  --card-bg: #ffffff;
+  --text-main: #0f172a;     /* Slate 900 */
+  --text-muted: #64748b;    /* Slate 500 */
+  
+  --radius: 16px;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-wrapper * {
+  box-sizing: border-box;
+}
+
+/* HEADER SECTION */
+.header {
+  background: linear-gradient(135deg, #0f172a 0%, #0284c7 100%);
+  color: white;
+  padding: 5rem 1rem 7rem;
+  text-align: center;
+  position: relative;
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+  z-index: 1;
+  width: 100%;
+}
+
+.header h1 {
+  color: rgb(224, 246, 250);
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 768px) {
+  .header h1 { font-size: 3.5rem; }
+}
+
+.header p {
+  color: #e0f2fe;
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto;
+  opacity: 0.9;
+}
+
+/* SEARCH BAR */
+.search-container {
+  max-width: 48rem;
+  margin: -5rem auto 3rem;
+  padding: 0 1.5rem;
+  position: relative;
+  z-index: 10;
+  width: 100%;
+}
+
+.search-form {
+  background: #ffffff;
+  padding: 0.5rem;
+  border-radius: 100px;
+  display: flex;
+  gap: 0.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1); 
+}
+
+.search-input-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 1rem 1.5rem 1rem 3.5rem;
+  border: none;
+  border-radius: 100px;
+  background-color: transparent;
+  color: var(--text-main);
+  font-size: 1.05rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.search-input::placeholder { color: #94a3b8; }
+.search-input:focus { background-color: transparent; }
+
+.search-button {
+  background: linear-gradient(to right, var(--primary), var(--primary-light));
+  color: white;
+  border: none;
+  padding: 0 2.5rem;
+  border-radius: 100px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.3);
+}
+
+.search-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(2, 132, 199, 0.4);
+}
+
+/* GRID & CARDS */
+.blog-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+  width: 100%;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.article-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  cursor: pointer;
+  position: relative;
+  top: 0;
+}
+
+.article-card:hover {
+  top: -8px;
+  box-shadow: var(--shadow-xl);
+  border-color: rgba(2, 132, 199, 0.2);
+}
+
+.article-image-wrapper {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.article-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.article-card:hover .article-image { transform: scale(1.1); }
+
+.source-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+  z-index: 2;
+  letter-spacing: 0.05em;
+}
+
+.article-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.category-badge {
+  display: inline-block;
+  background-color: var(--accent);
+  color: var(--primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.35rem 0.75rem;
+  border-radius: 100px;
+  margin-bottom: 1rem;
+  align-self: flex-start;
+  letter-spacing: 0.05em;
+}
+
+.article-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--text-main);
+}
+
+.article-excerpt {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.6;
+}
+
+.article-footer {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1.25rem;
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.read-more-btn {
+  background-color: var(--accent);
+  color: var(--primary-dark);
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 100px;
+  transition: all 0.2s ease;
+}
+
+.read-more-btn:hover {
+  background-color: var(--primary);
+  color: white;
+  gap: 0.6rem;
+}
+
+/* UTILITIES */
+.loading-container, .empty-state {
+  text-align: center;
+  padding: 4rem;
+  color: var(--text-muted);
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.animate-spin { animation: spin 1s linear infinite; }
+
+/* Mobile Adjustments */
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; }
+  .header h1 { font-size: 2rem; }
+  .search-container { padding: 0 1rem; }
+  .search-form { flex-direction: column; border-radius: 20px; padding: 0.75rem; }
+  .search-button { width: 100%; padding: 0.75rem; justify-content: center; }
+  .search-input { padding-left: 1rem; text-align: center; }
+  .search-icon { display: none; }
+}
+
+
+/* ===========================
+   2. ARTICLE READER (HERO LAYOUT)
+   (Added from video design)
+   =========================== */
+
+/* Main Container for the specific article page */
+.article-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  /* Ensure it sits on top if necessary */
+  position: relative;
+  z-index: 5;
+}
+
+/* HERO IMAGE SECTION */
+.article-hero-wrapper {
+  position: relative;
+  width: 100%;
+  height: 60vh; /* 60% of viewport height */
+  overflow: hidden;
+  background-color: #0f172a;
+}
+
+.article-hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.9;
+}
+
+.hero-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+}
+
+/* FLOATING NAVIGATION */
+.back-nav-wrapper {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  z-index: 10;
+}
+
+.back-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background-color: rgba(0, 0, 0, 0.75);
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 100px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-nav-btn:hover {
+  background-color: #ffffff;
+  color: #000000;
+  transform: translateY(-2px);
+}
+
+/* CONTENT CONTAINER (Overlapping the image) */
+.article-content-body {
+  max-width: 900px;
+  margin: -100px auto 0; /* Negative margin pulls it up */
+  position: relative;
+  background: #ffffff;
+  padding: 3rem;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+  z-index: 5;
+}
+
+/* METADATA */
+.article-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 1.5rem;
+}
+
+.meta-category {
+  color: #2563eb; /* Strong Blue */
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.meta-date, .meta-source {
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* HEADLINE */
+.article-headline {
+  font-size: 3.5rem;
+  font-weight: 900;
+  line-height: 1.1;
+  color: #111827;
+  margin: 0 0 2rem 0;
+  letter-spacing: -0.02em;
+}
+
+/* FOOTER ACTIONS */
+.article-footer-section {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.read-full-link {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 1.2rem;
+  background-color: #111827;
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  transition: background-color 0.2s;
+}
+
+.read-full-link:hover {
+  background-color: #333;
+}
+
+.disclaimer-text {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  text-align: center;
+  line-height: 1.5;
+}
+/* ===========================
+   CHANGE SEARCH INPUT COLOR
+   =========================== */
+
+.dark-theme .search-form {
+  /* Replace this hex code with your desired color */
+  background-color: #0f172a !important; 
+  
+  /* Optional: Change border color if needed */
+  border-color: #334155 !important; 
+}
+
+/* Ensure the text inside is visible */
+.dark-theme .search-input {
+  color: #ffffff !important;
+}
+
+.dark-theme .search-input::placeholder {
+  color: #94a3b8 !important;
+}
+/* ===========================
+   DARK MODE OVERRIDES
+   =========================== */
+
+/* 1. Theme Variables */
+.dark-theme {
+  /* Renamed to match aboutcss.css */
+  --bg-page: #020617;        /* Very Dark Slate (Slate 950) */
+  --bg-card: #1e293b;        /* Dark Card Color (Slate 800) */
+  
+  --text-main: #f8fafc;      /* White Text */
+  --text-muted: #94a3b8;     /* Gray Text */
+  --accent: #334155;         /* Dark Accent */
+  --border-color: #334155;   /* Dark Border */
+  
+  --primary: #38bdf8;        /* Sky Blue 400 */
+  --primary-dark: #7dd3fc;   /* Sky Blue 300 */
+  
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.5);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.5);
+}
+
+/* 2. Apply Backgrounds */
+.dark-theme.app-wrapper,
+.dark-theme .app-wrapper {
+  background-color: var(--bg-page); /* Updated name */
+  color: var(--text-main);
+}
+
+/* 3. Apply Card Styles (Cards Only) */
+.dark-theme .article-card,
+.dark-theme .article-content-body { 
+  background-color: var(--bg-card); /* Updated name */
+  border-color: var(--border-color);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+}
+
+/* 4. SEARCH BAR SPECIFIC COLOR */
+.dark-theme .search-form {
+  /* Uses the new variable name */
+  background-color: var(--bg-card); 
+  border-color: var(--border-color);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+}
+
+/* 5. Inputs & Text inside Search */
+.dark-theme .search-input {
+  color: #ffffff;
+}
+.dark-theme .search-input::placeholder {
+  color: #cbd5e1; 
+}
+.dark-theme .search-icon {
+  color: #cbd5e1;
+}
+
+/* 6. Header Adjustment */
+.dark-theme .header {
+  background: linear-gradient(135deg, #020617 0%, #0c4a6e 100%);
+}
+.dark-theme .header h1 {
+  color: #ffffff;
+}
+.dark-theme .header p {
+  color: #cbd5e1;
+}
+
+/* 7. Footer / Borders */
+.dark-theme .article-footer,
+.dark-theme .article-meta-row,
+.dark-theme .article-footer-section {
+  border-color: var(--border-color);
+}
+/* Change Heading Colors in Dark Mode */
+.dark-theme .blog-grid h2, 
+.dark-theme .section-title, 
+.dark-theme h1, 
+.dark-theme h2, 
+.dark-theme h3 {
+  color: #f8fafc; /* Bright White/Slate */
+}
+/* 8. Buttons */
+.dark-theme .category-badge,
+.dark-theme .read-more-btn {
+  background-color: #0f172a; 
+  color: var(--primary);
+  border: 1px solid var(--border-color);
+}
+
+.dark-theme .back-nav-btn {
+  background-color: rgba(30, 41, 59, 0.8); 
+  border-color: var(--border-color);
+  color: #e2e8f0;
+}
+
+.dark-theme .read-full-link {
+  background-color: var(--primary);
+  color: #020617;
+}
+
+/* Reader Mobile Adjustments */
+@media (max-width: 768px) {
+  .article-hero-wrapper { height: 40vh; }
+  .article-content-body { padding: 2rem 1.5rem; margin-top: -50px; }
+  .article-headline { font-size: 2.25rem; }
+  .back-nav-wrapper { top: 1rem; left: 1rem; }
+}
+
+/* Reader Mobile Adjustments */
+@media (max-width: 768px) {
+  .article-hero-wrapper { height: 40vh; }
+  .article-content-body { padding: 2rem 1.5rem; margin-top: -50px; }
+  .article-headline { font-size: 2.25rem; }
+  .back-nav-wrapper { top: 1rem; left: 1rem; }
+}

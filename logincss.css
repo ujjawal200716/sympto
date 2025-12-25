@@ -1,0 +1,325 @@
+/* =========================================
+   1. GENERAL RESET & LAYOUT
+   ========================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif;
+}
+
+.auth-wrapper {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: #ffffff;
+  transition: background-color 0.3s ease;
+}
+
+/* =========================================
+   2. LEFT SIDE (BRANDING)
+   ========================================= */
+.auth-left {
+  flex: 6;
+  background: linear-gradient(135deg, #e3f2fd 0%, #90caf9 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px;
+  color: #0d47a1;
+  transition: background 0.3s ease;
+}
+
+.auth-text-content {
+  max-width: 600px;
+}
+
+.auth-text-content h1 {
+  font-size: 4rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  letter-spacing: -1.5px;
+}
+
+.auth-text-content h2 {
+  font-size: 2rem;
+  margin-bottom: 25px;
+  font-weight: 500;
+  color: #1565c0;
+}
+
+.auth-text-content p {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: #1976d2;
+  max-width: 90%;
+}
+
+/* =========================================
+   3. RIGHT SIDE (FORM)
+   ========================================= */
+.auth-right {
+  flex: 4;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  position: relative !important;
+  transition: background-color 0.3s ease;
+}
+
+/* Logo Position */
+.corner-logo-container {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+}
+
+.app-logo {
+  height: 45px; 
+  width: auto;
+  border-radius: 8px; 
+}
+
+.auth-form-container {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* --- HEADER SPACING --- */
+.auth-header {
+  margin-bottom: 32px;
+}
+
+.auth-header h2 {
+  font-size: 2.2rem;
+  color: #111827;
+  margin-bottom: 8px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.sub-text {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* --- FORM LAYOUT (Main Gaps) --- */
+.auth-form-content {
+  display: flex;
+  flex-direction: column;
+  /* UNIFORM GAP: 20px between Email, Password, and Button */
+  gap: 20px; 
+}
+
+/* =========================================
+   4. INPUT GROUPS
+   ========================================= */
+.auth-input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* General Label Styling */
+.auth-input-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  text-align: left;
+}
+
+/* Gap between Label and Input Box */
+.auth-input-group > label {
+  margin-bottom: 8px;
+}
+
+/* Password Label Row */
+.auth-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px; 
+  width: 100%;
+}
+
+/* Input Wrapper */
+.custom-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  color: #9ca3af;
+  transition: color 0.2s;
+  z-index: 2;
+}
+
+/* Input Field */
+.custom-input-wrapper input {
+  width: 100%;
+  padding: 16px 16px 16px 48px;
+  background-color: #f3f4f6;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  font-size: 1rem;
+  color: #1f2937;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.custom-input-wrapper input:focus {
+  background-color: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+}
+
+.custom-input-wrapper:focus-within .input-icon {
+  color: #3b82f6;
+}
+
+.password-input {
+  padding-right: 48px !important; 
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  color: #9ca3af;
+  transition: color 0.2s;
+  z-index: 10;
+}
+
+.password-toggle-btn:hover {
+  color: #1f2937;
+}
+
+/* =========================================
+   5. BUTTONS & FOOTER
+   ========================================= */
+.auth-submit-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+}
+
+.auth-submit-btn:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 10px -2px rgba(37, 99, 235, 0.3);
+}
+
+/* Footer (Text & Sign Up) */
+.auth-footer {
+  /* CHANGED: Decreased gap from 16px to 12px */
+  margin-top: 16px; 
+  text-align: center;
+  font-size: 0.95rem;
+  color: #6b7280;
+}
+
+.auth-toggle-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.95rem;
+  margin-left: 0px;
+}
+
+.auth-toggle-btn:hover {
+  text-decoration: underline;
+  color: #1e40af;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .auth-left { display: none; }
+  .auth-right { flex: 1; }
+  .auth-form-container { padding: 0 15px; }
+}
+
+/* =========================================
+   6. DARK MODE OVERRIDES
+   ========================================= */
+.dark-theme .auth-left {
+    background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+    border-right: 1px solid #1e293b;
+}
+
+.dark-theme .auth-text-content h2,
+.dark-theme .auth-text-content p {
+    color: #bfdbfe;
+}
+
+.dark-theme .auth-right {
+    background-color: #0f172a; 
+}
+
+.dark-theme .auth-header h2 {
+    color: #f8fafc;
+}
+
+.dark-theme .sub-text,
+.dark-theme .auth-input-group label {
+    color: #94a3b8;
+}
+
+.dark-theme .custom-input-wrapper input {
+    background-color: #1e293b;
+    color: #f8fafc;
+}
+
+.dark-theme .custom-input-wrapper input:focus {
+    background-color: #020617;
+    border-color: #3b82f6;
+}
+
+.dark-theme .input-icon {
+    color: #64748b;
+}
+
+.dark-theme .custom-input-wrapper:focus-within .input-icon {
+    color: #60a5fa;
+}
+
+.dark-theme .auth-footer {
+    color: #94a3b8;
+}
+
+.dark-theme .auth-toggle-btn {
+    color: #60a5fa;
+}
+
+.dark-theme .auth-toggle-btn:hover {
+    color: #93c5fd;
+}
