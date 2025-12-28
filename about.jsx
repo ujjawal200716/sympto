@@ -4,12 +4,90 @@ import {
   ChevronDown, Activity, Heart, Clock, Lock,
   Star, Quote
 } from 'lucide-react';
-import logo from './logo.png';
+import logoLight from './logo.png';
+import logoDark from './logodark.png';
 
 // Component Imports
 import "./aboutcss.css";
 import Nev from "./test.jsx"; 
 import Chat from "./chat.jsx"; 
+
+// --- MODAL CONTENT DATA ---
+const modalData = {
+  about: {
+    title: "About Sympto",
+    content: (
+      <>
+        <p><strong>Bridging the gap between symptoms and clarity.</strong></p>
+        <p>At Sympto, we believe everyone deserves access to clear, understandable health information. Our AI-driven platform helps users track symptoms and understand potential health patterns before they visit a doctor.</p>
+        <h3>Our Mission</h3>
+        <p>To empower individuals to take control of their health data securely and efficiently.</p>
+      </>
+    )
+  },
+  contact: {
+    title: "Contact Support",
+    content: (
+      <>
+        <p>Have questions about the app? We're here to help.</p>
+        <ul style={{ listStyle: 'none', padding: 0, marginTop: '1rem' }}>
+          <li><strong>Email:</strong> support@sympto.in</li>
+          <li><strong>Phone:</strong> +91 000 000 0000</li>
+          <li><strong>HQ:</strong> Thane, Maharashtra, India</li>
+        </ul>
+        <p style={{ marginTop: '1rem', fontStyle: 'italic' }}>Support hours: Mon-Fri, 9am - 6pm IST.</p>
+      </>
+    )
+  },
+  careers: {
+    title: "Join the Team",
+    content: (
+      <>
+        <p>We are looking for passionate individuals to help us revolutionize personal health tracking.</p>
+        <h3>Open Positions</h3>
+        <ul>
+          <li>Frontend Developer (React) - Remote</li>
+          <li>Medical Data Analyst - Thane</li>
+        </ul>
+        <p>Send your CV to <strong>jobs@sympto.in</strong></p>
+      </>
+    )
+  },
+  privacy: {
+    title: "Privacy Policy",
+    content: (
+      <>
+        <p>Last Updated: December 2025</p>
+        <h3>1. Data Collection</h3>
+        <p>We collect data you provide directly to us, such as when you create an account. We DO NOT share your personal health data with third-party advertisers.</p>
+        <h3>2. Security</h3>
+        <p>We use industry-standard encryption to protect your medical insights.</p>
+      </>
+    )
+  },
+  terms: {
+    title: "Terms of Service",
+    content: (
+      <>
+        <p>By accessing Sympto.in, you agree to be bound by these Terms.</p>
+        <h3>Medical Disclaimer</h3>
+        <p>Sympto is <strong>not</strong> a medical device. The content provided is for informational purposes only. Always consult a doctor for medical advice.</p>
+      </>
+    )
+  },
+  cookies: {
+    title: "Cookie Policy",
+    content: (
+      <>
+        <p>We use cookies to ensure you get the best experience on our website.</p>
+        <ul>
+          <li><strong>Essential Cookies:</strong> Required for login sessions.</li>
+          <li><strong>Analytics:</strong> Used to improve our features.</li>
+        </ul>
+      </>
+    )
+  }
+};
 
 /* --- Configuration / Static Data --- */
 const FEATURES_DATA = [
@@ -87,6 +165,11 @@ const FAQ_DATA = [
 /* --- Main Component --- */
 export default function About() {
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
+  
+  // --- ADDED: Missing State for Modals ---
+  const [activeModal, setActiveModal] = useState(null);
+  const closeModal = () => setActiveModal(null);
+
   const currentYear = new Date().getFullYear();
 
   const toggleFaq = (index) => {
@@ -194,7 +277,7 @@ export default function About() {
           </div>
         </div>
 
-        {/* 6. Testimonials Section (CLEANED UP) */}
+        {/* 6. Testimonials Section */}
         <section className="testimonials-section">
           <div className="container">
             <div className="center-text">
@@ -258,20 +341,20 @@ export default function About() {
               {/* Right Column */}
               <div className="benefits-section">
                  <div className="benefits-grid">
-                    {BENEFITS_DATA.map((benefit, idx) => (
-                      <div key={idx} className="benefit-card">
-                        <benefit.icon className="card-icon" style={{ width: 32, height: 32, marginBottom: 10 }} />
-                        <h4 className="benefit-title">{benefit.title}</h4>
-                        <p style={{ fontSize: '0.9rem' }}>{benefit.sub}</p>
-                      </div>
-                    ))}
+                   {BENEFITS_DATA.map((benefit, idx) => (
+                     <div key={idx} className="benefit-card">
+                       <benefit.icon className="card-icon" style={{ width: 32, height: 32, marginBottom: 10 }} />
+                       <h4 className="benefit-title">{benefit.title}</h4>
+                       <p style={{ fontSize: '0.9rem' }}>{benefit.sub}</p>
+                     </div>
+                   ))}
                  </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* 8. FAQ Section (CLEANED UP) */}
+        {/* 8. FAQ Section */}
         <section className="faq-section" style={{ paddingBottom: '4rem' }}>
           <div className="container-narrow">
             <div className="center-text">
@@ -299,7 +382,7 @@ export default function About() {
                           transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                           flexShrink: 0,
                           marginLeft: '1rem',
-                          color: '#64748b' /* Fallback color, overridden by CSS class */
+                          color: '#64748b'
                         }}
                       />
                     </div>
@@ -316,52 +399,68 @@ export default function About() {
           </div>
         </section>
 
-        <footer className="sympto-footer">
-          <div className="sympto-footer-container">
-            <div className="sympto-footer-top">
-              <div className="footer-brand">
-                <img src={logo} alt="Sympto Logo" />
-                <p>Empowering you with health insights.</p>
-              </div>
+        <footer className="site-footer">
+               <div className="footer-wrapper">
+                 
+                 <div className="footer-primary-content">
+                   {/* Brand Section */}
+                   <div className="footer-identity">
+                      <img src={logoLight} alt="Sympto Logo" className="footer-brand-logo logo-light" />
+                      <img src={logoDark} alt="Sympto Logo" className="footer-brand-logo logo-dark" />
+                   </div>
 
-              <div className="footer-links-group">
-                <h4>Company</h4>
-                <ul>
-                  <li><a href="/about">About Us</a></li>
-                  <li><a href="/contact">Contact Support</a></li>
-                  <li><a href="/careers">Careers</a></li>
-                </ul>
-              </div>
+                   {/* Links Group 1 */}
+                   <div className="footer-nav-column">
+                     <h4>Company</h4>
+                     <ul>
+                       <li><button onClick={() => setActiveModal('about')}>About Us</button></li>
+                       <li><button onClick={() => setActiveModal('contact')}>Contact Support</button></li>
+                       <li><button onClick={() => setActiveModal('careers')}>Careers</button></li>
+                     </ul>
+                   </div>
+       
+                   {/* Links Group 2 */}
+                   <div className="footer-nav-column">
+                     <h4>Legal</h4>
+                     <ul>
+                       <li><button onClick={() => setActiveModal('privacy')}>Privacy Policy</button></li>
+                       <li><button onClick={() => setActiveModal('terms')}>Terms of Service</button></li>
+                       <li><button onClick={() => setActiveModal('cookies')}>Cookie Policy</button></li>
+                     </ul>
+                   </div>
+                 </div>
+       
+                 <div className="footer-notice-box">
+                   <span className="notice-icon">!</span>
+                   <p>
+                     <strong>IMPORTANT:</strong> This application is for informational purposes only 
+                     and is not a substitute for professional medical advice, diagnosis, or treatment. 
+                     Always seek the advice of your physician or other qualified health provider with 
+                     any questions you may have regarding a medical condition.
+                   </p>
+                 </div>
+       
+                 <div className="footer-copyright">
+                   <p>&copy; {currentYear} Sympto.in All rights reserved.</p>
+                 </div>
+                 
+               </div>
+             </footer>
 
-              <div className="footer-links-group">
-                <h4>Legal</h4>
-                <ul>
-                  <li><a href="/privacy">Privacy Policy</a></li>
-                  <li><a href="/terms">Terms of Service</a></li>
-                  <li><a href="/cookie-policy">Cookie Policy</a></li>
-                </ul>
-              </div>
-            </div>
-
-            <hr className="footer-divider" />
-
-            <div className="footer-disclaimer">
-              <p>
-                <strong>IMPORTANT:</strong> This application is for informational purposes only 
-                and is not a substitute for professional medical advice, diagnosis, or treatment. 
-                Always seek the advice of your physician or other qualified health provider with 
-                any questions you may have regarding a medical condition. If you think you may 
-                have a medical emergency, call your doctor or emergency services immediately.
-              </p>
-            </div>
-
-            <hr className="footer-divider" />
-
-            <div className="footer-bottom">
-              <p>&copy; {currentYear} Sympto.in All rights reserved.</p>
-            </div>
-          </div>
-        </footer>
+             {/* --- ADDED: Modal / Popup Component Logic --- */}
+             {activeModal && (
+                <div className="modal-overlay" onClick={closeModal}>
+                  <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                    <div className="modal-header">
+                      <h2>{modalData[activeModal].title}</h2>
+                      <button className="close-btn" onClick={closeModal}>&times;</button>
+                    </div>
+                    <div className="modal-body">
+                      {modalData[activeModal].content}
+                    </div>
+                  </div>
+                </div>
+              )}
 
       </div> 
     </>

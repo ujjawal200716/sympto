@@ -42,7 +42,10 @@
   box-sizing: border-box;
 }
 
-/* HEADER SECTION */
+/* ===========================
+   2. HEADER & NAVIGATION
+   =========================== */
+
 .header {
   background: linear-gradient(135deg, #0f172a 0%, #0284c7 100%);
   color: white;
@@ -74,7 +77,11 @@
   opacity: 0.9;
 }
 
-/* SEARCH BAR */
+
+/* ===========================
+   3. SEARCH BAR
+   =========================== */
+
 .search-container {
   max-width: 48rem;
   margin: -5rem auto 3rem;
@@ -145,7 +152,10 @@
   box-shadow: 0 10px 15px -3px rgba(2, 132, 199, 0.4);
 }
 
-/* GRID & CARDS */
+/* ===========================
+   4. GRID & CARDS
+   =========================== */
+
 .blog-grid {
   max-width: 1200px;
   margin: 0 auto;
@@ -231,6 +241,21 @@
   letter-spacing: 0.05em;
 }
 
+/* SAVE BUTTON STYLES */
+.save-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Animation for when saving is in progress */
+@keyframes pulse-green {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.1); }
+}
+
+.animate-pulse {
+    animation: pulse-green 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 .article-title {
   font-size: 1.25rem;
   font-weight: 700;
@@ -308,10 +333,8 @@
   .search-icon { display: none; }
 }
 
-
 /* ===========================
-   2. ARTICLE READER (HERO LAYOUT)
-   (Added from video design)
+   5. ARTICLE READER (HERO LAYOUT)
    =========================== */
 
 /* Main Container for the specific article page */
@@ -321,7 +344,6 @@
   margin: 0;
   padding: 0;
   background-color: #ffffff;
-  /* Ensure it sits on top if necessary */
   position: relative;
   z-index: 5;
 }
@@ -330,7 +352,7 @@
 .article-hero-wrapper {
   position: relative;
   width: 100%;
-  height: 60vh; /* 60% of viewport height */
+  height: 60vh; 
   overflow: hidden;
   background-color: #0f172a;
 }
@@ -382,10 +404,10 @@
   transform: translateY(-2px);
 }
 
-/* CONTENT CONTAINER (Overlapping the image) */
+/* CONTENT CONTAINER */
 .article-content-body {
   max-width: 900px;
-  margin: -100px auto 0; /* Negative margin pulls it up */
+  margin: -100px auto 0;
   position: relative;
   background: #ffffff;
   padding: 3rem;
@@ -406,7 +428,7 @@
 }
 
 .meta-category {
-  color: #2563eb; /* Strong Blue */
+  color: #2563eb; 
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -462,6 +484,16 @@
   text-align: center;
   line-height: 1.5;
 }
+
+/* Reader Mobile Adjustments */
+@media (max-width: 768px) {
+  .article-hero-wrapper { height: 40vh; }
+  .article-content-body { padding: 2rem 1.5rem; margin-top: -50px; }
+  .article-headline { font-size: 2.25rem; }
+  .back-nav-wrapper { top: 1rem; left: 1rem; }
+}
+
+
 /* ===========================
    CHANGE SEARCH INPUT COLOR
    =========================== */

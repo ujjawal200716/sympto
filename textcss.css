@@ -1,168 +1,157 @@
-/* ------------------------------------------------------------------- */
-/* --- GLOBAL LAYOUT FIX (Must be applied to your App's main wrapper) --- */
-/* ------------------------------------------------------------------- */
+/* ========================================= */
+/* Navbar.css / textcss.css - Fixed & Static */
+/* ========================================= */
 
-/* Apply this class to the main <div> that wraps your application's 
- * content (e.g., in App.jsx or Layout component) to prevent content 
- * from being covered by the fixed 64px navbar.
- */
-.content-spacer {
-    padding-top: 64px; 
+/* --- RESET & BASICS --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 /* --- MAIN NAVBAR CONTAINER --- */
-nav {
+nav.navbar {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
+    height: 60px; /* Standard fixed height */
     
-    /* 1. SMALLER NAVBAR HEIGHT (Was 80px) */
-    height: 64px; 
+    /* STATIC BACKGROUND (No Scroll Animation) */
+    background: #ffffff; 
+    border-bottom: 1px solid #e2e8f0;
     
-    /* 2. MORE BLUR EFFECT */
-    background: rgba(255, 255, 255, 0.8); 
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Pushes Logo Left, Links/Profile Right */
     
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    /* SPACING: Exact equal gap from left and right edges */
+    padding: 0 20px; 
+    
     z-index: 1000;
-    
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 32px; 
-    transition: all 0.3s ease;
 }
 
-/* --- LOGO --- */
-/* --- LOGO CONTAINER --- */
-.nav-logo {
+/* --- LEFT SIDE: LOGO --- */
+.nav-left {
     display: flex;
     align-items: center;
-    
-    /* FORCE: Use !important to ensure this gap takes priority */
-    gap: 6px !important; 
-    
-    text-decoration: none;
-    color: #1e293b; 
-    font-weight: 800;
-    font-size: 24px;
-    letter-spacing: -0.5px;
 }
 
-/* --- LOGO IMAGE --- */
 .nav-logo img {
-    height: 44px;
+    height: 15px; /* Adjusted logo size */
     width: auto;
-    
-    /* CRITICAL: Remove any hidden margins that add extra space */
-    margin: 0 !important; 
-    padding: 0 !important;
-}
-.nav-logo {
-    display: flex;
-    align-items: center;
-    gap: 8px; /* CHANGE THIS NUMBER to control the spacing perfectly */
-    text-decoration: none;
-    color: #1e293b; /* Make sure this matches your dark mode logic too */
+    display: block;
 }
 
-/* Ensure the text looks right */
-.nav-logo span {
-    font-weight: 800;
-    font-size: 24px;
-    letter-spacing: -0.5px;
-    line-height: 1; /* Aligns text vertically with icon */
+/* --- RIGHT SIDE CONTAINER (Links + Actions) --- */
+.nav-right-container {
+    display: flex;
+    align-items: center;
+    gap: 40px; /* Consistent gap between Links and Profile section */
 }
-/* --- NAVIGATION LINKS (CENTER) --- */
-nav ul {
+
+/* --- LINKS --- */
+.nav-links {
     list-style: none;
     display: flex;
-    align-items: center;
-    gap: 24px; 
-    background: transparent;
-    padding: 0;
-    
-    /* FIX: Prevent desktop links and profile icon from wrapping */
-    flex-wrap: nowrap; 
+    gap: 32px; /* Even spacing between links */
 }
 
-nav a {
+.nav-links a {
     text-decoration: none;
-    color: #475569; 
+    color: #475569;
     font-weight: 500;
-    font-size: 15px; 
-    padding: 8px 12px;
-    border-radius: 8px;
-    transition: color 0.2s ease;
-    
-    /* FIX: Prevent long text (like 'Contact us') from wrapping */
-    white-space: nowrap; 
+    font-size: 15px;
+    position: relative;
+    transition: color 0.2s;
 }
 
-nav a:hover {
-    color: #007aff; 
-    background-color: transparent; 
+.nav-links a:hover,
+.nav-links a.active-link {
+    color: #007aff;
 }
 
-/* --- RIGHT SIDE ACTIONS / AUTH ELEMENT CONTAINER --- */
-.auth-element, 
-.profile-dropdown-container { 
-    display: flex; 
+/* Active Link Blue Dot */
+.nav-links a.active-link::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px; height: 4px;
+    background-color: #007aff;
+    border-radius: 50%;
+}
+
+/* --- ACTIONS (Profile, Login, Mobile Toggle) --- */
+.nav-actions {
+    display: flex;
     align-items: center;
-    list-style: none;
-    position: relative; 
+    gap: 15px;
 }
 
-/* --- PROFILE ICON STYLING --- */
+/* Profile Button */
 .nav-profile-btn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    margin-left: 0px; 
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid #e2e8f0;
+    background: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 40px; 
-    width: 40px;
-    border-radius: 50%;
-    transition: background-color 0.2s, box-shadow 0.2s;
-    flex-shrink: 0; 
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
 .nav-profile-btn:hover {
-    background-color: #f1f5f9; 
+    border-color: #007aff;
+    background: #f8fafc;
 }
 
-.nav-profile-btn.active {
-    background-color: #e2e8f0;
-    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
-}
 .nav-profile-btn svg {
-    fill: #475569;
+    display: block;
+    width: 22px;
+    height: 22px;
+    color: #1e293b;
 }
 
+/* Login Button */
+.nav-btn {
+    padding: 9px 24px;
+    border-radius: 50px;
+    border: none;
+    background-color: #007aff;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
 
-/* --- DROPDOWN MENU REDESIGN --- */
+.nav-btn:hover {
+    background-color: #005bb5;
+}
+
+/* --- DROPDOWN MENU --- */
+.profile-dropdown-container {
+    position: relative;
+}
+
 .profile-dropdown {
     position: absolute;
-    top: 100%;
+    top: 130%;
     right: 0;
-    margin-top: 10px;
-    width: 220px; 
-    background-color: white;
+    width: 220px;
+    background: white;
+    border: 1px solid #f1f5f9;
     border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); 
-    border: 1px solid #e2e8f0;
-    padding: 4px 0; 
-    
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    padding: 8px;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-5px);
-    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
-    z-index: 1001; 
+    transform: translateY(10px);
+    transition: all 0.2s ease;
 }
 
 .profile-dropdown.active {
@@ -175,262 +164,62 @@ nav a:hover {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 16px; 
-    font-size: 15px; 
-    color: #475569; 
-    cursor: pointer;
-    transition: background-color 0.1s, color 0.1s;
-    border-radius: 8px; 
-    margin: 0 8px; 
-    text-decoration: none; 
+    padding: 10px 12px;
+    color: #334155;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: background 0.2s;
 }
 
 .dropdown-item:hover {
-    background-color: #eff6ff; 
-    color: #007aff; 
+    background: #f8fafc;
+    color: #007aff;
 }
 
-.dropdown-item svg {
-    fill: currentColor; 
-    flex-shrink: 0; 
-}
-
-/* Logout button specific styling */
-.dropdown-item.logout-option {
-    color: #ef4444; 
-    border-top: 1px solid #f1f5f9;
-    margin-top: 5px;
-    padding-top: 10px;
-    margin-bottom: 5px; 
-}
-
-.dropdown-item.logout-option:hover {
-    background-color: #fee2e2; 
-    color: #dc2626; 
-}
-
-/* --- LOGIN/LOGOUT BUTTON STYLING (EXISTING/MODIFIED) --- */
-.nav-btn {
-    padding: 8px 24px; 
-    background-color: #007aff; 
-    color: white;
-    border: none;
-    border-radius: 30px; 
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    transition: transform 0.2s ease, background-color 0.2s ease;
-    display: block;
-}
-
-.nav-btn:hover {
-    background-color: #0062cc; 
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25); 
-}
-
-.nav-link-button {
-    text-decoration: none !important;
-    display: block;
-}
-
-/* --- HAMBURGER MENU ICON --- */
+/* --- MOBILE & RESPONSIVE --- */
 .menu-button {
-    display: none; 
-    background: transparent;
+    display: none;
+    background: none;
     border: none;
     cursor: pointer;
-    padding: 4px;
-    flex-shrink: 0; 
-}
-
-.menu-button svg {
-    width: 28px;
-    height: 28px;
-    stroke: #1e293b;
-    stroke-width: 2.5; 
-}
-
-/* --- MOBILE SIDEBAR (.size) --- */
-.size {
-    position: fixed;
-    top: 64px; 
-    height: calc(100vh - 64px);
-    
-    left: 0;
-    width: 100%;
-    background-color: #ffffff;
-    z-index: 999;
-    
-    display: none; 
-    flex-direction: column;
-    padding: 24px 32px;
-    
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    overflow-y: auto; 
-}
-
-.size.active {
-    display: flex;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.size li {
-    list-style: none;
-    width: 100%;
-    padding: 0; 
-}
-
-/* Main mobile navigation links (Home, Blog, etc.) */
-.size li > a:not(.dropdown-item) { 
-    display: block;
-    width: 100%;
-    padding: 18px 0;
-    font-size: 18px;
-    font-weight: 500;
     color: #1e293b;
-    border-bottom: 1px solid #f1f5f9; 
-    margin: 0; 
 }
 
-/* Mobile Account Header */
-.size .auth-element h4 {
-    padding: 0 0 10px 0; 
-    margin: 0;
-    font-size: 16px;
+.mobile-sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 80%;
+    max-width: 300px;
+    height: 100vh;
+    background: white;
+    z-index: 2000;
+    padding: 24px;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.1);
 }
 
-/* Mobile Dropdown Items (The 7 links) */
-.size .dropdown-item {
-    width: 100%;
-    margin: 0; 
-    padding: 14px 10px;
-    border-radius: 0; 
-    border-bottom: 1px solid #f1f5f9;
-}
+.mobile-sidebar.active { transform: translateX(0); }
+.mobile-sidebar ul { list-style: none; margin-top: 20px; }
+.mobile-sidebar li { margin-bottom: 20px; }
+.mobile-sidebar a { text-decoration: none; font-size: 18px; color: #334155; font-weight: 500; }
 
-.size .dropdown-item.logout-option {
-    border-top: none; 
-    margin-top: 0;
-    padding-top: 14px;
-    margin-bottom: 0; 
-}
-/* ============================================================
-   DARK THEME OVERRIDES (.dark-theme)
-   ============================================================ */
-
-/* --- GLOBAL BACKGROUND --- */
-.dark-theme {
-    background-color: #0f172a; /* Deep Navy/Slate background */
-    color: #f1f5f9;
-}
-
-/* --- MAIN NAVBAR CONTAINER --- */
-.dark-theme nav {
-    /* Inverted from white 0.8 to black 0.8 */
-    background: rgba(15, 23, 42, 0.8); 
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle light border */
-}
-
-/* --- LOGO --- */
-.dark-theme .nav-logo {
-    color: #ffffff; /* Black text becomes white */
-}
-
-/* --- NAVIGATION LINKS --- */
-.dark-theme nav a {
-    color: #cbd5e1; /* Soft grey text */
-}
-
-.dark-theme nav a:hover {
-    color: #3b82f6; /* Brighter blue for better dark contrast */
-}
-
-/* --- PROFILE ICON STYLING --- */
-.dark-theme .nav-profile-btn:hover {
-    background-color: #1e293b; 
-}
-
-.dark-theme .nav-profile-btn.active {
-    background-color: #334155;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
-}
-
-.dark-theme .nav-profile-btn svg {
-    fill: #cbd5e1; /* Icons turn light */
-}
-
-/* --- DROPDOWN MENU --- */
-.dark-theme .profile-dropdown {
-    background-color: #1e293b; /* Darker slate surface */
-    border: 1px solid #334155;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); 
-}
-
-.dark-theme .dropdown-item {
-    color: #cbd5e1; 
-}
-
-.dark-theme .dropdown-item:hover {
-    background-color: #334155; 
-    color: #3b82f6; 
-}
-
-/* Logout button specific styling */
-.dark-theme .dropdown-item.logout-option {
-    color: #f87171; /* Brighter red for visibility */
-    border-top: 1px solid #334155;
-}
-
-.dark-theme .dropdown-item.logout-option:hover {
-    background-color: rgba(239, 68, 68, 0.15); 
-    color: #fca5a5; 
-}
-
-/* --- HAMBURGER MENU ICON --- */
-.dark-theme .menu-button svg {
-    stroke: #ffffff; /* Stroke becomes white */
-}
-
-/* --- MOBILE SIDEBAR --- */
-.dark-theme .size {
-    background-color: #0f172a;
-}
-
-.dark-theme .size li > a:not(.dropdown-item) { 
-    color: #f1f5f9;
-    border-bottom: 1px solid #1e293b; 
-}
-
-.dark-theme .size .dropdown-item {
-    border-bottom: 1px solid #1e293b;
-}
-
-/* --- RESPONSIVE BREAKPOINTS --- */
 @media (max-width: 900px) {
-    nav ul {
-        display: none;
-    }
-    
-    .menu-button {
-        display: block;
-    }
-    
-    nav {
-        padding: 0 20px;
-    }
-    
-    .size {
-        padding: 20px 20px;
-    }
+    nav.navbar { padding: 0 20px; } /* Smaller padding on mobile */
+    .nav-links { display: none; }
+    .auth-element { display: none; }
+    .menu-button { display: block; }
 }
 
-/* Hide the dropdown menu container on mobile */
-@media (max-width: 900px) {
-    .profile-dropdown-container {
-        display: none; 
-    }
-}
+/* --- DARK MODE OVERRIDES --- */
+.dark-theme nav.navbar { background: #0f172a; border-bottom: 1px solid #1e293b; }
+.dark-theme .nav-links a { color: #cbd5e1; }
+.dark-theme .nav-profile-btn { background: #1e293b; border-color: #334155; }
+.dark-theme .nav-profile-btn svg { color: #f8fafc; }
+.dark-theme .profile-dropdown { background: #1e293b; border-color: #334155; }
+.dark-theme .dropdown-item { color: #cbd5e1; }
+.dark-theme .dropdown-item:hover { background: #334155; color: #fff; }
+.dark-theme .menu-button { color: white; }
+.dark-theme .mobile-sidebar { background: #0f172a; }
+.dark-theme .mobile-sidebar a { color: #cbd5e1; }

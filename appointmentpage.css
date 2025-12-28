@@ -147,7 +147,7 @@
    5. FILTER BAR (Light Mode Default)
    ========================================= */
 .ap-filter-bar {
-  background-color: #ffffff; /* White Background */
+  background-color: #ffffff;
   padding: 20px 30px;
   border-radius: 12px;
   margin-bottom: 24px;
@@ -156,21 +156,20 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 20px;
-  /* Soft shadow for depth on white */
   box-shadow: 0 4px 6px -1px rgba(148, 163, 184, 0.1); 
-  border: 1px solid #e2e8f0; /* Light Slate Border */
+  border: 1px solid #e2e8f0;
 }
 
 .ap-filter-bar h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0f172a; /* Dark Slate Text */
+  color: #0f172a;
   letter-spacing: -0.02em;
 }
 
 .ap-highlight {
-  color: #0ea5e9; /* Sky Blue */
+  color: #0ea5e9;
   margin: 0 6px;
 }
 
@@ -183,17 +182,17 @@
 
 .ap-sort-label {
   font-weight: 600;
-  color: #64748b; /* Muted Slate Text */
+  color: #64748b;
   font-size: 0.95rem;
 }
 
-/* Styled Dropdown (Light Mode) */
-.ap-select {
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1; /* Light Gray Border */
-  background-color: #f8fafc; /* Very Light Gray BG */
-  color: #334155; /* Dark Gray Text */
+/* Styled Dropdown - Targets ANY select inside filter bar */
+.ap-filter-bar select {
+  padding: 10px 16px !important;
+  border-radius: 8px !important;
+  border: 1px solid #cbd5e1 !important; 
+  background-color: #f8fafc !important; 
+  color: #334155 !important;
   font-weight: 500;
   cursor: pointer;
   min-width: 140px;
@@ -201,32 +200,27 @@
   transition: all 0.2s;
 }
 
-.ap-select:hover {
-  border-color: #0ea5e9; /* Blue border on hover */
-  background-color: #ffffff;
+.ap-filter-bar select:hover {
+  border-color: #0ea5e9 !important;
+  background-color: #ffffff !important;
 }
 
 /* =========================================
-   DARK MODE OVERRIDE (Keeps the dark look when .dark-theme is active)
+   DARK MODE OVERRIDE
    ========================================= */
 .dark-theme .ap-filter-bar {
-  background-color: #0f172a; /* Dark Navy */
+  background-color: #0f172a; 
   border-color: #1e293b;
   box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
 }
 
-.dark-theme .ap-filter-bar h2 {
-  color: #ffffff;
-}
+.dark-theme .ap-filter-bar h2 { color: #ffffff; }
+.dark-theme .ap-sort-label { color: #94a3b8; }
 
-.dark-theme .ap-sort-label {
-  color: #94a3b8;
-}
-
-.dark-theme .ap-select {
-  background-color: #1e293b;
-  border-color: #334155;
-  color: #f8fafc;
+.dark-theme .ap-filter-bar select {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
 }
 
 /* =========================================
@@ -265,6 +259,29 @@
 }
 
 .ap-card-header h3 { margin: 0 0 6px 0; font-size: 1.25rem; color: #0f172a; font-weight: 700; }
+
+/* --- NEW SAVE BUTTON STYLES --- */
+.ap-save-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8; /* Default gray */
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+    margin-left: 12px;
+}
+
+.ap-save-btn:hover {
+    transform: scale(1.1);
+    color: #38bdf8; /* Hover blue */
+}
+
+.ap-save-btn.saved {
+    color: #10b981; /* Green when saved */
+}
+
 
 .ap-city { 
   font-size: 0.75rem; 
@@ -420,7 +437,12 @@
 }
 .dark-theme .ap-card:hover { border-color: #38bdf8; }
 .dark-theme .ap-card-header { background-color: #1e293b; }
-.dark-theme .ap-card-header h3 { color: white; }
+
+/* --- FIX FOR WHITE HOSPITAL TEXT IN DARK MODE --- */
+.dark-theme .ap-card-header h3 { 
+    color: #38bdf8; /* Changed from white to light blue for pop */
+}
+
 .dark-theme .ap-info-row { color: #cbd5e1; }
 .dark-theme .ap-phone-btn { 
   background-color: #334155; 
@@ -461,9 +483,12 @@
   
   .ap-filter-bar { flex-direction: column; align-items: stretch; text-align: center; gap: 15px; }
   .ap-sort-group { justify-content: center; width: 100%; }
-  .ap-select { width: 100%; }
+  
+  /* Make Select Full Width on Mobile */
+  .ap-filter-bar select { width: 100%; }
 
   .ap-grid { grid-template-columns: 1fr; }
   .sk-footer { grid-template-columns: 1fr; }
   .ap-card-footer { display: grid; grid-template-columns: 1fr !important; gap: 10px; }
 }
+

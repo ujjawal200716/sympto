@@ -843,6 +843,156 @@
   background-color: #1e293b;
   color: #f1f5f9;
 }
+/* --- NEW FOOTER ROW LAYOUT --- */
+.new-footer-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 900px; /* Aligns with chat width */
+  margin: 0 auto;
+}
+
+/* --- ROBOT BUTTON (Standalone on Left) --- */
+.new-robot-standalone-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.new-robot-standalone-btn:hover {
+  background-color: #f8fafc;
+  transform: scale(1.05);
+}
+
+/* --- NEW FOOTER ROW LAYOUT & FLOATING BUTTON --- */
+.new-footer-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 900px; 
+  margin: 0 auto;
+  position: relative; 
+}
+
+/* --- ROBOT/THREE-DOT BUTTON (Floating Top Left) --- */
+.new-robot-standalone-btn {
+  /* 1. FIXED POSITIONING: Locks it to the screen */
+  position: fixed !important;
+  
+  /* 2. PLACEMENT: Moved down to 85px to clear the Header bar (which is ~72px tall) */
+  top: 85px !important;      
+  left: 20px !important;     
+  
+  /* 3. LAYERING: Maximum Z-Index to ensure it sits ON TOP of everything */
+  z-index: 2147483647 !important; 
+
+  /* 4. VISIBILITY: Bright Blue background to make it pop */
+  background-color: #f5f4f4 !important; 
+  color: rgb(46, 45, 45) !important;
+  border: 2px solid white !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4) !important;
+
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.new-robot-standalone-btn:hover {
+  background-color: #2563eb !important;
+  transform: scale(1.1);
+}
+
+/* --- DROPDOWN MENU (Updates Position relative to Button) --- */
+.new-menu-wrapper {
+  position: static; 
+}
+
+.new-dropup-menu {
+  position: fixed !important;
+  /* Aligns menu right below the new button position */
+  top: 145px !important; /* 85px (button top) + 50px (height) + 10px (gap) */
+  left: 20px !important;
+  
+  width: 180px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 0 5px rgba(0,0,0,0.05);
+  border: 1px solid #e2e8f0;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 2147483647 !important; /* Keeps menu on top too */
+  animation: slideDownFade 0.2s ease-out;
+}
+
+@keyframes slideDownFade {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.new-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #334155;
+  transition: all 0.2s;
+}
+
+.new-dropdown-item:hover {
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+
+/* --- INPUT BAR (Takes remaining space) --- */
+.new-input-bar {
+  flex: 1; 
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 8px 24px rgba(148, 163, 184, 0.2);
+  border: 1px solid #f8fafc;
+  border-radius: 50px;
+  padding: 10px 20px;
+  margin-left: 0; 
+}
+
+/* --- INPUT BAR (Takes remaining space) --- */
+.new-input-bar {
+  flex: 1; /* Stretches to fill space next to robot */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 8px 24px rgba(148, 163, 184, 0.2);
+  border: 1px solid #f8fafc;
+  border-radius: 50px;
+  padding: 10px 20px;
+}
 /* --- ANIMATIONS --- */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
@@ -885,6 +1035,142 @@
 
 .new-voice-trigger-btn { color: #64748b; margin-right: -4px; }
 .new-voice-trigger-btn:hover { background: #f1f5f9; color: var(--primary-color); }
+/* =========================================
+   DARK THEME OVERRIDES
+   Add class="dark-theme" to your wrapper 
+   ========================================= */
+
+.dark-theme .new-sympto-container {
+  /* --- Reassign Variables for Dark Mode --- */
+  --bg-color: #0f172a;        /* Slate 900 (Main Background) */
+  --chat-bg: #0f172a;         
+  --assistant-bg: #1e293b;    /* Slate 800 (Card/Bubble Background) */
+  --assistant-text: #f1f5f9;  /* Slate 100 (Primary Text) */
+  --border-light: #334155;    /* Slate 700 (Borders) */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* --- Global Text & Background --- */
+.dark-theme .new-sympto-container,
+.dark-theme .new-sympto-chat-area {
+  background-color: var(--bg-color);
+  color: var(--assistant-text);
+}
+
+/* --- Header --- */
+.dark-theme .new-sympto-header {
+  background-color: rgba(15, 23, 42, 0.9); /* Darker, semi-transparent */
+  border-bottom: 1px solid var(--border-light);
+}
+
+.dark-theme .new-logo-text h1 {
+  text-shadow: 0 0 15px rgba(59, 130, 246, 0.5); /* Add glow to text */
+}
+
+/* --- Chat Bubbles --- */
+.dark-theme .new-assistant-bubble {
+  background-color: var(--assistant-bg);
+  color: #e2e8f0;
+  border: 1px solid var(--border-light);
+}
+
+.dark-theme .new-assistant-avatar {
+  background-color: var(--assistant-bg);
+  border-color: var(--border-light);
+  color: #94a3b8;
+}
+
+/* --- Input Bar & Footer --- */
+.dark-theme .new-input-bar {
+  background-color: #1e293b; /* Dark Slate */
+  border-color: #334155;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.dark-theme .new-chat-input {
+  color: #fff;
+  border-color: #475569;
+}
+
+.dark-theme .new-chat-input:focus {
+  background-color: #0f172a; /* Darker input on focus */
+  border-color: #3b82f6;
+}
+
+.dark-theme .new-chat-input::placeholder {
+  color: #64748b;
+}
+
+/* --- Icons & Buttons --- */
+.dark-theme .new-icon-btn,
+.dark-theme .new-camera-btn {
+  color: #94a3b8;
+}
+
+.dark-theme .new-icon-btn:hover,
+.dark-theme .new-camera-btn:hover {
+  background-color: #334155;
+  color: #fff;
+}
+
+/* --- Quick Action Buttons (Pills) --- */
+.dark-theme .new-quick-action-btn {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+.dark-theme .new-quick-action-btn:hover {
+  background-color: #334155;
+  border-color: #60a5fa;
+  color: #fff;
+}
+
+/* --- NEW FLOATING MENU (Dark Mode) --- */
+.dark-theme .new-dropup-menu {
+  background-color: #1e293b; /* Dark Menu Background */
+  border: 1px solid #475569;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.dark-theme .new-dropdown-item {
+  color: #cbd5e1;
+}
+
+.dark-theme .new-dropdown-item:hover {
+  background-color: #334155;
+  color: #60a5fa; /* Light Blue on hover */
+}
+
+/* --- Floating Robot Button Override --- */
+/* (Optional: Makes the border match dark theme, keeps button blue) */
+.dark-theme .new-robot-standalone-btn {
+  border-color: #1e293b !important; 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6) !important;
+}
+/* Styling for the new image inside the avatar circle */
+/* Updated: Forces the logo to fill the avatar container */
+.new-bot-logo {
+  width: 100%;        /* Fills the 36px parent width */
+  height: 100%;       /* Fills the 36px parent height */
+  object-fit: cover;  /* Ensures it covers the area without empty space */
+  border-radius: 12px; /* Matches the avatar's rounded corners */
+  display: block;
+}
+/* --- Voice Overlay --- */
+.dark-theme .new-voice-mode-overlay {
+  background-color: #0f172a;
+}
+.dark-theme .new-voice-status-text {
+  color: #e2e8f0;
+}
+.dark-theme .new-voice-trigger-btn {
+  background-color: #1e293b;
+  color: #fff;
+}
+.dark-theme .new-voice-trigger-btn:hover {
+  background-color: #334155;
+}
 
 @media (max-width: 640px) {
   .new-sympto-header { padding: 0 1rem; }

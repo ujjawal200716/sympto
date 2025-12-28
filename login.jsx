@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
-import logo from './logo.png'; 
+import { useNavigate, Link } from 'react-router-dom'; 
+import logoLight from './logo.png';     
+import logoDark from './logodark.png';  
 import './logincss.css';
 
-// --- ICONS (Updated to use 'currentColor' for CSS styling) ---
+// --- ICONS ---
+const SunIcon = ({ className }) => (
+  <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+);
+const MoonIcon = ({ className }) => (
+  <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+);
 const UserIcon = ({ className }) => (
   <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
 );
@@ -24,9 +31,10 @@ const AuthPage = () => {
   const navigate = useNavigate(); 
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false); 
+
   const [error, setError] = useState('');
 
-  // 🔧 FIX: Use Environment Variable
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   const [formData, setFormData] = useState({
@@ -43,7 +51,6 @@ const AuthPage = () => {
     e.preventDefault(); 
     setError('');
 
-    // 🔧 FIX: Use dynamic base URL
     const endpoint = isLogin ? `${API_BASE_URL}/api/login` : `${API_BASE_URL}/api/register`;
     
     try {
@@ -72,13 +79,23 @@ const AuthPage = () => {
     }
   };
 
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
   return (
-    <div className="auth-wrapper">
+    <div className={`auth-wrapper ${isDarkMode ? 'dark-theme' : ''}`}>
       
       {/* --- LEFT SIDE --- */}
       <div className="auth-left">
         <div className="corner-logo-container">
-            <img src={logo} alt="App Logo" className="app-logo"/>
+            <Link to="/" className="nav-logo">
+               <img 
+                 src={isDarkMode ? logoDark : logoLight} 
+                 alt="Sympto Logo" 
+                 className="app-logo"
+               />
+            </Link>
         </div>
         <div className="auth-text-content">
           {isLogin ? (
@@ -99,6 +116,11 @@ const AuthPage = () => {
 
       {/* --- RIGHT SIDE --- */}
       <div className="auth-right">
+
+        {/* ---------------------------------------------------- */}
+        {/* ADDED: THEME TOGGLE BUTTON WAS MISSING HERE          */}
+        {/* ---------------------------------------------------- */}
+       
         
         <div className="auth-form-container">
           <div className="auth-header">

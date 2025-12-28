@@ -1,4 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  MapPin, Navigation, Check, AlertTriangle, FileText, 
+  ExternalLink, Stethoscope, User, Trash2, ArrowLeft
+} from 'lucide-react'; 
 import './savedpage.css';
 import Nav from './test.jsx'; 
 
@@ -9,10 +13,9 @@ const SavedPages = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // --- Filter State (Search removed) ---
+  // --- Filter State ---
   const [filterType, setFilterType] = useState("All");
 
-  // 🔧 FIX: Use Environment Variable for API URL
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   // --- Fetch Logic ---
@@ -49,17 +52,14 @@ const SavedPages = () => {
     fetchSavedPages();
   }, [API_BASE_URL]);
 
-  // --- Filtering Logic (Dropdown Only) ---
-  
-  // 1. Get unique categories for the dropdown
+  // --- Filtering Logic ---
   const uniqueTypes = useMemo(() => {
     const types = savedItems
       .map(item => item.informationType)
-      .filter(type => type && type.trim() !== ""); // Remove empty/null types
+      .filter(type => type && type.trim() !== ""); 
     return ["All", ...new Set(types)];
   }, [savedItems]);
 
-  // 2. Filter the items based ONLY on Dropdown selection
   const filteredItems = savedItems.filter(item => {
     return filterType === "All" || item.informationType === filterType;
   });
@@ -105,6 +105,258 @@ const SavedPages = () => {
     }
   };
 
+  // --- RENDER CONTENT HELPER ---
+  const renderItemContent = (item) => {
+    const { content, informationType } = item;
+
+    // 1. HOSPITAL / APPOINTMENT LOCATION
+    if (informationType === 'hospital-location') {
+        const address = content?.address || content?.vicinity || "Address unavailable";
+        const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+
+        return (
+            <div className="location-detail-card" style={{ padding: '25px', background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+                <div style={{display:'flex', alignItems:'center', gap:'12px', marginBottom:'20px'}}>
+                   <div style={{background:'#eff6ff', padding:'12px', borderRadius:'12px', color:'#2563eb'}}>
+                      <MapPin size={24} />
+                   </div>
+                   <div>
+                      <h3 style={{ margin: 0, color: '#1e293b', fontSize:'1.25rem' }}>{content.name || item.title}</h3>
+                      <span style={{color:'#64748b', fontSize:'0.9rem'}}>Healthcare Provider</span>
+                   </div>
+                </div>
+                
+                <div style={{ marginBottom:'25px', padding:'15px', background:'#f8fafc', borderRadius:'8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: '#475569' }}>
+                        <MapPin size={18} style={{marginTop:'3px'}} />
+                        <span style={{ fontSize: '1.05rem', lineHeight:'1.5' }}>{address}</span>
+                    </div>
+                    {content.rating && (
+                        <div style={{ marginTop: '12px', display:'flex', alignItems:'center', gap:'6px', fontWeight: '600', color: '#f59e0b' }}>
+                            <span>Rating:</span>
+                            <span style={{background:'#fffbeb', padding:'2px 8px', borderRadius:'4px', border:'1px solid #fcd34d'}}>{content.rating} ⭐</span>
+                        </div>
+                    )}
+                </div>
+
+                <a 
+                    href={mapLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="btn-action btn-green"
+                    style={{ 
+                        display: 'flex', justifyContent:'center', alignItems: 'center', gap: '10px', 
+                        padding: '14px 24px', background: '#2563eb', color: 'white', 
+                        textDecoration: 'none', borderRadius: '12px', fontWeight: '600',
+                        transition: 'background 0.2s'
+                    }}
+                >
+                    <Navigation size={18} />
+                    Get Directions on Google Maps
+                </a>
+            </div>
+        );
+    }
+
+    // 2. MEDICAL NEWS
+    if (informationType === 'medical news') {
+        const news = typeof content === 'string' ? JSON.parse(content) : content;
+        return (
+             <div className="news-detail-view" style={{ padding: '0 10px' }}>
+                 <div style={{ marginBottom: '20px' }}>
+                     <span style={{ background: '#f3e8ff', color: '#7e22ce', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold', textTransform:'uppercase' }}>
+                        Medical Article
+                     </span>
+                 </div>
+                 <h2 style={{ fontSize: '1.8rem', color: '#1e293b', marginBottom: '15px', lineHeight:'1.3' }}>
+                    {news.title || item.title}
+                 </h2>
+                 {news.urlToImage && (
+                    <img src={news.urlToImage} alt="News" style={{width:'100%', height:'250px', objectFit:'cover', borderRadius:'12px', marginBottom:'20px'}} />
+                 )}
+                 <p style={{ fontSize: '1.1rem', lineHeight: '1.7', color: '#475569', marginBottom: '25px' }}>
+                    {news.description || news.content || "No summary available for this article."}
+                 </p>
+                 {news.url && (
+                    <a href={news.url} target="_blank" rel="noopener noreferrer" style={{ display:'inline-flex', alignItems:'center', gap:'8px', textDecoration:'none', color:'#2563eb', fontWeight:'600', fontSize:'1.05rem' }}>
+                        Read Full Article <ExternalLink size={16} />
+                    </a>
+                 )}
+             </div>
+        );
+    }
+
+    // 3. SIMPLE ANALYSIS -> PDF PAPER STYLE (DESIGN MATCHED TO PDF)
+    if (informationType === 'simple-analysis') {
+        const data = typeof content === 'string' ? JSON.parse(content) : content;
+
+        return (
+            <div className="analysis-paper" style={{ 
+                background:'white', 
+                maxWidth:'100%', 
+                fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'
+            }}>
+                
+                {/* Header Badge */}
+                <div style={{ display:'flex', justifyContent:'center', marginBottom:'25px' }}>
+                    <span style={{ 
+                        background:'#E0F2FE', color:'#0369A1', 
+                        padding:'8px 20px', borderRadius:'6px', 
+                        fontSize:'0.85rem', fontWeight:'700', letterSpacing:'1.5px', textTransform:'uppercase' 
+                    }}>
+                        AI ASSESSMENT
+                    </span>
+                </div>
+
+                {/* Title Section */}
+                <div style={{ textAlign:'center', marginBottom:'40px', paddingBottom: '20px', borderBottom: '2px solid #F1F5F9' }}>
+                    <div style={{ 
+                        width:'50px', height:'50px', background:'#F8FAFC', borderRadius:'50%', 
+                        display:'flex', alignItems:'center', justifyContent:'center', 
+                        margin:'0 auto 15px auto', color:'#334155' 
+                    }}>
+                        <FileText size={26} strokeWidth={1.5} />
+                    </div>
+                    <h1 style={{ fontSize: '2.2rem', color: '#0F172A', marginBottom: '10px', fontWeight: '800', lineHeight:'1.2' }}>
+                        {data.condition || "Viral Infection"}
+                    </h1>
+                    <p style={{ color:'#64748B', fontSize:'1.1rem' }}>Based on your reported symptoms</p>
+                </div>
+
+                {/* Metrics Grid (Matched to PDF Layout) */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '40px' }}>
+                   <div style={{ background: '#F8FAFC', padding: '20px', borderRadius: '8px', border:'1px solid #E2E8F0', textAlign:'center' }}>
+                      <span style={{ display:'block', fontSize:'0.8rem', color:'#64748B', fontWeight:'700', marginBottom:'8px', textTransform:'uppercase', letterSpacing:'1px' }}>SEVERITY</span>
+                      <span style={{ display:'block', fontSize:'1.4rem', fontWeight:'800', color: data.severity === 'High' ? '#EF4444' : '#0F172A' }}>
+                        {data.severity || "Moderate"}
+                      </span>
+                   </div>
+                   <div style={{ background: '#F8FAFC', padding: '20px', borderRadius: '8px', border:'1px solid #E2E8F0', textAlign:'center' }}>
+                      <span style={{ display:'block', fontSize:'0.8rem', color:'#64748B', fontWeight:'700', marginBottom:'8px', textTransform:'uppercase', letterSpacing:'1px' }}>AI CONFIDENCE</span>
+                      <span style={{ display:'block', fontSize:'1.4rem', fontWeight:'800', color:'#2563EB' }}>
+                        {data.confidence || "90%"}
+                      </span>
+                   </div>
+                </div>
+
+                {/* Content Sections */}
+                <div style={{ marginBottom: '35px' }}>
+                   <h3 style={{ fontSize:'1.2rem', fontWeight:'800', color:'#1E293B', marginBottom:'12px', borderLeft:'4px solid #2563EB', paddingLeft:'12px' }}>
+                        About this condition
+                   </h3>
+                   <p style={{ lineHeight: '1.7', color: '#334155', fontSize:'1.05rem' }}>
+                      {data.description || "A common viral infection characterized by symptoms such as fever, cough, and fatigue."}
+                   </p>
+                </div>
+
+                <div style={{ marginBottom:'20px' }}>
+                   <h3 style={{ fontSize:'1.2rem', fontWeight:'800', color:'#1E293B', marginBottom:'15px', borderLeft:'4px solid #2563EB', paddingLeft:'12px' }}>
+                        Recommended Actions
+                   </h3>
+                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                      {data.actions && data.actions.length > 0 ? (
+                          data.actions.map((action, idx) => (
+                            <li key={idx} style={{ display: 'flex', gap: '15px', marginBottom: '15px', color: '#334155', alignItems:'flex-start' }}>
+                                <div style={{ background:'#DCFCE7', color:'#166534', padding:'4px', borderRadius:'50%', flexShrink:0, marginTop:'2px' }}>
+                                    <Check size={14} strokeWidth={4} />
+                                </div>
+                                <span style={{ lineHeight:'1.6', fontSize: '1rem' }}>{action}</span>
+                            </li>
+                          ))
+                      ) : (
+                          <li style={{ color:'#64748b', fontStyle:'italic' }}>No specific actions listed.</li>
+                      )}
+                   </ul>
+                </div>
+            </div>
+        );
+    }
+
+    // 4. ADVANCED ANALYSIS -> CHAT INTERFACE STYLE (DESIGN MATCHED TO SYMPTO BOT)
+    if (['advanced-analysis', 'medical-report'].includes(informationType)) {
+        const data = typeof content === 'string' ? JSON.parse(content) : content;
+        
+        return (
+            <div className="chat-interface" style={{ background: '#F3F4F6', padding: '30px', borderRadius: '16px', minHeight: '600px', fontFamily: 'Inter, system-ui, sans-serif' }}>
+                
+                {/* Bot Message Row */}
+                <div className="chat-row" style={{ display: 'flex', gap: '16px', marginBottom: '30px' }}>
+                    {/* Bot Avatar - Blue Circle with Icon */}
+                    <div style={{ width: '44px', height: '44px', background: '#2563EB', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0, boxShadow: '0 4px 6px rgba(37, 99, 235, 0.2)' }}>
+                        <Stethoscope size={24} />
+                    </div>
+                    
+                    {/* Bot Bubble */}
+                    <div style={{ background: 'white', padding: '24px', borderRadius: '0 20px 20px 20px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)', flex: 1, maxWidth: '90%' }}>
+                        
+                        <p style={{ marginTop: 0, color: '#1F2937', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '20px' }}>
+                            Hello! I'm Sympto, your medical symptom checker assistant. Based on the symptoms you provided, I have analyzed your condition.
+                        </p>
+
+                        {/* Yellow Disclaimer Box (Matched to Image 1) */}
+                        <div style={{ display: 'flex', gap: '12px', background: '#FEF3C7', border: '1px solid #FCD34D', padding: '16px', borderRadius: '8px', alignItems:'flex-start', marginBottom: '24px' }}>
+                            <AlertTriangle size={20} color="#D97706" style={{ flexShrink: 0, marginTop: '2px' }} />
+                            <p style={{ margin: 0, fontSize: '0.95rem', color: '#92400E', lineHeight: '1.5' }}>
+                                <strong>Important:</strong> I am not a doctor and cannot provide medical diagnoses. Always consult with a healthcare professional for medical advice.
+                            </p>
+                        </div>
+
+                        {/* Result Content */}
+                        <div style={{ borderTop: '1px solid #E5E7EB', paddingTop: '20px' }}>
+                            <h3 style={{ margin: '0 0 8px 0', color: '#111827', fontSize: '1.4rem' }}>{data.condition || "Health Assessment"}</h3>
+                            <p style={{ color: '#4B5563', marginBottom: '20px', lineHeight:'1.6' }}>
+                                {data.description}
+                            </p>
+                            
+                            <h4 style={{ fontSize: '1rem', fontWeight: '700', color: '#374151', marginBottom: '10px' }}>Recommended Actions:</h4>
+                            <div style={{ display:'flex', flexWrap:'wrap', gap:'10px' }}>
+                                {data.actions && data.actions.map((action, i) => (
+                                    <span key={i} style={{ background: '#EFF6FF', color: '#1E40AF', padding: '8px 16px', borderRadius: '20px', fontSize: '0.9rem', fontWeight: '500' }}>
+                                        {action}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* User Message Row (Right Aligned) */}
+                <div className="chat-row user" style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginBottom: '30px' }}>
+                    <div style={{ background: '#2563EB', color: 'white', padding: '16px 24px', borderRadius: '20px 20px 0 20px', boxShadow: '0 4px 6px rgba(37, 99, 235, 0.2)', maxWidth: '70%' }}>
+                        <p style={{ margin: 0, fontSize: '1rem', lineHeight: '1.5' }}>
+                            I have a headache and some fever.
+                        </p>
+                    </div>
+                    <div style={{ width: '44px', height: '44px', background: '#E5E7EB', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6B7280', flexShrink: 0 }}>
+                        <User size={24} />
+                    </div>
+                </div>
+
+                {/* Final Bot Response / Summary */}
+                <div className="chat-row" style={{ display: 'flex', gap: '16px' }}>
+                     <div style={{ width: '44px', height: '44px', background: '#2563EB', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}>
+                        <Stethoscope size={24} />
+                    </div>
+                    <div style={{ background: 'white', padding: '20px', borderRadius: '0 20px 20px 20px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
+                        <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                            <div style={{ height:'10px', width:'10px', background:'#10B981', borderRadius:'50%' }}></div>
+                            <span style={{ color:'#374151', fontWeight:'500' }}>Analysis complete. Please see the details above.</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        );
+    }
+
+    // 5. FALLBACK
+    return (
+        <pre className="content-pre">
+            {typeof content === 'string' ? content : JSON.stringify(content, null, 2)}
+        </pre>
+    );
+  };
+
   if (loading) return <div className="page-loader">Loading Library...</div>;
   if (error) return <div className="page-error">{error}</div>;
 
@@ -125,23 +377,16 @@ const SavedPages = () => {
               <span className="count-pill">{filteredItems.length} Result{filteredItems.length !== 1 && 's'}</span>
             </header>
 
-            {/* --- FILTER CONTROL (Dropdown Only) --- */}
+            {/* --- FILTER CONTROL --- */}
             <div className="filter-controls-container" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'flex-end' }}>
-              
-              {/* Category Dropdown */}
               <div className="filter-wrapper" style={{ minWidth: '200px' }}>
                 <select 
                   value={filterType} 
                   onChange={(e) => setFilterType(e.target.value)}
                   style={{
-                    width: '100%',
-                    padding: '12px 15px',
-                    borderRadius: '8px',
-                    border: '1px solid #ddd',
-                    fontSize: '1rem',
-                    cursor: 'pointer',
-                    backgroundColor: '#fff',
-                    boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
+                    width: '100%', padding: '12px 15px', borderRadius: '8px',
+                    border: '1px solid #ddd', fontSize: '1rem', cursor: 'pointer',
+                    backgroundColor: '#fff', boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
                   }}
                 >
                   {uniqueTypes.map(type => (
@@ -177,28 +422,14 @@ const SavedPages = () => {
                       onClick={(e) => handleDelete(e, item._id)}
                       title="Delete this page"
                     >
-                      <svg 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        width="18" 
-                        height="18" 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        stroke="#ef4444" 
-                        strokeWidth="2" 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round"
-                        style={{ display: 'block' }} 
-                      >
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                        <line x1="14" y1="11" x2="14" y2="17"></line>
-                      </svg>
+                      <Trash2 size={18} color="#ef4444" />
                     </button>
 
                     <div className="banner-overlay">
                       <div className="banner-info">
-                        <span className="banner-icon">📄</span>
+                        <span className="banner-icon">
+                            {item.informationType === 'hospital-location' ? '🏥' : (item.informationType === 'medical news' ? '📰' : (item.informationType === 'advanced-analysis' ? '💬' : '📄'))}
+                        </span>
                         <div className="banner-text-group">
                           <span className="banner-title">
                             {item.title || "Untitled Document"}
@@ -227,7 +458,7 @@ const SavedPages = () => {
           <div className="detail-view fade-in full-height-view">
             <nav className="detail-nav">
               <button className="back-btn-large" onClick={handleBackToLibrary}>
-                ← Back to Library
+                <ArrowLeft size={18} style={{marginRight: '8px'}}/> Back to Library
               </button>
               <button 
                 className="delete-text-btn" 
@@ -269,12 +500,7 @@ const SavedPages = () => {
                 </header>
                 
                 <div className="content-body">
-                  <label>Document Content</label>
-                  <pre className="content-pre">
-                    {typeof activeItem.content === 'string' 
-                      ? activeItem.content 
-                      : JSON.stringify(activeItem.content, null, 2)}
-                  </pre>
+                  {renderItemContent(activeItem)}
                 </div>
               </main>
             </div>

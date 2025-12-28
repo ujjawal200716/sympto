@@ -1,14 +1,16 @@
 import React, { useState, useRef } from 'react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import "./sample.css"; 
-import Nev from "./test.jsx";
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import "./sample.css"; // Ensure this matches your CSS filename
+import Nev from "./test.jsx";    // Ensure this matches your Navbar filename
 
-// 🔒 SECURE: Key is now loaded from environment variables
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+// 🔒 SECURE: Key loaded from environment variables
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyCpTpkRriy5TR8P4uldvomP2no9Zd-tCAg";
 
 export default function SymptomChecker() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [isSaved, setIsSaved] = useState(false); // New state for Save button
+  const [isSaved, setIsSaved] = useState(false);
   
   const [formData, setFormData] = useState({
     age: '',
@@ -26,9 +28,10 @@ export default function SymptomChecker() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
   const inputRef = useRef(null);
+  const resultCardRef = useRef(null); // Ref for PDF generation
 
-  // ... (Existing helper lists: symptomsList, steps, options remain the same) ...
   const symptomsList = [
     { id: 1, name: 'Fever', icon: '🌡️' },
     { id: 2, name: 'Cough', icon: '😷' },
@@ -57,22 +60,19 @@ export default function SymptomChecker() {
     { label: 'Select Common Symptoms', field: 'symptoms', type: 'multiselect' }, 
   ];
 
-// --- NEW: SAVE TO SERVER FUNCTION ---
+  // --- SAVE FUNCTION ---
   const handleSave = async () => {
-    // 1. Check for Authentication Token
     const token = localStorage.getItem('token');
     if (!token) {
         alert("Please log in to save your assessment.");
         return;
     }
 
-    // 2. Prevent saving if already saved
     if (isSaved) {
         alert("This report is already saved.");
         return;
     }
 
-    // 🔧 FIX: Use environment variable for the API URL
     const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
     try {
@@ -82,14 +82,13 @@ export default function SymptomChecker() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            // 3. Payload adapted for Symptom Checker Data
             body: JSON.stringify({
                 title: `Symptom Check: ${result.condition} - ${new Date().toLocaleDateString()}`,
-                informationType: 'sample analysis', // <--- NEW: Added Information Type
+                informationType: 'sample analysis', 
                 pageData: { 
-                    type: 'symptom-checker', // Tag to identify this specific layout
-                    formData: formData,      // The inputs (Age, Symptoms, etc)
-                    result: result           // The AI Output (Condition, Severity, etc)
+                    type: 'symptom-checker', 
+                    formData: formData,      
+                    result: result           
                 } 
             })
         });
@@ -97,7 +96,7 @@ export default function SymptomChecker() {
         const data = await response.json();
 
         if (response.ok) {
-            setIsSaved(true); // Turns the icon solid/green
+            setIsSaved(true); 
             alert("✅ Assessment saved to your profile!");
         } else {
             alert(`❌ Error: ${data.message}`);
@@ -107,6 +106,7 @@ export default function SymptomChecker() {
         alert("❌ Failed to connect to server");
     }
   };
+
   const options = {
     gender: ['Male', 'Female', 'Other', 'Prefer not to say'],
     duration: ['Less than 1 day', '1-3 days', '4-7 days', 'More than a week'],
@@ -114,7 +114,7 @@ export default function SymptomChecker() {
     temperature: ['No fever', 'Low fever (37-38°C)', 'Moderate fever (38-39°C)', 'High fever (39°C+)'],
   };
 
-  // ... (Existing handlers: handleContainerClick, toggleSymptom, updateFormData, canProceed, handleBack) ...
+  // --- FORM HANDLERS ---
   const handleContainerClick = () => { if (inputRef.current) inputRef.current.focus(); };
 
   const toggleSymptom = (id) => {
@@ -150,11 +150,11 @@ export default function SymptomChecker() {
     if (currentStep > 0) setCurrentStep(currentStep - 1);
   };
 
+  // --- AI ANALYSIS ---
   const analyzeSymptoms = async () => {
     setLoading(true);
     setError(null);
 
-    // 🔧 Check if API Key exists
     if (!API_KEY) {
       setError("Missing API Key. Please configure VITE_GEMINI_API_KEY.");
       setLoading(false);
@@ -195,8 +195,6 @@ export default function SymptomChecker() {
     setIsSaved(false);
   };
 
-  // --- NEW BUTTON HANDLERS ---
-  
   const handleShare = async () => {
     if (navigator.share && result) {
       try {
@@ -212,36 +210,58 @@ export default function SymptomChecker() {
     }
   };
 
-  const handleDownload = () => {
-    if (!result) return;
-    const textContent = `
-=== SYMPTO CHECK REPORT ===
-Date: ${new Date().toLocaleDateString()}
+  // --- UPDATED PDF DOWNLOAD (FITS TO PAGE) ---
+  const handleDownload = async () => {
+    const input = resultCardRef.current;
+    if (!input || !result) return;
 
-Patient Age: ${formData.age}
-Reported Severity: ${formData.severity}
+    try {
+      // 1. Force scroll to top to prevent white bars/cutoff
+      window.scrollTo(0, 0);
 
-ASSESSMENT:
-Condition: ${result.condition}
-AI Confidence: ${result.confidence}
-Severity Level: ${result.severity}
+      // 2. Capture the element
+      const canvas = await html2canvas(input, {
+        scale: 2, // High resolution
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        scrollY: -window.scrollY // Correction for scroll position
+      });
 
-DESCRIPTION:
-${result.description}
+      // 3. Initialize PDF (A4 size)
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png');
+      
+      // 4. Calculate Dimensions to FIT the page
+      const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm
+      const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
+      
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      
+      // Calculate ratio to fit width first
+      const ratio = pageWidth / imgWidth;
+      
+      // Determine final height based on width ratio
+      let finalHeight = imgHeight * ratio;
+      let finalWidth = pageWidth;
 
-RECOMMENDATIONS:
-${result.recommendations.map(r => `- ${r}`).join('\n')}
+      // If the image is STILL too tall for one page, scale it down further to fit height
+      if (finalHeight > pageHeight) {
+         const heightRatio = pageHeight / finalHeight;
+         finalHeight = pageHeight - 10; // -10 for padding
+         finalWidth = finalWidth * heightRatio;
+      }
 
-*Disclaimer: This is AI-generated advice. Consult a doctor.*
-    `;
-    
-    const element = document.createElement("a");
-    const file = new Blob([textContent], {type: 'text/plain'});
-    element.href = URL.createObjectURL(file);
-    element.download = "symptom-report.txt";
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+      // 5. Center horizontally
+      const xOffset = (pageWidth - finalWidth) / 2;
+      
+      pdf.addImage(imgData, 'PNG', xOffset, 10, finalWidth, finalHeight);
+      pdf.save(`SymptoReport-${new Date().toISOString().slice(0,10)}.pdf`);
+
+    } catch (err) {
+      console.error("PDF Generation Error:", err);
+      alert("Failed to generate PDF. Please try again.");
+    }
   };
 
   const step = steps[currentStep];
@@ -321,40 +341,59 @@ ${result.recommendations.map(r => `- ${r}`).join('\n')}
         // --- NEW DESIGNED RESULTS PAGE ---
         <div className="results-wrapper">
             <Nev />
-            <div className="result-card">
+            {/* ATTACH REF HERE FOR PDF GENERATION */}
+            <div className="result-card" ref={resultCardRef}>
               
               {/* Header */}
               <div className="result-header">
                 <span className="result-badge">AI Assessment</span>
-                <div className="action-row">
-                   <button onClick={handleShare} className="icon-btn" title="Share">
-                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
-                   </button>
-                   <button onClick={handleDownload} className="icon-btn" title="Download Report">
-                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                   </button>
-                 <button 
-  onClick={handleSave} 
-  className={`icon-btn ${isSaved ? 'saved-active' : ''}`} 
-  title={isSaved ? "Saved" : "Save to Profile"}
-  disabled={isSaved} // Optional: Prevents clicking again if already saved
->
-  <svg 
-    width="20" 
-    height="20" 
-    viewBox="0 0 24 24" 
-    fill={isSaved ? "currentColor" : "none"} 
-    stroke="currentColor" 
-    strokeWidth="2"
-  >
-    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-  </svg>
-</button>
+                
+                {/* ACTION BUTTONS WITH FIXED VISIBLE ICONS */}
+                <div className="action-row" data-html2canvas-ignore="true">
+                  {/* Share Button */}
+                  <button onClick={handleShare} className="icon-btn" title="Share">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                      <polyline points="16 6 12 2 8 6"></polyline>
+                      <line x1="12" y1="2" x2="12" y2="15"></line>
+                    </svg>
+                  </button>
+
+                  {/* Download Button */}
+                  <button onClick={handleDownload} className="icon-btn" title="Download PDF">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                  </button>
+
+                  {/* Save Button (Changes color if saved) */}
+                  <button 
+                    onClick={handleSave} 
+                    className={`icon-btn ${isSaved ? 'saved-active' : ''}`} 
+                    title={isSaved ? "Saved" : "Save to Profile"}
+                    disabled={isSaved}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill={isSaved ? "#059669" : "none"} stroke={isSaved ? "#059669" : "#64748b"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                      <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                      <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                  </button>
                 </div>
               </div>
 
               {/* Main Diagnosis */}
               <div className="diagnosis-section">
+                {/* --- LARGE ICON --- */}
+                <div className="diagnosis-icon">
+                  <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 3C4.89543 3 4 3.89543 4 5V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V5C20 3.89543 19.1046 3 18 3H6ZM6 1H18C20.2091 1 22 2.79086 22 5V19C22 21.2091 20.2091 23 18 23H6C3.79086 23 2 21.2091 2 19V5C2 2.79086 3.79086 1 6 1Z" fillOpacity="0.5"/>
+                    <path d="M11 7H13V10H16V12H13V15H11V12H8V10H11V7Z"/>
+                  </svg>
+                </div>
+
                 <h1 className="condition-name">{result.condition}</h1>
                 <p className="condition-meta">Based on your symptoms</p>
               </div>
@@ -390,8 +429,8 @@ ${result.recommendations.map(r => `- ${r}`).join('\n')}
                 </ul>
               </div>
 
-              {/* Footer Button */}
-              <button onClick={resetQuiz} className="btn-restart">
+              {/* Footer Button - Ignored in PDF */}
+              <button onClick={resetQuiz} className="btn-restart" data-html2canvas-ignore="true">
                 Check Another Symptom
               </button>
             </div>

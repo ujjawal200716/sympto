@@ -1,18 +1,23 @@
-/* File: src/findcss.css */
-
 /* =========================================
    1. LIGHT MODE (DEFAULT)
    ========================================= */
 
 /* The outer container (for z-index context) */
 .find-modal-overlay {
-    z-index: 1000; 
+    z-index: 9999999; 
 }
 
 .find-modal-content {
-    /* Positioning */
+    /* Positioning - CENTERED */
     position: fixed; 
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     
+    /* 🔴 ADD THIS LINE 🔴 */
+    z-index: 10000000; 
+    /* ------------------ */
+
     /* Appearance */
     display: flex;
     align-items: center;
@@ -182,16 +187,137 @@
 }
 
 /* Dark Mode Highlights */
-/* Note: We generally keep the yellow highlight but ensure text is black 
-   so it remains readable even on a dark page background */
-
 .dark-theme .highlight-find {
-    background-color: #fbbf24; /* Amber-400 (Slightly darker yellow/orange) */
-    color: #000000;            /* Always black text inside highlight */
+    background-color: #fbbf24; /* Amber-400 */
+    color: #000000;            /* Always black text */
 }
 
 .dark-theme .active-highlight {
     background-color: #3b82f6; /* Blue-500 */
     color: #ffffff;
     box-shadow: 0 0 4px rgba(59, 130, 246, 0.6);
+}
+
+/* =========================================
+   3. MOBILE OPTIMIZATIONS (CENTERED)
+   ========================================= */
+/* =========================================
+   3. MOBILE OPTIMIZATIONS (COMPACT & CENTERED)
+   ========================================= */
+@media (max-width: 768px) {
+    
+    .find-modal-content {
+        /* FIX: High Z-Index */
+        z-index: 2147483647 !important; 
+        
+        /* Position: Center of screen */
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        bottom: auto !important;
+        
+        /* Transform */
+        transform: translate3d(-50%, -50%, 0) !important;
+        will-change: transform, opacity;
+        
+        /* Layout & Sizing - REDUCED SIZE */
+        width: auto;             /* Wraps content tightly */
+        min-width: 280px;        /* Prevents it from being too squashed */
+        max-width: 85%;          /* Limits width on small screens */
+        padding: 6px 8px;        /* Reduced padding (was 10px 14px) */
+        gap: 6px;                /* Reduced gap (was 8px) */
+        
+        /* Appearance */
+        background-color: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Slightly smaller shadow */
+        border: none;
+        border-radius: 16px;     /* Slightly smaller radius */
+        
+        animation: centerPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* Input Field - COMPACT */
+    .find-input {
+        flex: 1; 
+        width: auto;
+        height: 34px;          /* Reduced height (was 42px) */
+        font-size: 14px;       /* Smaller font (was 16px) */
+        border-radius: 17px;   /* Adjusted for new height */
+        padding-left: 12px;    /* Tighter padding */
+        background-color: #f1f5f9;
+        border: 1px solid transparent;
+        appearance: none; 
+    }
+
+    .find-input:focus {
+        background-color: #ffffff;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+        border-color: #3b82f6;
+    }
+
+    /* Buttons - COMPACT */
+    .find-modal-content button {
+        width: 32px;           /* Reduced size (was 42px) */
+        height: 32px;          /* Reduced size (was 42px) */
+        background-color: transparent;
+        border-radius: 50%;
+        margin: 0;
+        padding: 4px;          /* Ensure icon fits inside */
+        flex-shrink: 0; 
+    }
+
+    .find-modal-content button svg {
+        width: 18px;           /* Force icon SVG scaling if needed */
+        height: 18px;
+    }
+
+    .find-modal-content button:active {
+        background-color: #e2e8f0;
+        transform: scale(0.95);
+    }
+
+    /* Match Count */
+    .match-count {
+        font-size: 11px;       /* Smaller text */
+        min-width: auto;
+        padding: 0 4px;
+        color: #64748b;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* Dark Mode Mobile Overrides */
+    .dark-theme .find-modal-content {
+        background-color: rgba(15, 23, 42, 0.96);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .dark-theme .find-input {
+        background-color: #1e293b;
+        color: #f8fafc;
+    }
+    
+    .dark-theme .find-input:focus {
+        background-color: #0f172a;
+        border-color: #3b82f6;
+    }
+
+    .dark-theme .find-modal-content button:active {
+        background-color: #334155;
+    }
+
+    /* Animation */
+    @keyframes centerPop {
+        0% { 
+            transform: translate3d(-50%, -50%, 0) scale(0.85); 
+            opacity: 0; 
+        }
+        100% { 
+            transform: translate3d(-50%, -50%, 0) scale(1); 
+            opacity: 1; 
+        }
+    }
 }

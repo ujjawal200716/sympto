@@ -747,71 +747,342 @@
 }
 
 /* =========================================
-   Top Section: Layout (Switched to Grid)
+   5. Footer (Left-Right Layout)
    ========================================= */
-.sympto-footer-top {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr; 
-  /* CHANGED: Reduced gap from 40px to 30px */
-  gap: 30px;
-  margin-bottom: 40px;
-  align-items: start;
+.site-footer {
+  position: relative; 
+  background-color: #e9fcfd; /* Match the white background in image */
+  border-top: 1px solid #e2e8f0;
+  padding: 50px 0 30px; 
+  width: 100%;
 }
 
-/* Brand Section */
-.footer-brand {
-  max-width: 350px; 
+.footer-wrapper {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 24px;
 }
 
-.footer-brand img {
-  height: 36px;
+.footer-primary-content {
+  display: flex;
+  flex-wrap: wrap;
+  /* KEY CHANGE: Pushes Logo to left and Links to right */
+  justify-content: space-between; 
+  align-items: flex-start; /* Ensures top alignment */
+  gap: 40px; 
+  margin-bottom: 30px;
+  text-align: left; /* Reset text alignment to left */
+}
+
+/* --- Left Side: Logo & Tagline --- */
+.footer-identity {
+  flex: 0 1 350px; 
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Aligns content to the left */
+}
+
+.footer-brand-logo {
+  height: 50px; 
   width: auto;
-  margin-bottom: 20px;
+  object-fit: contain;
+  margin-bottom: 12px;
   display: block;
+  /* No auto margins here, keeps it left */
 }
 
-.footer-brand p {
-  color: #6b7280;
-  line-height: 1.6;
-  font-size: 0.95rem;
+.footer-brand-logo:not([src]), 
+.footer-brand-logo[src=""] { display: none; }
+
+.footer-identity p {
+  color: #64748b; 
+  line-height: 1.5;
+  font-size: 0.9rem;
   margin: 0;
+  text-align: left;
 }
 
-/* Links Groups */
-.footer-links-group {
-  justify-self: start; 
+/* --- Right Side: Navigation Links --- */
+/* Optional wrapper to group columns if needed, but flex works without it */
+
+.footer-nav-column {
+  flex: 0 0 auto;
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Aligns links to the left */
 }
 
-.footer-links-group h4 {
-  font-size: 0.85rem;
+.footer-nav-column h4 {
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 700;
-  color: #111827;
-  margin-bottom: 20px;
-  margin-top: 5px; 
+  color: #0f172a; 
+  margin-bottom: 16px;
+  text-align: left;
 }
 
-.footer-links-group ul {
+.footer-nav-column ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.footer-links-group li {
+.footer-nav-column li { 
+  margin-bottom: 10px; 
+}
+
+.footer-nav-column a,
+.footer-nav-column button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  color: #475569;
+  font-size: 0.9rem;
+  transition: color 0.2s ease, padding-left 0.2s ease;
+  display: inline-block;
+  text-align: left;
+}
+
+.footer-nav-column a:hover,
+.footer-nav-column button:hover {
+  color: #2563eb;
+  padding-left: 5px; 
+}
+
+/* =========================================
+   Updated Notice Box Styling
+   ========================================= */
+
+.footer-notice-box {
+  /* Box Styling */
+  background-color: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  padding: 16px 20px;
+  
+  /* Layout: Make it full width */
+  width: 100%; 
+  max-width: 100%; /* Removes previous width restriction */
+  box-sizing: border-box; /* Ensures padding doesn't break width */
+  margin: 0 0 30px 0; /* Add bottom margin to separate from copyright */
+  
+  /* Flex settings for the icon and text */
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.footer-notice-box p {
+  margin: 0;
+  color: #92400e;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  text-align: left;
+  flex: 1; /* Ensures text takes up remaining space */
+}
+
+/* Icon Styling */
+.notice-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  background: #f59e0b;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 12px;
+  margin-top: 2px; /* Slight visual alignment with text */
+}
+
+.footer-copyright {
+  text-align: center; /* Copyright usually stays centered, or change to left if preferred */
+  border-top: 1px solid #f1f5f9;
+  padding-top: 20px;
+}
+
+.footer-copyright p {
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+/* Mobile Responsiveness: Stacks them vertically on small screens */
+@media (max-width: 768px) {
+  .footer-primary-content {
+    flex-direction: column;
+    gap: 30px;
+  }
+  
+  /* On mobile, you might want to stack the columns */
+  .footer-nav-column {
+    width: 100%;
+  }
+}
+/* =========================================
+   6. Popup / Modal Styles (NEW)
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(15, 23, 42, 0.6); /* Slate overlay */
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* High z-index to sit on top of everything */
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  background: #ffffff;
+  width: 90%;
+  max-width: 600px;
+  max-height: 85vh;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8fafc;
+  border-radius: 12px 12px 0 0;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  line-height: 1;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0 0.5rem;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #ef4444;
+}
+
+.modal-body {
+  padding: 2rem;
+  overflow-y: auto;
+  color: #334155;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.modal-body h3 {
+  color: #2563eb;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* =========================================
+   Dark Mode Overrides for Modals
+   ========================================= */
+
+/* 1. Darken the main modal box */
+.dark-theme .modal-content {
+  background: #1e293b; /* Slate-800 */
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+}
+
+/* 2. Darken the header background and borders */
+.dark-theme .modal-header {
+  background-color: #0f172a; /* Slate-900 (Darker than body) */
+  border-bottom: 1px solid #334155; /* Slate-700 */
+}
+
+/* 3. Lighten the Title Text */
+.dark-theme .modal-header h2 {
+  color: #f1f5f9; /* Slate-100 (Almost White) */
+}
+
+/* 4. Adjust Close Button for dark background */
+.dark-theme .close-btn {
+  color: #94a3b8; /* Slate-400 */
+}
+
+.dark-theme .close-btn:hover {
+  color: #f87171; /* Light Red for visibility */
+}
+
+/* 5. Lighten Body Text */
+.dark-theme .modal-body {
+  color: #cbd5e1; /* Slate-300 */
+}
+
+/* 6. Adjust Headings inside body (Make blue lighter) */
+.dark-theme .modal-body h3 {
+  color: #60a5fa; /* Blue-400 (Lighter blue for contrast) */
+}
+/* --- Footer Logo Switching --- */
+
+.footer-brand-logo {
+  height: 50px; /* Adjust size as needed */
+  width: auto;
+  object-fit: contain;
   margin-bottom: 12px;
 }
 
-.footer-links-group a {
-  text-decoration: none;
-  color: #4b5563;
-  font-size: 0.95rem;
-  transition: color 0.2s ease;
+/* 1. Default State (Light Mode) */
+.logo-light {
+  display: block;
 }
 
-.footer-links-group a:hover {
-  color: #2563eb;
+.logo-dark {
+  display: none; /* Hide dark logo by default */
 }
+
+/* 2. Dark Mode State */
+/* When .dark-theme is present on body/wrapper, switch them */
+.dark-theme .logo-light {
+  display: none;
+}
+
+.dark-theme .logo-dark {
+  display: block;
+}
+/* Optional: Make the scrollbar look good in dark mode */
+.dark-theme .modal-body::-webkit-scrollbar-track {
+  background: #0f172a; 
+}
+.dark-theme .modal-body::-webkit-scrollbar-thumb {
+  background-color: #475569; 
+  border-radius: 20px;
+}
+
 /* =========================================
    SCOPED DARK THEME (Won't affect other pages)
    Usage: <div class="about-page dark-theme">

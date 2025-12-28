@@ -1,13 +1,15 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Link, useNavigate } from "react-router-dom";
-import axios from 'axios'; // Import Axios
-import './textcss.css';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate, useLocation } from "react-router-dom";
+// Removed Axios since we aren't fetching the image anymore
+import './textcss.css'; 
+
 import logoLight from './logo.png';
 import logoDark from './logodark.png';
-import FindInPageModal from './find'; 
+import FindInPageModal from './find';
 
+// Icons configuration
 const Icons = {
-    dashboard: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z", 
+    dashboard: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z",
     profile: "M12 4a4 4 0 0 1 4 4 4 4 0 0 1 -4 4 4 4 0 0 1 -4 -4 4 4 0 0 1 4 -4zM12 14c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4z",
     settings: "M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.2-.15.24-.43.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.09-.75-1.7-.99L15 3h-4L9.49 5.03c-.61.24-1.18.59-1.7.99l-2.49-1c-.23-.08-.5-.01-.61.22l-2 3.46c-.12.21-.08.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.2.15-.24.43-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.09.75 1.7.99L11 21h4l.51-2.03c.61-.24 1.18-.59 1.7-.99l2.49 1c.23.08.5.01.61-.22l2-3.46c.12-.21.08-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z",
     orders: "M16 6h-2v2h-4V6H6l4-4 4 4zm-4-4V2zM2 12c0-5.33 1.95-9.69 5.25-11.5L8.5 2c-2.73 1.5-4.5 4.54-4.5 8 0 3.86 2.65 7.15 6.2 7.82l.8.18v2.05c-2.45-.66-4.38-2.68-5.32-5.11L4 14.5c.34 2.22 1.95 3.96 4.1 4.71l-.15.14c-1.76 1.76-2.58 3.59-2.58 5.65h2.16c0-1.28.37-2.31 1.1-3.04.73-.73 1.77-1.1 3.05-1.1s2.32.37 3.05 1.1c.73.73 1.1 1.77 1.1 3.05h2.16c0-2.06-.82-3.89-2.58-5.65l-.15-.14c2.15-.75 3.76-2.49 4.1-4.71l.53 1.18c-.94 2.43-2.87 4.45-5.32 5.11v-2.05l.8-.18c3.55-.67 6.2-3.96 6.2-7.82 0-3.46-1.77-6.5-4.5-8l1.25-1.5z",
@@ -20,55 +22,37 @@ const Icons = {
 };
 
 function Navbar() {
+    // State Management
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [isFindModalOpen, setIsFindModalOpen] = useState(false); 
+    const [isFindModalOpen, setIsFindModalOpen] = useState(false);
     const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
-    
-    // NEW: State for profile image
-    const [profileImg, setProfileImg] = useState(null); 
-    
+    // Removed profileImg state
+    const [scrolled, setScrolled] = useState(false);
+
+    // Refs & Hooks
     const profileRef = useRef(null);
     const navigate = useNavigate();
-    const contentToSearchRef = useRef(document.body); 
-    
-    // 🔧 FIX: Use Environment Variable
-    const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'; 
+    const location = useLocation();
+    const contentToSearchRef = useRef(document.body);
+
+    // Handle Scroll for Glass Effect
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 50);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
         setIsLoggedIn(!!token);
-        
-        // NEW: Fetch profile image if logged in
-        if (token) {
-            fetchProfileImage(token);
-        }
+        // Removed fetchProfileImage call
     }, []);
 
-    // NEW: Function to fetch user data and set image
-    const fetchProfileImage = async (token) => {
-        try {
-            const res = await axios.get(`${BASE_URL}/api/user-profile`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            const data = res.data;
-            if (data.profileImg) {
-                // Logic to handle slashes (fixes Windows path issues)
-                if (data.profileImg.startsWith('http')) {
-                    setProfileImg(data.profileImg);
-                } else {
-                    const cleanPath = data.profileImg.replace(/\\/g, "/");
-                    const finalPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
-                    setProfileImg(`${BASE_URL}${finalPath}`);
-                }
-            }
-        } catch (err) {
-            console.error("Failed to load navbar profile image", err);
-        }
-    };
-
-    // Theme logic
+    // Dark Mode Toggle
     useEffect(() => {
         if (darkMode) {
             document.body.classList.add('dark-theme');
@@ -79,6 +63,7 @@ function Navbar() {
         }
     }, [darkMode]);
 
+    // Click Outside Listener for Dropdown
     useEffect(() => {
         function handleClickOutside(event) {
             if (profileRef.current && !profileRef.current.contains(event.target)) {
@@ -86,189 +71,187 @@ function Navbar() {
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const showSidebar = useCallback((e) => {
-        if(e) e.preventDefault();
-        setSidebarOpen(true);
-        setDropdownOpen(false);
-    }, []);
-
-    const hideSidebar = useCallback((e) => {
-        if(e) e.preventDefault();
-        setSidebarOpen(false);
-    }, []);
+    // Handlers
+    const showSidebar = () => setSidebarOpen(true);
+    const hideSidebar = () => setSidebarOpen(false);
+    const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
         setIsLoggedIn(false);
-        setProfileImg(null); // Clear image on logout
-        setDropdownOpen(false);
-        hideSidebar();
         navigate('/login');
     };
-    
+
     const handleFindInPage = (e) => {
-        if (e) e.preventDefault(); 
+        e.preventDefault();
         setIsFindModalOpen(true);
         setDropdownOpen(false);
-        hideSidebar();
-    }
-    
-    const toggleTheme = (e) => {
-        if (e) e.preventDefault();
-        setDarkMode(!darkMode);
-        setDropdownOpen(false);
-        hideSidebar();
-    }
-
-    const toggleDropdown = () => {
-        setDropdownOpen(prev => !prev);
     };
 
+    const toggleTheme = (e) => {
+        e.preventDefault();
+        setDarkMode(!darkMode);
+        setDropdownOpen(false);
+    };
+
+    // Profile Menu Items
     const MENU_ITEMS = [
         { name: 'My Profile', path: '/myprofile', icon: Icons.profile },
-        { name: darkMode ? 'Light Mode' : 'Dark Mode', path: '##theme', icon: darkMode ? Icons.sun : Icons.moon }, 
-        { name: 'Find in Page', path: '##find', icon: Icons.find }, 
-        { name: 'Saved ', path: '/saved', icon: Icons.saved },
+        { name: darkMode ? 'Light Mode' : 'Dark Mode', path: '##theme', icon: darkMode ? Icons.sun : Icons.moon },
+        { name: 'Find in Page', path: '##find', icon: Icons.find },
+        { name: 'Saved', path: '/saved', icon: Icons.saved },
         { name: 'Logout', path: '#logout', icon: Icons.logout },
     ];
 
-    const handleItemClick = (itemPath, e) => {
-        if (itemPath === '#logout') {
-            handleLogout();
-        } else if (itemPath === '##find') {
-            handleFindInPage(e);
-        } else if (itemPath === '##theme') {
-            toggleTheme(e);
-        } else {
-            setDropdownOpen(false);
-            if (itemPath.startsWith('/')) hideSidebar();
-        }
-    }
+    const isActive = (path) => location.pathname === path ? 'active-link' : '';
 
     return (
-        <nav>
-            <Link to="/" className="nav-logo">
-                <img 
-                    src={darkMode ? logoDark : logoLight} 
-                    alt="Logo" 
-                />
-            </Link>
+        <>
+            <style>
+                {`
+                /* Essential CSS to enforce the layout request */
+                .navbar {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    /* Ensure gap is same on left (logo) and right (content) */
+                    padding: 15px 4%; 
+                    width: 100%;
+                    position: fixed;
+                    top: 0;
+                    z-index: 1000;
+                    background: transparent;
+                    transition: all 0.3s ease;
+                }
+                
+                .navbar.scrolled {
+                    background: ${darkMode ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.8)'};
+                    backdrop-filter: blur(10px);
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                }
 
-            <ul>
-                <li><Link to="/home">Home</Link></li>
-                <li><Link to="/contactus" >Contact us</Link></li>
-                <li><Link to="/appointment">Appointment</Link></li>
-                <li><Link to="/blog">News</Link></li>
-                <li><Link to="/about">About</Link></li>
+                .nav-right-container {
+                    display: flex;
+                    align-items: center;
+                    gap: 30px; /* Space between Links and Login/Profile */
+                }
 
-                {isLoggedIn ? (
-                    <li ref={profileRef} className="profile-dropdown-container">
-                        <button
-                            onClick={toggleDropdown}
-                            className={`nav-profile-btn ${dropdownOpen ? 'active' : ''}`}
-                            aria-expanded={dropdownOpen}
-                            aria-label="User Profile Menu"
-                            style={{ padding: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                        >
-                            {/* UPDATED: Show Image if exists, else Show Icon */}
-                            {profileImg ? (
-                                <img 
-                                    src={profileImg} 
-                                    alt="User" 
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} 
-                                />
-                            ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#475569" style={{ margin: '8px' }}>
-                                    <path d={Icons.profile}/>
-                                </svg>
-                            )}
+                /* Desktop Links Style */
+                .nav-links {
+                    display: flex;
+                    list-style: none;
+                    gap: 25px;
+                    margin: 0;
+                    padding: 0;
+                }
+
+                .nav-links a {
+                    text-decoration: none;
+                    color: inherit;
+                    font-weight: 500;
+                }
+                
+                /* Hide desktop links on mobile */
+                @media (max-width: 768px) {
+                    .nav-links { display: none; }
+                }
+                `}
+            </style>
+
+            <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+
+                {/* 1. LEFT SECTION: Logo */}
+                <div className="nav-left">
+                    <p className="nav-logo">
+                        <img src={darkMode ? logoDark : logoLight} alt="Sympto Logo" style={{ height: '30px' }} />
+                    </p>
+                </div>
+
+                {/* 2. RIGHT SECTION: Links + Auth (Grouped together to be on the right) */}
+                <div className="nav-right-container">
+                    
+                    {/* Navigation Links (Moved here from center) */}
+                    <ul className="nav-links">
+                        <li><Link to="/home" className={isActive('/home')}>Home</Link></li>
+                        <li><Link to="/contactus" className={isActive('/contactus')}>Contact us</Link></li>
+                        <li><Link to="/appointment" className={isActive('/appointment')}>Appointment</Link></li>
+                        <li><Link to="/blog" className={isActive('/blog')}>News</Link></li>
+                        <li><Link to="/about" className={isActive('/about')}>About</Link></li>
+                    </ul>
+
+                    {/* Profile & Actions */}
+                    <div className="nav-actions">
+                        {isLoggedIn ? (
+                            <div ref={profileRef} className="profile-dropdown-container">
+                                {/* REMOVED PROFILE IMAGE: Showing Icon only */}
+                                <button 
+                                    onClick={toggleDropdown} 
+                                    className={`nav-profile-btn ${dropdownOpen ? 'active' : ''}`}
+                                    style={{ color: darkMode ? '#fff' : '#000', background: 'transparent', border: '1px solid currentColor', borderRadius: '50%', padding: '5px', width: '35px', height: '35px', display: 'flex', justifyContent: 'center', alignItems: 'center' }} 
+                                >
+                                    <svg viewBox="0 0 24 24" width="20px" height="20px" fill="currentColor">
+                                        <path d={Icons.profile} />
+                                    </svg>
+                                </button>
+
+                                {/* Dropdown Menu */}
+                                <div className={`profile-dropdown ${dropdownOpen ? 'active' : ''}`}>
+                                    {MENU_ITEMS.map((item) => (
+                                        <Link
+                                            key={item.name}
+                                            to={item.path}
+                                            onClick={item.path === '#logout' ? handleLogout : (item.path === '##theme' ? toggleTheme : (item.path === '##find' ? handleFindInPage : null))}
+                                            className={`dropdown-item ${item.path === '#logout' ? 'logout-option' : ''}`}
+                                        >
+                                            <svg width="18px" height="18px" viewBox="0 0 24 24" fill="currentColor"><path d={item.icon} /></svg>
+                                            <span>{item.name}</span>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="auth-element">
+                                <Link to="/login">
+                                    <button className="nav-btn">Sign In</button>
+                                </Link>
+                            </div>
+                        )}
+
+                        {/* Mobile Toggle Button */}
+                        <button className="menu-button" onClick={showSidebar} style={{ marginLeft: '10px' }}>
+                            <svg viewBox="0 -960 960 960" width="26px" height="26px" fill="currentColor"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" /></svg>
                         </button>
+                    </div>
+                </div>
+            </nav>
 
-                        <div className={`profile-dropdown ${dropdownOpen ? 'active' : ''}`}>
-                            {MENU_ITEMS.map((item) => (
-                                <Link 
-                                    key={item.name}
-                                    to={item.path.startsWith('/') ? item.path : '#'}
-                                    onClick={(e) => handleItemClick(item.path, e)}
-                                    className={`dropdown-item ${item.path === '#logout' ? 'logout-option' : ''}`}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 24 24" width="20px">
-                                        <path d={item.icon}/>
-                                    </svg>
-                                    <span>{item.name}</span>
-                                </Link>
-                            ))}
-                        </div>
+            {/* Mobile Sidebar (Drawer) */}
+            <div className={`mobile-sidebar ${sidebarOpen ? 'active' : ''}`}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', paddingBottom: '10px', borderBottom: '1px solid #eee' }}>
+                    <span style={{ fontWeight: 'bold', fontSize: '20px', color: darkMode ? '#fff' : '#000' }}>Menu</span>
+                    <button onClick={hideSidebar} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                        <svg viewBox="0 -960 960 960" height="28px" width="28px" fill={darkMode ? "#fff" : "#1e293b"}><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" /></svg>
+                    </button>
+                </div>
+
+                <ul>
+                    <li><Link to="/home" onClick={hideSidebar}>Home</Link></li>
+                    <li><Link to="/contactus" onClick={hideSidebar}>Contact us</Link></li>
+                    <li><Link to="/appointment" onClick={hideSidebar}>Appointment</Link></li>
+                    <li><Link to="/blog" onClick={hideSidebar}>News</Link></li>
+                    <li><Link to="/about" onClick={hideSidebar}>About</Link></li>
+
+                    <li className="auth-element-mobile" style={{ marginTop: '20px', border: 'none' }}>
+                        {!isLoggedIn && <Link to="/login" onClick={hideSidebar}><button className="nav-btn" style={{ width: '100%' }}>Sign In</button></Link>}
                     </li>
-                ) : (
-                <li className="auth-element">
-                    <Link to="/login" className="nav-link-button">
-                        <button className="nav-btn">Login</button>
-                    </Link>
-                </li>
-                )}
-            </ul>
+                </ul>
+            </div>
 
-            <button className="menu-button" onClick={showSidebar}>
-                <svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px" fill="none" stroke="#1e293b">
-                    <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/>
-                </svg>
-            </button>
-
-            <ul className={`size ${sidebarOpen ? 'active' : ''}`}>
-                <li onClick={hideSidebar} style={{ width: 'fit-content' }}>
-                    <a href="#" onClick={(e) => e.preventDefault()}>
-                        <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="24px" fill="#1e293b">
-                            <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
-                        </svg>
-                    </a>
-                </li>
-
-                <li><Link to="/home" onClick={hideSidebar}>Home</Link></li>
-                <li><Link to="/contactus" onClick={hideSidebar}>Contact us</Link></li>
-                <li><Link to="/appointment" onClick={hideSidebar}>Appointment</Link></li>
-                <li><Link to="/blog" onClick={hideSidebar}>Blog</Link></li>
-                <li><Link to="/about" onClick={hideSidebar}>About</Link></li>
-
-                <li className="auth-element" style={{ marginTop: '20px', padding: '0 0' }}>
-                    {isLoggedIn ? (
-                        <div style={{ width: '100%' }}>
-                            <h4 style={{ color: '#1e293b', marginBottom: '10px', paddingLeft: '10px' }}>Account</h4>
-                            {MENU_ITEMS.map((item) => (
-                                <Link
-                                    key={`mobile-${item.name}`}
-                                    to={item.path.startsWith('/') ? item.path : '#'}
-                                    onClick={(e) => handleItemClick(item.path, e)}
-                                    className={`dropdown-item ${item.path === '#logout' ? 'logout-option' : ''}`}
-                                    style={{ margin: '0 0', borderRadius: '0', borderBottom: '1px solid #f1f5f9', padding: '14px 10px' }}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 24 24" width="20px">
-                                        <path d={item.icon}/>
-                                    </svg>
-                                    <span>{item.name}</span>
-                                </Link>
-                            ))}
-                        </div>
-                    ) : (
-                    <Link to="/login" onClick={hideSidebar} className="nav-link-button" style={{ width: '100%' }}>
-                        <button className="nav-btn" style={{ width: '100%', marginTop: '10px' }}>Login</button>
-                    </Link>
-                    )}
-                </li>
-            </ul>
-            
-            <FindInPageModal
-                isOpen={isFindModalOpen}
-                onClose={() => setIsFindModalOpen(false)}
-                targetRef={contentToSearchRef} 
-            />
-            
-        </nav>
+            <FindInPageModal isOpen={isFindModalOpen} onClose={() => setIsFindModalOpen(false)} targetRef={contentToSearchRef} />
+        </>
     );
 }
 

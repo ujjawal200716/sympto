@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   MapPin, Phone, Search, AlertCircle, Stethoscope, Loader2, 
-  Clock, Navigation, Accessibility, Building2 
+  Clock, Navigation, Accessibility, Building2, Bookmark 
 } from 'lucide-react'; 
 import './appointmentpage.css';
 import Nav from './test.jsx'; 
 import Chat from "./chat.jsx";
+
+// 🔧 FIX: Use environment variable for your backend API
+const BACKEND_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 // --- GEOAPIFY CATEGORY MAPPER ---
 const getCategoryFromSymptom = (text) => {
@@ -47,15 +50,84 @@ const AppointmentPage = () => {
   const [hospitals, setHospitals] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
   const [sortBy, setSortBy] = useState('distance'); 
   const [visibleCount, setVisibleCount] = useState(10); 
   const observerTarget = useRef(null);
-
   const [searchParams, setSearchParams] = useState({ symptoms: '', location: '' });
+  
+  // --- NEW: State to track saved hospital IDs ---
+  const [savedHospitalIds, setSavedHospitalIds] = useState(new Set());
 
   // 🔒 SECURE: Use Environment Variable
   const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY || "8f0118ac0b6c4f329988a6c4d7c5aba7"; 
+
+  // --- NEW: Fetch saved status on mount ---
+  useEffect(() => {
+    const fetchSavedStatus = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        // Get all saved items to find which ones are hospitals
+        const response = await fetch(`${BACKEND_API_URL}/api/my-saved-pages`, {
+           headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          // Filter for hospital type and create a Set of their IDs for fast lookup
+          const ids = new Set(
+            data.filter(item => item.informationType === 'hospital-location')
+                .map(item => item.content.id)
+          );
+          setSavedHospitalIds(ids);
+        }
+      } catch (err) {
+        console.error("Error fetching saved status:", err);
+      }
+    };
+    fetchSavedStatus();
+  }, []);
+
+  // --- NEW: Handle Save Function ---
+  const handleSaveHospital = async (e, hospital) => {
+    e.preventDefault(); // Stop navigation if clicking near links
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert("Please log in to save locations.");
+        return;
+    }
+    if (savedHospitalIds.has(hospital.id)) {
+        alert("This location is already saved.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${BACKEND_API_URL}/api/save-page`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                title: hospital.name,
+                informationType: 'hospital-location', // Specific type for these items
+                pageData: hospital // Save the entire hospital object data
+            })
+        });
+
+        const data = await response.json();
+        if (response.ok || (response.status === 400 && data.message.includes("already saved"))) {
+            setSavedHospitalIds(prev => new Set([...prev, hospital.id]));
+            alert(response.ok ? "✅ Location saved!" : "⚠️ Already synced to your profile.");
+        } else {
+            alert(`Error: ${data.message}`);
+        }
+    } catch (err) {
+        console.error("Save error:", err);
+        alert("Failed to connect to server.");
+    }
+  };
+
 
   // --- INFINITE SCROLL OBSERVER ---
   useEffect(() => {
@@ -248,7 +320,7 @@ const AppointmentPage = () => {
                 <select 
                   value={sortBy} 
                   onChange={(e) => setSortBy(e.target.value)}
-                  style={{padding:'5px 10px', borderRadius:'6px', border:'1px solid #ccc'}}
+                  className="ap-select" // Added class for easier styling
                 >
                   <option value="distance">Distance</option>
                   <option value="name">Name (A-Z)</option>
@@ -257,10 +329,12 @@ const AppointmentPage = () => {
             </div>
 
             <div className="ap-grid">
-              {visibleHospitals.map((hospital) => (
+              {visibleHospitals.map((hospital) => {
+                const isSaved = savedHospitalIds.has(hospital.id);
+                return (
                 <div key={hospital.id} className="ap-card">
                   <div className="ap-card-header">
-                    <div>
+                    <div style={{flex: 1}}> {/* Added flex:1 to push save button right */}
                       <div style={{display:'flex', gap:'8px', flexWrap:'wrap'}}>
                           <span style={{
                             fontSize:'12px', textTransform:'capitalize', background:'#e0f2fe', 
@@ -287,6 +361,14 @@ const AppointmentPage = () => {
                         </div>
                       )}
                     </div>
+                    {/* --- NEW SAVE BUTTON --- */}
+                    <button 
+                        onClick={(e) => handleSaveHospital(e, hospital)}
+                        className={`ap-save-btn ${isSaved ? 'saved' : ''}`}
+                        title={isSaved ? "Saved" : "Save location"}
+                    >
+                        <Bookmark size={20} fill={isSaved ? "currentColor" : "none"} />
+                    </button>
                   </div>
 
                   <div className="ap-card-body">
@@ -325,19 +407,19 @@ const AppointmentPage = () => {
                       </a>
                     ) : null}
 
-                    {/* 🔧 FIXED: Google Maps Direction Link */}
+                    {/* --- UPDATED BUTTON --- */}
                     <a 
-                      href={`https://www.google.com/maps/dir/?api=1&destination=${hospital.lat},${hospital.lon}`} 
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${hospital.lat},${hospital.lon}`}
                       target="_blank" 
                       rel="noreferrer"
                       className="ap-phone-btn" 
                       style={{background:'#2563eb', color:'white', textAlign:'center', justifyContent:'center'}}
                     >
-                      <Navigation className="ap-icon-sm" /> Directions
+                      <Navigation className="ap-icon-sm" /> Navigate
                     </a>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
 
             {/* --- 3. BOTTOM SPINNER (For infinite scroll) --- */}

@@ -1,4 +1,4 @@
-/* SymptomChecker.css - Light Blue Theme (Complete) */
+/* SymptomChecker.css - Vibrant Dark Mode, Mobile Ready & Animated Progress Bar */
 
 /* ---------------------------------------------------------
    1. Container & Global Layout
@@ -7,17 +7,18 @@
 .app-container {
   min-height: 100vh;
   width: 100vw;
-  /* Soft blue gradient background */
+  /* Soft, modern gradient */
   background: radial-gradient(circle at top right, #e0f2fe, #f0f9ff, #ffffff);
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   display: flex;
   justify-content: center;
   align-items: flex-start; 
-  padding-top: 80px; /* Adjusted slightly for better centering */
+  padding-top: 60px;
   padding-bottom: 50px;
   color: #1e293b;
   box-sizing: border-box;
+  transition: background 0.5s ease, color 0.5s ease;
 }
 
 .content-wrapper {
@@ -35,23 +36,19 @@
 }
 
 /* ---------------------------------------------------------
-   2. Header & Progress Bar
+   2. Header & ANIMATED Progress Bar (THE "SCENE")
    --------------------------------------------------------- */
 
-.header-section {
-  margin-bottom: 3.5rem;
-}
+.header-section { margin-bottom: 3rem; }
 
 .header-top {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
-.step-indicator {
-  text-align: right;
-}
+.step-indicator { text-align: right; }
 
 .current-step {
   font-size: 2.5rem;
@@ -66,29 +63,49 @@
   font-weight: 600;
 }
 
+/* IMPROVED: Track has depth */
 .progress-track {
   width: 100%;
-  height: 6px;
-  background-color: #e2e8f0;
+  height: 14px; /* Taller for better visual impact */
+  background-color: #cbd5e1;
   border-radius: 99px;
   overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  position: relative;
 }
 
+/* NEW: Animated Striped Progress Bar */
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #7dd3fc, #0ea5e9);
+  border-radius: 99px;
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 10px rgba(14, 165, 233, 0.4);
+  
+  /* The "Scene": Striped Gradient */
+  background-image: linear-gradient(
+    45deg, 
+    #3b82f6 25%, 
+    #0ea5e9 25%, 
+    #0ea5e9 50%, 
+    #3b82f6 50%, 
+    #3b82f6 75%, 
+    #0ea5e9 75%, 
+    #0ea5e9 100%
+  );
+  background-size: 20px 20px; /* Size of the stripes */
+  animation: progress-move 1s linear infinite; /* Movement animation */
+  box-shadow: 0 0 15px rgba(14, 165, 233, 0.6); /* Glow */
+}
+
+@keyframes progress-move {
+  0% { background-position: 0 0; }
+  100% { background-position: 20px 20px; }
 }
 
 /* ---------------------------------------------------------
    3. Form Elements (Questions, Inputs, Buttons)
    --------------------------------------------------------- */
 
-.main-card {
-  background: transparent;
-  padding: 0;
-}
+.main-card { background: transparent; padding: 0; }
 
 .field-label {
   display: inline-block;
@@ -108,7 +125,7 @@
   font-weight: 700;
   color: #1e293b;
   margin-top: 0;
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
   line-height: 1.25;
   letter-spacing: -0.03em;
 }
@@ -134,13 +151,11 @@
   transition: width 0.4s ease;
 }
 
-.input-group:focus-within::after {
-  width: 100%;
-}
+.input-group:focus-within::after { width: 100%; }
 
 .medical-input {
   width: 100%;
-  font-size: 4.5rem;
+  font-size: 4rem;
   font-weight: 200;
   color: #0f172a;
   border: none;
@@ -175,7 +190,7 @@
 
 .option-btn {
   width: 100%;
-  padding: 1.75rem 2rem;
+  padding: 1.5rem 2rem;
   text-align: left;
   border-radius: 16px;
   border: 1px solid transparent;
@@ -186,14 +201,14 @@
   justify-content: space-between;
   align-items: center;
   font-weight: 600;
-  font-size: 1.25rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+  font-size: 1.2rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .option-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 25px 50px -12px rgba(14, 165, 233, 0.15);
+  box-shadow: 0 10px 20px -5px rgba(14, 165, 233, 0.15);
   border-color: #7dd3fc;
   color: #0284c7;
   background-color: #f0f9ff;
@@ -222,14 +237,14 @@
   padding: 1.5rem;
   border: 2px solid #e2e8f0;
   border-radius: 16px;
-  min-height: 200px;
+  min-height: 180px;
   font-family: inherit;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   line-height: 1.6;
   color: #1e293b;
   background-color: #ffffff;
   resize: none;
-  margin-bottom: 4rem;
+  margin-bottom: 3rem;
   outline: none;
   transition: all 0.3s ease;
   box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.02);
@@ -249,8 +264,8 @@
 }
 
 .symptom-btn {
-  padding: 2rem;
-  border-radius: 24px;
+  padding: 1.5rem;
+  border-radius: 20px;
   border: 1px solid transparent;
   background: #ffffff;
   cursor: pointer;
@@ -260,12 +275,12 @@
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   aspect-ratio: 1/1;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
 }
 
 .symptom-btn:hover {
   transform: translateY(-4px);
-  box-shadow: 0 25px 50px -12px rgba(14, 165, 233, 0.15);
+  box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.15);
   color: #0ea5e9;
 }
 
@@ -276,8 +291,8 @@
   box-shadow: 0 15px 30px -5px rgba(14, 165, 233, 0.3);
 }
 
-.symptom-icon { font-size: 3.5rem; margin-bottom: 1rem; }
-.symptom-name { font-size: 1.1rem; font-weight: 600; text-align: center; }
+.symptom-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+.symptom-name { font-size: 1rem; font-weight: 600; text-align: center; }
 
 /* Navigation Buttons */
 .nav-area {
@@ -336,12 +351,12 @@
 }
 
 /* ---------------------------------------------------------
-   4. NEW RESULTS PAGE STYLING (The New Design)
+   4. BETTER UI FOR RESULTS PAGE (LAST PAGE)
    --------------------------------------------------------- */
 
 .results-wrapper {
   width: 100%;
-  max-width: 650px; /* Tighter width for the report card */
+  max-width: 650px;
   margin: 0 auto;
   padding: 0 20px;
   animation: fadeIn 0.5s ease;
@@ -351,17 +366,29 @@
   background: #ffffff;
   border-radius: 24px;
   padding: 40px;
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  /* Richer shadow for depth */
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.15); 
+  border: 1px solid rgba(226, 232, 240, 0.8);
   margin-top: 20px;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Header & Icons */
+.result-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 8px; /* Thicker top accent */
+  background: linear-gradient(90deg, #3b82f6, #0ea5e9, #6366f1);
+}
+
 .result-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
 }
 
 .result-badge {
@@ -369,129 +396,120 @@
   color: #0284c7;
   padding: 8px 16px;
   border-radius: 30px;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border: 1px solid #bae6fd;
 }
 
-.action-row {
-  display: flex;
-  gap: 12px;
-}
+.action-row { display: flex; gap: 12px; }
 
-.icon-btn {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #64748b;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.icon-btn:hover {
-  background: #ffffff;
-  border-color: #0ea5e9;
-  color: #0ea5e9;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
-}
-
-.saved-active {
-  background: #ecfdf5;
-  color: #059669;
-  border: 1px solid #059669;
-}
-
-/* Main Diagnosis */
 .diagnosis-section {
   text-align: center;
   margin-bottom: 35px;
-  padding-bottom: 30px;
+  padding-bottom: 35px;
   border-bottom: 2px dashed #f1f5f9;
 }
 
+.diagnosis-icon {
+  font-size: 5rem;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+}
+
+/* Enhanced Title Typography */
 .condition-name {
-  font-size: 2.5rem;
-  color: #0f172a;
-  margin: 0 0 8px 0;
+  font-size: 3rem; /* Larger */
+  /* Text Gradient */
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0 0 12px 0;
   font-weight: 800;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 
 .condition-meta {
-  color: #94a3b8;
-  font-size: 1rem;
+  color: #64748b;
+  font-size: 1.1rem;
   margin: 0;
   font-weight: 500;
+  line-height: 1.5;
 }
 
-/* Statistics Grid */
 .stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  margin-bottom: 35px;
+  margin-bottom: 40px;
 }
 
 .stat-box {
-  padding: 20px;
+  padding: 24px;
   border-radius: 20px;
   text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background: #f8fafc; 
+  border: 1px solid #f1f5f9;
+  transition: transform 0.2s;
+}
+
+.stat-box:hover {
+  transform: translateY(-2px);
+  background: #f1f5f9;
 }
 
 .stat-label {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
-  opacity: 0.8;
-  margin-bottom: 8px;
+  color: #64748b;
+  margin-bottom: 10px;
   font-weight: 700;
   letter-spacing: 0.05em;
 }
 
 .stat-value {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 800;
+  color: #1e293b;
 }
 
 /* Severity Colors */
-.severity-mild { background: #ecfdf5; color: #059669; }     /* Green */
-.severity-moderate { background: #fffbeb; color: #b45309; } /* Yellow/Orange */
-.severity-medium { background: #fffbeb; color: #b45309; }    /* Fallback */
-.severity-high { background: #fef2f2; color: #dc2626; }      /* Red */
-.severity-severe { background: #fef2f2; color: #dc2626; }    /* Red */
+.severity-mild { background: #ecfdf5; color: #059669; border-color: #a7f3d0; } 
+.severity-moderate { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+.severity-medium { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+.severity-high { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+.severity-severe { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
 
 .confidence-box {
   background: #f0f9ff;
   color: #0284c7;
+  border-color: #bae6fd;
 }
 
-/* Info & Recommendations */
 .info-block h3, .rec-block h3 {
   font-size: 1.1rem;
-  color: #334155;
-  margin-bottom: 15px;
+  color: #1e293b;
+  margin-bottom: 20px;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .info-block p {
   color: #475569;
   line-height: 1.7;
   font-size: 1rem;
-  margin-bottom: 35px;
+  margin-bottom: 40px;
   background: #f8fafc;
-  padding: 20px;
+  padding: 24px;
   border-radius: 16px;
+  border-left: 4px solid #e2e8f0; 
 }
 
 .rec-list-styled {
@@ -500,47 +518,59 @@
   margin: 0 0 40px 0;
 }
 
+/* Enhanced Recommendation Cards */
 .rec-list-styled li {
   background: #ffffff;
-  margin-bottom: 12px;
-  padding: 16px;
-  border-radius: 16px;
+  margin-bottom: 16px;
+  padding: 20px;
+  border-radius: 18px;
   display: flex;
-  align-items: flex-start;
+  align-items: center; 
   color: #334155;
-  font-size: 1rem;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  font-size: 1.05rem;
+  font-weight: 500;
+  border: 1px solid #e2e8f0;
+  /* Soft Shadow for each item */
+  box-shadow: 0 4px 6px -2px rgba(0,0,0,0.02);
+  transition: all 0.2s ease;
+}
+
+.rec-list-styled li:hover {
+  border-color: #bae6fd;
+  transform: translateX(4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
 }
 
 .rec-icon {
   color: #0ea5e9;
-  margin-right: 15px;
-  font-weight: 900;
+  margin-right: 20px;
   background: #e0f2fe;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
+  width: 40px; 
+  height: 40px;
+  font-size: 1.25rem; 
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
   flex-shrink: 0;
 }
 
-/* Restart Button */
 .btn-restart {
   width: 100%;
   padding: 1.25rem;
   background: #1e293b;
   color: white;
   border: none;
-  border-radius: 16px;
+  border-radius: 99px;
   font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 10px 20px -5px rgba(30, 41, 59, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
 
 .btn-restart:hover {
@@ -548,10 +578,6 @@
   transform: translateY(-2px);
   box-shadow: 0 15px 25px -5px rgba(30, 41, 59, 0.4);
 }
-
-/* ---------------------------------------------------------
-   5. Utilities & Mobile Responsiveness
-   --------------------------------------------------------- */
 
 .error-box {
   background-color: #fef2f2;
@@ -567,146 +593,246 @@
 }
 
 /* ---------------------------------------------------------
-   5. Dark Mode Overrides (CORRECTED)
+   6. VIBRANT DARK MODE (DESIGN UPGRADE)
    --------------------------------------------------------- */
 
 .dark-theme .app-container {
-  /* 1. Define the Variables */
-  --primary: #38bdf8;
-  --primary-dark: #7dd3fc;
-  --text-main: #f1f5f9;
-  --text-muted: #94a3b8;
-  --surface: #2c3e50;
-  --bg-gradient: linear-gradient(to bottom, #2c3e50, #1e293b);
-  
-  --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-  --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
-
-  /* 2. APPLY the Variables (This was missing!) */
-  background: var(--bg-gradient);
-  color: var(--text-main);
-}
-/* ---------------------------------------------------------
-   5. Dark Mode Overrides (Colors based on image)
-   --------------------------------------------------------- */
-
-/* Override Variables */
-.dark-theme .app-container {
-  /* Colors derived from the dark UI in the image */
-  --primary: #38bdf8;        /* Bright blue accent */
-  --primary-dark: #7dd3fc;   /* Lighter blue for text */
-  --text-main: #f1f5f9;      /* Off-white for main text */
-  --text-muted: #94a3b8;     /* Muted blue-grey */
-  --surface: #2c3e50;        /* Dark charcoal background */
-  
-  /* Deep Dark Background */
-  --bg-gradient: linear-gradient(to bottom, #2c3e50, #1e293b);
-  
-  /* Shadows */
-  --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-  --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
-}
-
-/* Header & Progress */
-.dark-theme .header-section,
-.dark-theme .question-text,
-.dark-theme .medical-input {
-  color: var(--text-main); /* Ensure main text is white */
-}
-
-.dark-theme .current-step {
-  background: var(--primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.dark-theme .progress-track {
-  background-color: #4a5a6a; /* Darker grey track */
-}
-
-.dark-theme .progress-fill {
-  background: linear-gradient(90deg, #38bdf8, #0ea5e9); /* Bright blue fill */
-}
-
-/* Input Fields */
-.dark-theme .input-group {
-  border-bottom-color: #475569;
-}
-
-.dark-theme .input-group::after {
-  background: linear-gradient(90deg, #38bdf8, #7dd3fc); /* Bright blue accent */
-}
-
-.dark-theme .field-label {
-  background-color: rgba(56, 189, 248, 0.1);
-  border-color: rgba(56, 189, 248, 0.2);
-  color: #7dd3fc; /* Light blue label */
-}
-
-.dark-theme .unit {
-  color: var(--text-muted);
-}
-
-/* Options & Buttons */
-.dark-theme .option-btn {
-  background: var(--surface);
-  border-color: transparent;
-}
-
-.dark-theme .option-btn:hover {
-  border-color: #0ea5e9;
-  background-color: #34495e;
-  color: var(--primary);
-}
-
-.dark-theme .option-btn.selected {
-  background-color: rgba(14, 165, 233, 0.15);
-  border-color: var(--primary);
-  color: #e0f2fe;
-}
-
-/* Text Area */
-.dark-theme .text-area-input {
-  background-color: rgba(44, 62, 80, 0.8); /* Dark frosted glass */
-  border-color: #475569;
+  background: radial-gradient(circle at top right, #1e293b, #0f172a, #020617);
   color: #f1f5f9;
 }
 
-/* Navigation Buttons */
-.dark-theme .btn-primary {
-  background: #f8fafc;
-  color: #020617;
+/* Text Colors */
+.dark-theme .header-section,
+.dark-theme .question-text,
+.dark-theme .medical-input,
+.dark-theme .stat-value,
+.dark-theme .info-block h3,
+.dark-theme .rec-block h3 {
+  color: #f1f5f9; /* Bright White */
 }
 
-.dark-theme .btn-primary:hover:not(:disabled) {
-  background: #ffffff;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+.dark-theme .condition-name {
+    background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-/* Results Card */
+.dark-theme .total-steps,
+.dark-theme .unit,
+.dark-theme .condition-meta,
+.dark-theme .stat-label {
+  color: #94a3b8; /* Muted Blue-Grey */
+}
+
+/* Inputs & Forms */
+.dark-theme .input-group { border-bottom-color: #475569; }
+.dark-theme .input-group::after { background: linear-gradient(90deg, #38bdf8, #0ea5e9); }
+.dark-theme .field-label {
+  background-color: rgba(14, 165, 233, 0.2);
+  border: 1px solid rgba(14, 165, 233, 0.3);
+  color: #7dd3fc;
+}
+
+.dark-theme .option-btn {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
+}
+
+.dark-theme .option-btn:hover {
+  border-color: #38bdf8;
+  background: rgba(30, 41, 59, 0.9);
+  color: #38bdf8;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.15); /* Subtle Neon Glow */
+}
+
+.dark-theme .option-btn.selected {
+  background: rgba(14, 165, 233, 0.15);
+  border-color: #38bdf8;
+  color: #e0f2fe;
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.3);
+}
+
+.dark-theme .text-area-input {
+  background-color: rgba(30, 41, 59, 0.6);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+}
+
+/* Result Card - Glassmorphism Style */
 .dark-theme .result-card {
-  background: rgba(44, 62, 80, 0.85); /* Dark frosted glass */
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(14, 165, 233, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+/* Stats & Info Boxes */
+.dark-theme .stat-box {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .info-block p,
+.dark-theme .rec-list-styled li {
+  background: rgba(15, 23, 42, 0.6);
+  color: #cbd5e1;
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
+
+.dark-theme .info-block p { border-left: 4px solid #38bdf8; }
+
+.dark-theme .rec-list-styled li:hover {
+  border-color: #38bdf8;
+  background: rgba(30, 41, 59, 0.8);
+}
+
+/* Vibrant Badges in Dark Mode */
+.dark-theme .severity-mild { background: rgba(5, 150, 105, 0.2); color: #6ee7b7; border-color: rgba(5, 150, 105, 0.5); }
+.dark-theme .severity-moderate { background: rgba(217, 119, 6, 0.2); color: #fcd34d; border-color: rgba(217, 119, 6, 0.5); }
+.dark-theme .severity-high, 
+.dark-theme .severity-severe { background: rgba(220, 38, 38, 0.2); color: #fca5a5; border-color: rgba(220, 38, 38, 0.5); }
+.dark-theme .confidence-box { background: rgba(3, 105, 161, 0.2); color: #7dd3fc; border-color: rgba(3, 105, 161, 0.5); }
+
+/* Icons & Buttons */
+.dark-theme .icon-btn {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+}
+
+.dark-theme .icon-btn:hover {
+  border-color: #38bdf8;
+  color: #38bdf8;
+  background: rgba(15, 23, 42, 1);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); /* Neon Glow on Hover */
+}
+
+.dark-theme .btn-primary, 
+.dark-theme .btn-restart {
+  box-shadow: 0 0 20px rgba(14, 165, 233, 0.3); /* Button Glow */
+}
+
+/* ---------------------------------------------------------
+   7. CRITICAL FIX: FORCE ICON VISIBILITY
+   --------------------------------------------------------- */
+
+.icon-btn svg {
+  width: 15px !important;
+  height: 15px !important;
+  min-width: 15px;
+  min-height: 15px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2px;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px; 
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #64748b;
+  padding: 0;
+  margin: 0;
+}
+
+.icon-btn:hover {
+  border-color: #0ea5e9;
+  color: #0ea5e9; 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+}
+
+.icon-btn.saved-active {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #059669;
+}
+
+.diagnosis-icon svg {
+  width: 100px !important;
+  height: 100px !important;
+}
+
+/* ---------------------------------------------------------
+   8. MOBILE RESPONSIVENESS (IMPROVED)
+   --------------------------------------------------------- */
+
 @media (max-width: 768px) {
+  /* Layout adjustments */
   .app-container {
-    padding-top: 60px;
-    padding-left: 15px;
-    padding-right: 15px;
+    padding: 30px 15px 15px 15px;
+    align-items: flex-start;
   }
   
-  .content-wrapper { padding: 1rem; }
-  
-  .symptoms-grid { grid-template-columns: repeat(2, 1fr); }
-  
-  .medical-input { font-size: 3.5rem; }
-  
-  .question-text { font-size: 1.75rem; }
-  
-  /* Results Page Mobile */
-  .result-card { padding: 25px; }
-  
-  .stats-grid { grid-template-columns: 1fr; }
-  
-  .condition-name { font-size: 2rem; }
+  .content-wrapper, .results-wrapper {
+    padding: 1rem;
+    max-width: 100%;
+  }
+
+  /* Font Scaling */
+  .question-text {
+    font-size: 1.75rem; /* Smaller question text */
+    margin-bottom: 2rem;
+  }
+
+  .medical-input {
+    font-size: 3rem; /* Smaller input numbers */
+  }
+
+  .unit { font-size: 1.5rem; }
+
+  /* Grid Conversions */
+  .symptoms-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns instead of 3 */
+    gap: 1rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr; /* Stack stats vertically */
+    gap: 1rem;
+  }
+
+  /* Card & Element Sizing */
+  .symptom-btn { padding: 1rem; }
+  .symptom-icon { font-size: 2.5rem; }
+  .option-btn { padding: 1.25rem; font-size: 1rem; }
+
+  /* Result Page Tweaks */
+  .result-card {
+    padding: 24px;
+    border-radius: 16px;
+  }
+
+  .condition-name {
+    font-size: 2rem;
+  }
+
+  .diagnosis-icon svg {
+    width: 70px !important;
+    height: 70px !important;
+  }
+
+  .action-row {
+    gap: 8px;
+  }
+
+  /* Navigation: Buttons Full Width or easier to tap */
+  .nav-area {
+    padding-top: 1rem;
+    gap: 1rem;
+  }
+
+  .btn {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
 }

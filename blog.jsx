@@ -1,17 +1,21 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, Loader, Zap, BookOpen, Image as ImageIcon, Sun, Moon } from 'lucide-react';
+import { Search, Loader, Zap, BookOpen, Image as ImageIcon, Bookmark } from 'lucide-react'; // Added Bookmark icon
 import "./blogcss.css"; 
-import Nev from "./test.jsx";
+import Navbar from "./test.jsx"; 
 import Chat from "./chat.jsx";
 
 // 🔒 SECURE: Use Environment Variable
 const NEWSDATA_API_KEY = import.meta.env.VITE_NEWSDATA_API_KEY || 'pub_8ca8c194d4764d34b23ba94f545af69d';
 const API_BASE_URL = 'https://newsdata.io/api/1/news';
+// 🔧 FIX: Use environment variable for your backend API
+const BACKEND_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 // --- Utility Components ---
 
 function PostCard({ post }) {
   const [imgError, setImgError] = useState(false);
+  const [isSaved, setIsSaved] = useState(false); // Track save state locally for this card
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleRedirect = () => {
     if (post.url) {
@@ -19,11 +23,78 @@ function PostCard({ post }) {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleRedirect();
+    }
+  };
+
+  // --- SAVE TO SERVER FUNCTION ---
+  const handleSave = async (e) => {
+    e.stopPropagation(); // Prevent triggering the card click (redirect)
+
+    // 1. Check for Authentication Token
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert("Please log in to save articles.");
+        return;
+    }
+
+    // 2. Prevent saving if already saved
+    if (isSaved) {
+        alert("This article is already saved.");
+        return;
+    }
+
+    setIsSaving(true);
+
+    try {
+        const response = await fetch(`${BACKEND_API_URL}/api/save-page`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            // 3. Payload adapted for News Data
+            body: JSON.stringify({
+                title: post.title,
+                informationType: 'medical news', // <--- Categorize as news
+                pageData: { 
+                    type: 'news-article', // Tag to identify layout
+                    url: post.url,        // The link to save
+                    source: post.source_id,
+                    image: post.image,
+                    date: post.date,
+                    description: post.description
+                } 
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            setIsSaved(true); 
+            alert("✅ Article saved to your profile!");
+        } else {
+            alert(`❌ Error: ${data.message}`);
+        }
+    } catch (err) {
+        console.error("Save Error:", err);
+        alert("❌ Failed to connect to server");
+    } finally {
+        setIsSaving(false);
+    }
+  };
+
   return (
     <article 
       className="article-card" 
-      onClick={handleRedirect} 
-      style={{ cursor: 'pointer' }}
+      onClick={handleRedirect}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex="0"
+      style={{ cursor: 'pointer', position: 'relative' }} // relative for positioning absolute elements if needed
     >
       <div className="article-image-wrapper">
         {post.image && !imgError ? (
@@ -38,7 +109,7 @@ function PostCard({ post }) {
           <div style={{
             width: '100%',
             height: '100%',
-            background: 'var(--accent)', // Uses CSS variable for theme compatibility
+            background: 'var(--accent)', 
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -56,9 +127,35 @@ function PostCard({ post }) {
       </div>
       
       <div className="article-content">
-        <span className="category-badge">
-          {post.category || 'Medical'}
-        </span>
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
+            <span className="category-badge">
+            {post.category || 'Medical'}
+            </span>
+            
+            {/* SAVE BUTTON */}
+            <button 
+                onClick={handleSave}
+                disabled={isSaved || isSaving}
+                title={isSaved ? "Saved" : "Save for later"}
+                style={{
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: isSaved ? 'default' : 'pointer',
+                    color: isSaved ? '#10b981' : '#64748b', // Green if saved, gray otherwise
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    transition: 'transform 0.2s'
+                }}
+                className="save-btn" // Optional class for hover effects
+            >
+                <Bookmark 
+                    size={20} 
+                    fill={isSaved ? "#10b981" : "none"} // Fill if saved
+                    className={isSaving ? "animate-pulse" : ""}
+                />
+            </button>
+        </div>
         
         <h3 className="article-title" title={post.title}>
           {post.title}
@@ -70,7 +167,7 @@ function PostCard({ post }) {
         
         <div className="article-footer">
           <span>{post.date}</span>
-          <button className="read-more-btn">
+          <button className="read-more-btn" tabIndex="-1">
             Read More <Zap size={14} />
           </button>
         </div>
@@ -87,9 +184,6 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
-  // 1. Add Dark Mode State
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
   const observerTarget = useRef(null);
   const nextPageRef = useRef(null);
   const hasMoreRef = useRef(true);
@@ -235,58 +329,32 @@ export default function BlogPage() {
       },
       { threshold: 0.1 }
     );
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
+
+    const currentTarget = observerTarget.current;
+    
+    if (currentTarget) {
+      observer.observe(currentTarget);
     }
+    
     return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
       }
     };
   }, [loading, loadMore]);
 
   return (
-    // 2. Wrap entire app in the dynamic class for dark mode
-    <div className={`app-wrapper ${isDarkMode ? 'dark-theme' : ''}`}>
-      
-      {/* 3. Floating Toggle Button */}
-      <button 
-        onClick={() => setIsDarkMode(!isDarkMode)}
-        style={{
-          position: 'fixed',
-          bottom: '2rem',
-          right: '2rem',
-          zIndex: 1000,
-          padding: '1rem',
-          borderRadius: '50%',
-          border: 'none',
-          cursor: 'pointer',
-          background: isDarkMode ? '#38bdf8' : '#0f172a',
-          color: isDarkMode ? '#0f172a' : '#fff',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-          transition: 'all 0.3s ease',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-        title="Toggle Theme"
-      >
-        {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
-      </button>
-
-      {/* Header Section */}
+    <div className="app-wrapper">
       <header className="header">
         <h1>Medical News Feed</h1>
         <p>Latest clinical updates, research, and medical breakthroughs.</p>
       </header>
 
-      {/* External Components (Inside wrapper so they get dark mode context if they support it) */}
       <div style={{ position: 'relative', zIndex: 50 }}>
-        <Nev />
+        <Navbar />
       </div>
       <Chat />
 
-      {/* Floating Search Bar */}
       <div className="search-container">
         <form onSubmit={handleSearch} className="search-form">
           <div className="search-input-wrapper">
@@ -305,10 +373,7 @@ export default function BlogPage() {
         </form>
       </div>
 
-      {/* Main Grid Content */}
       <main className="blog-grid">
-        
-        {/* Error State */}
         {error && (
           <div className="error-alert" style={{textAlign: 'center', padding: '2rem', color: '#ef4444'}}>
             <Zap size={20} style={{ display: 'inline', marginRight: '8px' }} />
@@ -316,7 +381,6 @@ export default function BlogPage() {
           </div>
         )}
 
-        {/* Post Grid */}
         {posts.length > 0 ? (
           <>
             <div style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -332,7 +396,6 @@ export default function BlogPage() {
             </div>
           </>
         ) : (
-          /* Empty State */
           !loading && !error && (
             <div className="empty-state">
               <BookOpen size={64} style={{ margin: '0 auto 1.5rem', opacity: 0.3 }} />
@@ -344,7 +407,6 @@ export default function BlogPage() {
         )}
       </main>
 
-      {/* Infinite Scroll Loader */}
       <div ref={observerTarget} className="loading-container">
         {loading && posts.length > 0 && (
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)' }}>
