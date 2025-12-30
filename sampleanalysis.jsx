@@ -2,9 +2,9 @@ import React, { useState, useRef } from 'react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { FaExclamationTriangle, FaCheckSquare, FaFileDownload, FaShareAlt, FaSave, FaUserMd } from 'react-icons/fa'; 
-import "./sample.css"; 
-import Nev from "./test.jsx"; 
+import { FaExclamationTriangle, FaCheckSquare, FaFileDownload, FaShareAlt, FaSave, FaUserMd } from 'react-icons/fa'; // NEW ICONS
+import "./sample.css"; // Ensure this matches your CSS filename
+import Nev from "./test.jsx";    // Ensure this matches your Navbar filename
 
 // 🔒 SECURE: Key loaded from environment variables
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY10 || import.meta.env.VITE_GEMINI_API_KEY11 || "AIzaSyABU46dmL39WlMA9rtBpS1NLgsRVHh4zGs";
@@ -12,7 +12,7 @@ const API_KEY = import.meta.env.VITE_GEMINI_API_KEY10 || import.meta.env.VITE_GE
 export default function SymptomChecker() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false); 
+  const [isDownloading, setIsDownloading] = useState(false); // New loading state for download
   
   const [formData, setFormData] = useState({
     age: '',
@@ -49,6 +49,7 @@ export default function SymptomChecker() {
     { id: 12, name: 'Rash', icon: '🔴' },
   ];
 
+  // Updated labels to be more polite ("Please the user mode")
   const steps = [
     { label: 'Patient Age', field: 'age', type: 'input', question: 'Please enter the patient\'s age:' },
     { label: 'Gender', field: 'gender', type: 'select', question: 'Please select the gender:' },
@@ -168,6 +169,7 @@ export default function SymptomChecker() {
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
       const symptomNames = formData.symptoms.map(id => symptomsList.find(s => s.id === id)?.name).join(', ');
 
+      // INCREASED INFORMATION: Added urgency, specialist, and precautions to the prompt
       const prompt = `
         Act as a compassionate and professional medical symptom checker API. 
         Analyze the following patient data:
@@ -228,9 +230,8 @@ export default function SymptomChecker() {
       alert("Sharing is not supported on this browser.");
     }
   };
-
-  // --- FIXED DOWNLOAD FUNCTION ---
-  const handleDownload = async () => {
+// --- FIXED DOWNLOAD FUNCTION ---
+ const handleDownload = async () => {
     const input = resultCardRef.current;
     if (!input || !result) return;
     
@@ -244,26 +245,43 @@ export default function SymptomChecker() {
       const pdfBg = isDarkMode ? '#0f172a' : '#ffffff'; 
       const pdfText = isDarkMode ? '#f1f5f9' : '#1e293b'; 
 
-      // 2. Capture Setup - Calculate FULL height
-      const scrollHeight = input.scrollHeight;
+      // 2. Capture Setup
+      // We calculate this just for the windowHeight buffer, not to restrict the canvas
+      const originalHeight = input.scrollHeight;
 
       const canvas = await html2canvas(input, {
         scale: 2, 
         useCORS: true,
         allowTaint: true,
-        color : pdfText,
         backgroundColor: pdfBg,
         
-        // CRITICAL FIXES FOR SCROLLING:
-        height: scrollHeight,       // Force canvas to be full height
-        windowHeight: scrollHeight, // Tell the "virtual browser" it's this tall
-        y: 0,                       // Force capture to start at top of element
-        scrollY: 0,                 // Reset scroll position
+        // --- FIX 1: REMOVE the 'height' property ---
+        // Removing 'height' allows the canvas to grow if your onclone styles make the content taller.
+        // height: scrollHeight,  <-- DELETED
+        
+        // --- FIX 2: ADD BUFFER to windowHeight ---
+        // This ensures the virtual browser is tall enough to render hidden overflow content
+        windowHeight: originalHeight + 2000, 
+        
+        y: 0,
+        scrollY: 0, 
 
-        // --- MODIFY DOM BEFORE CAPTURE ---
         onclone: (clonedDoc) => {
           
-          // A. Fix the Parent Wrapper (if captured)
+          // --- FIX 3: FORCE ELEMENTS VISIBLE (Fixes missing elements) ---
+          // Creates a style tag to disable animations and force opacity
+          const style = clonedDoc.createElement('style');
+          style.innerHTML = `
+            * {
+              transition: none !important;
+              animation: none !important;
+              opacity: 1 !important;
+              visibility: visible !important;
+            }
+          `;
+          clonedDoc.body.appendChild(style);
+
+          // A. Fix the Parent Wrapper 
           const wrapper = clonedDoc.querySelector('.results-wrapper');
           if (wrapper) {
              wrapper.style.height = 'auto';
@@ -279,7 +297,7 @@ export default function SymptomChecker() {
             card.style.overflow = 'visible';    
           }
 
-          // C. Fix The Title (Remove Gradients for PDF clarity)
+          // C. Fix The Title
           const gradients = clonedDoc.querySelectorAll('.condition-name');
           gradients.forEach(el => {
              el.style.background = 'none';               
@@ -301,15 +319,20 @@ export default function SymptomChecker() {
         }
       });
 
-      // 3. Generate PDF (Long vertical format)
+      // 3. Generate PDF 
       const imgData = canvas.toDataURL('image/png');
+      
+      // Calculate PDF dimensions based on the ACTUAL generated canvas
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+
       const pdf = new jsPDF({
         orientation: 'p',
         unit: 'px',
-        format: [canvas.width, canvas.height] 
+        format: [imgWidth, imgHeight] 
       });
 
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
       pdf.save(`SymptoReport-${new Date().toISOString().slice(0,10)}.pdf`);
 
     } catch (err) {
@@ -319,7 +342,6 @@ export default function SymptomChecker() {
       setIsDownloading(false);
     }
   };
-
   const step = steps[currentStep];
 
   return (
@@ -343,6 +365,7 @@ export default function SymptomChecker() {
           <div className="main-card">
             <label className="field-label">{step?.label || "Information"}</label>
             
+            {/* Displaying the polite questions defined in the steps array */}
             <h2 className="question-text">
                {step?.question}
             </h2>
@@ -391,52 +414,54 @@ export default function SymptomChecker() {
           </div>
         </div>
       ) : (
-        // --- UPGRADED RESULT PAGE ---
+        // --- UPGRADED RESULT PAGE (Matches Image + Fixes Download) ---
         <div className="results-wrapper">
             <Nev />
             
+            {/* We attach the ref HERE so we capture this entire card */}
             <div className="result-card" ref={resultCardRef}>
               
               {/* 1. Header Area with Buttons */}
               <div className="result-header">
                  <span className="result-badge">Analysis Complete</span>
                  <div className="action-row" data-html2canvas-ignore="true">
-                   
-                   <button onClick={handleShare} className="icon-btn" title="Share">
-                     <FaShareAlt />
-                   </button>
+                    
+                    <button onClick={handleShare} className="icon-btn" title="Share">
+                      <FaShareAlt />
+                    </button>
 
-                   <button 
-                     onClick={handleSave} 
-                     className={`icon-btn ${isSaved ? 'saved-active' : ''}`} 
-                     disabled={isSaved}
-                     title={isSaved ? "Saved" : "Save to Profile"}
-                   >
-                     <FaSave />
-                   </button>
+                    <button 
+                      onClick={handleSave} 
+                      className={`icon-btn ${isSaved ? 'saved-active' : ''}`} 
+                      disabled={isSaved}
+                      title={isSaved ? "Saved" : "Save to Profile"}
+                    >
+                      <FaSave />
+                    </button>
 
-                   {/* Main Download Button */}
-                   <button 
-                     className="btn btn-primary" 
-                     onClick={handleDownload}
-                     disabled={isDownloading}
-                     style={{ padding: '0.8rem 1.5rem', fontSize: '0.9rem' }}
-                   >
+                    {/* Main Download Button */}
+                    <button 
+                      className="btn btn-primary" 
+                      onClick={handleDownload}
+                      disabled={isDownloading}
+                      style={{ padding: '0.8rem 1.5rem', fontSize: '0.9rem' }}
+                    >
                        {isDownloading ? 'Generating...' : <><FaFileDownload /> Save Report</>}
-                   </button>
+                    </button>
                  </div>
               </div>
 
               {/* 2. Diagnosis Title */}
               <div className="diagnosis-section">
                 <div className="diagnosis-icon">
+                    {/* Dynamic Icon based on generic or check */}
                    <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor"><path d="M6 3C4.89543 3 4 3.89543 4 5V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V5C20 3.89543 19.1046 3 18 3H6ZM6 1H18C20.2091 1 22 2.79086 22 5V19C22 21.2091 20.2091 23 18 23H6C3.79086 23 2 21.2091 2 19V5C2 2.79086 3.79086 1 6 1Z" fillOpacity="0.5"/><path d="M11 7H13V10H16V12H13V15H11V12H8V10H11V7Z"/></svg>
                 </div>
                 <h1 className="condition-name">{result.condition}</h1>
                 <p className="condition-meta">Possible Condition Analysis</p>
               </div>
 
-              {/* 3. URGENCY BANNER */}
+              {/* 3. THE YELLOW WARNING BANNER (From Image) */}
               {result.urgency && (
                   <div className="warning-banner">
                     <FaExclamationTriangle className="warning-icon" />
@@ -453,7 +478,7 @@ export default function SymptomChecker() {
                 <p className="about-text">{result.description}</p>
               </div>
 
-              {/* 5. STATS GRID */}
+              {/* 5. STATS GRID (3 Columns) */}
               <div className="stats-grid">
                 <div className={`stat-box severity-${result.severity?.toLowerCase() || 'medium'}`}>
                   <span className="stat-label">Severity</span>
@@ -471,34 +496,35 @@ export default function SymptomChecker() {
                 )}
               </div>
 
-              {/* 6. RECOMMENDED ACTIONS */}
+              {/* 6. RECOMMENDED ACTIONS HEADER (Green Check) */}
               <div className="actions-header">
                 <FaCheckSquare className="check-icon-large" />
                 <span>Recommended Actions</span>
               </div>
 
+              {/* Recommended Actions List */}
               <ul className="rec-list-styled">
                 {result.recommendations?.map((rec, idx) => (
                   <li key={idx} className="rec-item">
-                      <div className="rec-icon-box">{idx + 1}</div>
-                      <span>{rec}</span>
+                     <div className="rec-icon-box">{idx + 1}</div>
+                     <span>{rec}</span>
                   </li>
                 ))}
               </ul>
 
-              {/* 7. PRECAUTIONS */}
+              {/* 7. PRECAUTIONS (If any exist) */}
               {result.precautions && result.precautions.length > 0 && (
                 <>
                   <div className="actions-header" style={{ marginTop: '2rem', color: '#dc2626' }}>
-                      <FaExclamationTriangle className="check-icon-large" style={{ background: '#fef2f2', color: '#dc2626' }} />
-                      <span>Precautions</span>
+                     <FaExclamationTriangle className="check-icon-large" style={{ background: '#fef2f2', color: '#dc2626' }} />
+                     <span>Precautions</span>
                   </div>
                   <ul className="rec-list-styled">
                     {result.precautions.map((item, idx) => (
-                        <li key={idx} className="rec-item" style={{ borderLeft: '5px solid #ef4444' }}>
-                           <div className="rec-icon-box" style={{ background: '#fef2f2', color: '#dc2626' }}>✕</div>
-                           <span>{item}</span>
-                        </li>
+                       <li key={idx} className="rec-item" style={{ borderLeft: '5px solid #ef4444' }}>
+                          <div className="rec-icon-box" style={{ background: '#fef2f2', color: '#dc2626' }}>✕</div>
+                          <span>{item}</span>
+                       </li>
                     ))}
                   </ul>
                 </>
