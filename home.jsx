@@ -175,7 +175,7 @@ const Home = () => {
                 <div className="scrolling-words-container">
                   <div 
                     className="scrolling-words-wrapper"
-                    style={{ transform: `translateY(-${index * 1.1}em)` }} 
+                    style={{ transform: `translateY(-${index * 1.12}em)` }} 
                   >
                     {words.map((word) => (
                       <span key={word} className="scrolling-word">{word}</span>
@@ -189,12 +189,12 @@ const Home = () => {
                <div className="check-item"> Analyze your symptoms</div>
                <div className="check-item"> Understand your health</div>
                <div className="check-item"> Get ready for your visit</div>
-               <div className="check-item"> Get ready for your visit</div>
+               <div className="check-item">Plan your next steps</div>
             </div>
 
             <div className="hero-actions">
               <Link to="/sampleanalysis" className="btn btn-secondary">
-                Sample Analysis
+                Simple Analysis
               </Link>
               <Link to="/advancedanalysis" className="btn btn-primary">
                 Start Advanced Check <ArrowRight size={18} style={{marginLeft: '8px'}}/>

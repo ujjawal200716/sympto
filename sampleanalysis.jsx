@@ -2,15 +2,17 @@ import React, { useState, useRef } from 'react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { FaExclamationTriangle, FaCheckSquare, FaFileDownload, FaShareAlt, FaSave, FaUserMd } from 'react-icons/fa'; // NEW ICONS
 import "./sample.css"; // Ensure this matches your CSS filename
 import Nev from "./test.jsx";    // Ensure this matches your Navbar filename
 
 // 🔒 SECURE: Key loaded from environment variables
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyCpTpkRriy5TR8P4uldvomP2no9Zd-tCAg";
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY10 || import.meta.env.VITE_GEMINI_API_KEY11;
 
 export default function SymptomChecker() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false); // New loading state for download
   
   const [formData, setFormData] = useState({
     age: '',
@@ -47,17 +49,18 @@ export default function SymptomChecker() {
     { id: 12, name: 'Rash', icon: '🔴' },
   ];
 
+  // Updated labels to be more polite ("Please the user mode")
   const steps = [
-    { label: 'Age', field: 'age', type: 'input' },
-    { label: 'Gender', field: 'gender', type: 'select' },
-    { label: 'Describe Your Symptoms', field: 'otherSymptoms', type: 'textarea' }, 
-    { label: 'How long have you had symptoms?', field: 'duration', type: 'select' },
-    { label: 'Symptom Severity', field: 'severity', type: 'select' },
-    { label: 'Do you have a fever?', field: 'temperature', type: 'select' },
-    { label: 'Any Medical History?', field: 'medicalHistory', type: 'textarea' },
-    { label: 'Current Medications', field: 'medications', type: 'textarea' },
-    { label: 'Known Allergies', field: 'allergies', type: 'textarea' },
-    { label: 'Select Common Symptoms', field: 'symptoms', type: 'multiselect' }, 
+    { label: 'Patient Age', field: 'age', type: 'input', question: 'Please enter the patient\'s age:' },
+    { label: 'Gender', field: 'gender', type: 'select', question: 'Please select the gender:' },
+    { label: 'Symptoms Description', field: 'otherSymptoms', type: 'textarea', question: 'Please describe what you are feeling:' }, 
+    { label: 'Duration', field: 'duration', type: 'select', question: 'How long have the symptoms persisted?' },
+    { label: 'Severity', field: 'severity', type: 'select', question: 'Please rate the symptom severity:' },
+    { label: 'Temperature', field: 'temperature', type: 'select', question: 'Do you currently have a fever?' },
+    { label: 'Medical History', field: 'medicalHistory', type: 'textarea', question: 'Please list any relevant medical history:' },
+    { label: 'Medications', field: 'medications', type: 'textarea', question: 'Are you currently taking any medications?' },
+    { label: 'Allergies', field: 'allergies', type: 'textarea', question: 'Please list any known allergies:' },
+    { label: 'Common Symptoms', field: 'symptoms', type: 'multiselect', question: 'Please select any common symptoms applicable:' }, 
   ];
 
   // --- SAVE FUNCTION ---
@@ -166,10 +169,28 @@ export default function SymptomChecker() {
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
       const symptomNames = formData.symptoms.map(id => symptomsList.find(s => s.id === id)?.name).join(', ');
 
+      // INCREASED INFORMATION: Added urgency, specialist, and precautions to the prompt
       const prompt = `
-        Act as a medical symptom checker API. Analyze: Age: ${formData.age}, Gender: ${formData.gender}, Description: ${formData.otherSymptoms}, Symptoms: ${symptomNames}, Severity: ${formData.severity}, Duration: ${formData.duration}.
-        Return ONLY valid JSON:
-        { "condition": "Condition Name", "severity": "Low/Medium/High", "confidence": "85%", "description": "Short explanation.", "recommendations": ["Action 1", "Action 2"] }
+        Act as a compassionate and professional medical symptom checker API. 
+        Analyze the following patient data:
+        Age: ${formData.age}, Gender: ${formData.gender}, 
+        Description: ${formData.otherSymptoms}, 
+        Selected Symptoms: ${symptomNames}, 
+        Severity: ${formData.severity}, Duration: ${formData.duration},
+        Fever Status: ${formData.temperature},
+        Medical History: ${formData.medicalHistory}, Medications: ${formData.medications}, Allergies: ${formData.allergies}.
+
+        Return ONLY valid JSON with the following structure:
+        { 
+          "condition": "Name of the most likely condition", 
+          "severity": "Low/Medium/High/Critical", 
+          "confidence": "Percentage (e.g., 85%)", 
+          "description": "A clear, simple explanation of the condition.", 
+          "urgency": "A specific recommendation sentence (e.g., 'Consult a General Practitioner within 24-48 hours, especially if symptoms worsen.')",
+          "specialist": "Type of doctor to see (e.g., Dermatologist, GP)",
+          "recommendations": ["Action step 1", "Action step 2", "Action step 3"],
+          "precautions": ["Thing to avoid 1", "Thing to avoid 2"] 
+        }
       `;
 
       const result = await model.generateContent(prompt);
@@ -178,7 +199,7 @@ export default function SymptomChecker() {
       setResult(JSON.parse(cleanJson));
     } catch (err) {
       console.error("Gemini Error:", err);
-      setError("Failed to analyze. Check API Key.");
+      setError("Failed to analyze. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -209,67 +230,102 @@ export default function SymptomChecker() {
       alert("Sharing is not supported on this browser.");
     }
   };
-
-  // --- UPDATED PDF DOWNLOAD (FITS TO PAGE) ---
+// --- FIXED DOWNLOAD FUNCTION ---
   const handleDownload = async () => {
     const input = resultCardRef.current;
     if (!input || !result) return;
+    
+    setIsDownloading(true);
 
     try {
-      // 1. Force scroll to top to prevent white bars/cutoff
-      window.scrollTo(0, 0);
+      // 1. Determine Theme Colors for PDF
+      const isDarkMode = document.querySelector('.dark-theme') !== null || 
+                         document.body.classList.contains('dark-theme');
+      
+      const pdfBg = isDarkMode ? '#0f172a' : '#ffffff'; 
+      const pdfText = isDarkMode ? '#f1f5f9' : '#1e293b'; 
 
-      // 2. Capture the element
+      // 2. Capture Setup - Calculate FULL height
+      const scrollHeight = input.scrollHeight;
+      const scrollWidth = input.scrollWidth;
+
       const canvas = await html2canvas(input, {
-        scale: 2, // High resolution
+        scale: 2, 
         useCORS: true,
-        backgroundColor: '#ffffff',
-        scrollY: -window.scrollY // Correction for scroll position
+        allowTaint: true,
+        color : pdfText,
+        backgroundColor: pdfBg,
+        
+        // CRITICAL FIXES FOR SCROLLING:
+        height: scrollHeight,       // Force canvas to be full height
+        windowHeight: scrollHeight, // Tell the "virtual browser" it's this tall
+        y: 0,                       // Force capture to start at top of element
+        scrollY: 0,                 // Reset scroll position
+
+        // --- MODIFY DOM BEFORE CAPTURE ---
+        onclone: (clonedDoc) => {
+          
+          // A. Fix the Parent Wrapper (The most common cause of cut-offs)
+          const wrapper = clonedDoc.querySelector('.results-wrapper');
+          if (wrapper) {
+             wrapper.style.height = 'auto';
+             wrapper.style.overflow = 'visible';
+             wrapper.style.maxHeight = 'none';
+          }
+
+          // B. Fix the Main Card Container
+          const card = clonedDoc.querySelector('.result-card');
+          if (card) {
+            card.style.height = 'auto';      
+            card.style.maxHeight = 'none';     
+            card.style.overflow = 'visible';    
+          }
+
+          // C. Fix The Title (Remove Gradients for PDF clarity)
+          const gradients = clonedDoc.querySelectorAll('.condition-name');
+          gradients.forEach(el => {
+             el.style.background = 'none';               
+             el.style.webkitTextFillColor = 'initial';    
+             el.style.color = pdfText;                    
+          });
+
+          // D. Force Text Visibility
+          const textSelectors = [
+            '.stat-value', '.stat-label', '.condition-meta', 
+            '.about-text', 'li span', 'h1', 'h2', 'h3', 'p', 'div'
+          ];
+          
+          textSelectors.forEach(selector => {
+            clonedDoc.querySelectorAll(selector).forEach(el => {
+              el.style.color = pdfText; 
+            });
+          });
+        }
       });
 
-      // 3. Initialize PDF (A4 size)
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      // 3. Generate PDF (Long vertical format)
       const imgData = canvas.toDataURL('image/png');
-      
-      // 4. Calculate Dimensions to FIT the page
-      const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm
-      const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
-      
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      
-      // Calculate ratio to fit width first
-      const ratio = pageWidth / imgWidth;
-      
-      // Determine final height based on width ratio
-      let finalHeight = imgHeight * ratio;
-      let finalWidth = pageWidth;
+      const pdf = new jsPDF({
+        orientation: 'p',
+        unit: 'px',
+        format: [canvas.width, canvas.height] // Creates a custom page size matching the image
+      });
 
-      // If the image is STILL too tall for one page, scale it down further to fit height
-      if (finalHeight > pageHeight) {
-         const heightRatio = pageHeight / finalHeight;
-         finalHeight = pageHeight - 10; // -10 for padding
-         finalWidth = finalWidth * heightRatio;
-      }
-
-      // 5. Center horizontally
-      const xOffset = (pageWidth - finalWidth) / 2;
-      
-      pdf.addImage(imgData, 'PNG', xOffset, 10, finalWidth, finalHeight);
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
       pdf.save(`SymptoReport-${new Date().toISOString().slice(0,10)}.pdf`);
 
     } catch (err) {
-      console.error("PDF Generation Error:", err);
-      alert("Failed to generate PDF. Please try again.");
+      console.error("PDF Failed:", err);
+      alert("Download failed. Please try again.");
+    } finally {
+      setIsDownloading(false);
     }
   };
-
   const step = steps[currentStep];
 
   return (
     <div className="app-container">
       {!result ? (
-        // ... (EXISTING FORM UI - UNCHANGED) ...
         <div className="content-wrapper">
           <div className="header-section">
             <div className="header-top">
@@ -287,11 +343,10 @@ export default function SymptomChecker() {
 
           <div className="main-card">
             <label className="field-label">{step?.label || "Information"}</label>
+            
+            {/* Displaying the polite questions defined in the steps array */}
             <h2 className="question-text">
-               {step?.field === 'symptoms' ? 'Select common symptoms:' : 
-                step?.field === 'otherSymptoms' ? 'Describe what you feel:' :
-                step?.field === 'age' ? 'How old is the patient?' :
-                step?.field === 'severity' ? 'How intense is the pain?' : 'Provide details below.'}
+               {step?.question}
             </h2>
 
             {step?.type === 'input' && (
@@ -313,7 +368,7 @@ export default function SymptomChecker() {
             )}
 
             {step?.type === 'textarea' && (
-              <textarea value={formData[step.field]} onChange={(e) => updateFormData(step.field, e.target.value)} placeholder="Type here..." className="text-area-input" />
+              <textarea value={formData[step.field]} onChange={(e) => updateFormData(step.field, e.target.value)} placeholder="Please type here..." className="text-area-input" />
             )}
 
             {step?.type === 'multiselect' && (
@@ -332,73 +387,77 @@ export default function SymptomChecker() {
             <div className="nav-area">
               <button onClick={handleBack} disabled={currentStep === 0} className="btn btn-back">Back</button>
               <button onClick={handleNext} disabled={!canProceed() || loading} className="btn btn-primary">
-                {loading ? 'Processing...' : currentStep === steps.length - 1 ? 'Analyze' : 'Continue'}
+                {loading ? 'Please wait...' : currentStep === steps.length - 1 ? 'Analyze Symptoms' : 'Continue'}
               </button>
             </div>
           </div>
         </div>
       ) : (
-        // --- NEW DESIGNED RESULTS PAGE ---
+        // --- UPGRADED RESULT PAGE (Matches Image + Fixes Download) ---
         <div className="results-wrapper">
             <Nev />
-            {/* ATTACH REF HERE FOR PDF GENERATION */}
+            
+            {/* We attach the ref HERE so we capture this entire card */}
             <div className="result-card" ref={resultCardRef}>
               
-              {/* Header */}
+              {/* 1. Header Area with Buttons */}
               <div className="result-header">
-                <span className="result-badge">AI Assessment</span>
-                
-                {/* ACTION BUTTONS WITH FIXED VISIBLE ICONS */}
-                <div className="action-row" data-html2canvas-ignore="true">
-                  {/* Share Button */}
-                  <button onClick={handleShare} className="icon-btn" title="Share">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                      <polyline points="16 6 12 2 8 6"></polyline>
-                      <line x1="12" y1="2" x2="12" y2="15"></line>
-                    </svg>
-                  </button>
+                 <span className="result-badge">Analysis Complete</span>
+                 <div className="action-row" data-html2canvas-ignore="true">
+                    
+                    <button onClick={handleShare} className="icon-btn" title="Share">
+                      <FaShareAlt />
+                    </button>
 
-                  {/* Download Button */}
-                  <button onClick={handleDownload} className="icon-btn" title="Download PDF">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                      <polyline points="7 10 12 15 17 10"></polyline>
-                      <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                  </button>
+                    <button 
+                      onClick={handleSave} 
+                      className={`icon-btn ${isSaved ? 'saved-active' : ''}`} 
+                      disabled={isSaved}
+                      title={isSaved ? "Saved" : "Save to Profile"}
+                    >
+                      <FaSave />
+                    </button>
 
-                  {/* Save Button (Changes color if saved) */}
-                  <button 
-                    onClick={handleSave} 
-                    className={`icon-btn ${isSaved ? 'saved-active' : ''}`} 
-                    title={isSaved ? "Saved" : "Save to Profile"}
-                    disabled={isSaved}
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill={isSaved ? "#059669" : "none"} stroke={isSaved ? "#059669" : "#64748b"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                      <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                      <polyline points="7 3 7 8 15 8"></polyline>
-                    </svg>
-                  </button>
-                </div>
+                    {/* Main Download Button */}
+                    <button 
+                      className="btn btn-primary" 
+                      onClick={handleDownload}
+                      disabled={isDownloading}
+                      style={{ padding: '0.8rem 1.5rem', fontSize: '0.9rem' }}
+                    >
+                       {isDownloading ? 'Generating...' : <><FaFileDownload /> Save Report</>}
+                    </button>
+                 </div>
               </div>
 
-              {/* Main Diagnosis */}
+              {/* 2. Diagnosis Title */}
               <div className="diagnosis-section">
-                {/* --- LARGE ICON --- */}
                 <div className="diagnosis-icon">
-                  <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 3C4.89543 3 4 3.89543 4 5V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V5C20 3.89543 19.1046 3 18 3H6ZM6 1H18C20.2091 1 22 2.79086 22 5V19C22 21.2091 20.2091 23 18 23H6C3.79086 23 2 21.2091 2 19V5C2 2.79086 3.79086 1 6 1Z" fillOpacity="0.5"/>
-                    <path d="M11 7H13V10H16V12H13V15H11V12H8V10H11V7Z"/>
-                  </svg>
+                    {/* Dynamic Icon based on generic or check */}
+                   <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor"><path d="M6 3C4.89543 3 4 3.89543 4 5V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V5C20 3.89543 19.1046 3 18 3H6ZM6 1H18C20.2091 1 22 2.79086 22 5V19C22 21.2091 20.2091 23 18 23H6C3.79086 23 2 21.2091 2 19V5C2 2.79086 3.79086 1 6 1Z" fillOpacity="0.5"/><path d="M11 7H13V10H16V12H13V15H11V12H8V10H11V7Z"/></svg>
                 </div>
-
                 <h1 className="condition-name">{result.condition}</h1>
-                <p className="condition-meta">Based on your symptoms</p>
+                <p className="condition-meta">Possible Condition Analysis</p>
               </div>
 
-              {/* Stats Grid */}
+              {/* 3. THE YELLOW WARNING BANNER (From Image) */}
+              {result.urgency && (
+                  <div className="warning-banner">
+                    <FaExclamationTriangle className="warning-icon" />
+                    <div>
+                      <strong>Recommendation: </strong>
+                      {result.urgency}
+                    </div>
+                  </div>
+              )}
+
+              {/* 4. ABOUT SECTION */}
+              <div className="about-section">
+                <h3 className="section-title">About this condition</h3>
+                <p className="about-text">{result.description}</p>
+              </div>
+
+              {/* 5. STATS GRID (3 Columns) */}
               <div className="stats-grid">
                 <div className={`stat-box severity-${result.severity?.toLowerCase() || 'medium'}`}>
                   <span className="stat-label">Severity</span>
@@ -408,31 +467,53 @@ export default function SymptomChecker() {
                   <span className="stat-label">AI Confidence</span>
                   <span className="stat-value">{result.confidence}</span>
                 </div>
+                {result.specialist && (
+                    <div className="stat-box specialist-box">
+                        <span className="stat-label">Specialist</span>
+                        <span className="stat-value" style={{fontSize: '1.3rem'}}>{result.specialist}</span>
+                    </div>
+                )}
               </div>
 
-              {/* Description */}
-              <div className="info-block">
-                <h3>About this condition</h3>
-                <p>{result.description}</p>
+              {/* 6. RECOMMENDED ACTIONS HEADER (Green Check) */}
+              <div className="actions-header">
+                <FaCheckSquare className="check-icon-large" />
+                <span>Recommended Actions</span>
               </div>
 
-              {/* Recommendations */}
-              <div className="rec-block">
-                <h3>Recommended Actions</h3>
-                <ul className="rec-list-styled">
-                  {result.recommendations?.map((rec, idx) => (
-                    <li key={idx}>
-                      <span className="rec-icon">✓</span>
-                      {rec}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {/* Recommended Actions List */}
+              <ul className="rec-list-styled">
+                {result.recommendations?.map((rec, idx) => (
+                  <li key={idx} className="rec-item">
+                     <div className="rec-icon-box">{idx + 1}</div>
+                     <span>{rec}</span>
+                  </li>
+                ))}
+              </ul>
 
-              {/* Footer Button - Ignored in PDF */}
+              {/* 7. PRECAUTIONS (If any exist) */}
+              {result.precautions && result.precautions.length > 0 && (
+                <>
+                  <div className="actions-header" style={{ marginTop: '2rem', color: '#dc2626' }}>
+                     <FaExclamationTriangle className="check-icon-large" style={{ background: '#fef2f2', color: '#dc2626' }} />
+                     <span>Precautions</span>
+                  </div>
+                  <ul className="rec-list-styled">
+                    {result.precautions.map((item, idx) => (
+                       <li key={idx} className="rec-item" style={{ borderLeft: '5px solid #ef4444' }}>
+                          <div className="rec-icon-box" style={{ background: '#fef2f2', color: '#dc2626' }}>✕</div>
+                          <span>{item}</span>
+                       </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
+              {/* Restart Button */}
               <button onClick={resetQuiz} className="btn-restart" data-html2canvas-ignore="true">
-                Check Another Symptom
+                Start New Check
               </button>
+
             </div>
         </div>
       )}

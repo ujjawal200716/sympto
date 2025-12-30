@@ -388,3 +388,227 @@
   .filter-controls-container { justify-content: center; }
   .filter-wrapper select { width: 100%; }
 }
+/* --- DARK MODE OVERRIDES --- */
+.dark-theme .saved-page-wrapper {
+  /* Dark Slate Gradient Background */
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #f1f5f9;
+}
+
+/* Update Background Orbs to Glow instead of Fade */
+.dark-theme .saved-page-wrapper::before {
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(15, 23, 42, 0) 70%);
+}
+.dark-theme .saved-page-wrapper::after {
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(15, 23, 42, 0) 70%);
+}
+
+/* --- TEXT & HEADERS --- */
+.dark-theme .header-titles h1,
+.dark-theme .content-header h2 {
+  color: #f8fafc; /* Almost White */
+}
+
+.dark-theme .header-titles p,
+.dark-theme .banner-date,
+.dark-theme .sidebar-meta-item label,
+.dark-theme .timestamp {
+  color: #94a3b8; /* Light Slate Grey */
+}
+
+.dark-theme .count-pill {
+  background: #1e293b;
+  color: #38bdf8;
+  border-color: #334155;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* --- FILTERS --- */
+.dark-theme .filter-wrapper select {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.dark-theme .filter-wrapper select:hover {
+  border-color: #475569;
+  background-color: #273548;
+}
+
+/* --- CARDS (GRID ITEMS) --- */
+.dark-theme .full-banner-btn {
+  background: #1e293b;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4);
+  border: 1px solid #334155;
+}
+
+.dark-theme .full-banner-btn:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  border-color: #475569;
+}
+
+.dark-theme .banner-title {
+  color: #f1f5f9;
+}
+
+.dark-theme .banner-icon {
+  background: rgba(14, 165, 233, 0.15); /* Low opacity blue */
+  color: #38bdf8; /* Brighter Blue */
+}
+
+.dark-theme .info-type-badge {
+  background-color: #0f172a;
+  color: #94a3b8;
+  border-color: #334155;
+}
+
+.dark-theme .view-link {
+  color: #38bdf8;
+}
+
+/* Delete Button */
+.dark-theme .card-delete-btn {
+  background: #1e293b !important;
+  border-color: #7f1d1d !important; /* Dark Red Border */
+  color: #f87171 !important; /* Light Red Icon */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark-theme .card-delete-btn:hover {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border-color: #dc2626 !important;
+}
+
+/* --- EMPTY STATE --- */
+.dark-theme .empty-state {
+  background: #1e293b;
+  border-color: #334155;
+}
+.dark-theme .empty-state p {
+  color: #94a3b8;
+}
+
+/* --- DETAIL / EXPANDED VIEW --- */
+.dark-theme .back-btn-large {
+  color: #94a3b8;
+}
+.dark-theme .back-btn-large:hover {
+  color: #f1f5f9;
+}
+
+.dark-theme .expanded-card.full-screen-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+}
+
+/* Sidebar */
+.dark-theme .card-sidebar {
+  background: #0f172a; /* Darker than card body */
+  border-right: 1px solid #334155;
+}
+.dark-theme .sidebar-meta-item strong {
+  color: #f1f5f9;
+}
+
+/* Date Badge in Sidebar */
+.dark-theme .d-day { color: #38bdf8; }
+.dark-theme .d-month { color: #f1f5f9; }
+.dark-theme .d-year { color: #64748b; }
+
+.dark-theme .status-indicator {
+  background: rgba(22, 163, 74, 0.2); /* Dark Green bg */
+  color: #4ade80; /* Light Green text */
+}
+
+/* Content Area */
+.dark-theme .card-content-area {
+  background: #1e293b;
+}
+
+.dark-theme .content-body label {
+  color: #cbd5e1;
+}
+
+/* Content Pre (Code/Text Block) */
+.dark-theme .content-pre {
+  background: #020617; /* Very dark/black */
+  color: #e2e8f0;
+  border: 1px solid #334155;
+}
+
+/* Analysis Paper Look */
+.dark-theme .analysis-paper,
+.dark-theme .chat-interface {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.dark-theme .analysis-paper::before {
+  /* Make top bar glow slightly more */
+  background: linear-gradient(90deg, #3b82f6, #22d3ee);
+}
+
+/* Responsive Fixes for Dark Mode */
+@media (max-width: 768px) {
+  .dark-theme .card-sidebar {
+    border-bottom: 1px solid #334155;
+  }
+}
+/* --- A. BASE STYLES (Light Mode / Default) --- */
+/* This replaces the inline styles you had in React */
+.filter-wrapper select {
+  width: 100%;
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: #fff; /* White background for Light Mode */
+  color: #334155;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  
+  /* Custom Arrow Icon (Dark Grey for Light Mode) */
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 16px;
+  transition: all 0.2s ease;
+}
+
+/* Hover Effect */
+.filter-wrapper select:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* Focus Effect */
+.filter-wrapper select:focus {
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+
+/* --- B. DARK MODE OVERRIDES (The Fix) --- */
+/* When .dark-theme is active, these rules take over */
+.dark-theme .filter-wrapper select {
+  background-color: #1e293b; /* Dark Slate Background */
+  color: #f8fafc;            /* White Text */
+  border-color: #334155;     /* Dark Border */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+
+  /* Custom Arrow Icon (Changed to WHITE for Dark Mode) */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ffffff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+}
+
+.dark-theme .filter-wrapper select:hover {
+  background-color: #334155;
+  border-color: #475569;
+}

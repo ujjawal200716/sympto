@@ -1,4 +1,4 @@
-/* SymptomChecker.css - Vibrant Dark Mode, Mobile Ready & Animated Progress Bar */
+/* SymptomChecker.css - Vibrant Dark Mode, Mobile Ready & Animated Results */
 
 /* ---------------------------------------------------------
    1. Container & Global Layout
@@ -19,6 +19,7 @@
   color: #1e293b;
   box-sizing: border-box;
   transition: background 0.5s ease, color 0.5s ease;
+  overflow-x: hidden; /* Prevent horizontal scroll on animations */
 }
 
 .content-wrapper {
@@ -66,7 +67,7 @@
 /* IMPROVED: Track has depth */
 .progress-track {
   width: 100%;
-  height: 14px; /* Taller for better visual impact */
+  height: 14px;
   background-color: #cbd5e1;
   border-radius: 99px;
   overflow: hidden;
@@ -91,9 +92,9 @@
     #0ea5e9 75%, 
     #0ea5e9 100%
   );
-  background-size: 20px 20px; /* Size of the stripes */
-  animation: progress-move 1s linear infinite; /* Movement animation */
-  box-shadow: 0 0 15px rgba(14, 165, 233, 0.6); /* Glow */
+  background-size: 20px 20px;
+  animation: progress-move 1s linear infinite;
+  box-shadow: 0 0 15px rgba(14, 165, 233, 0.6);
 }
 
 @keyframes progress-move {
@@ -335,12 +336,14 @@
   align-items: center;
   gap: 0.75rem;
   box-shadow: 0 10px 20px -5px rgba(14, 165, 233, 0.4);
+  transition: all 0.3s ease;
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.5);
-  filter: brightness(110%);
+   background: linear-gradient(135deg, #0ea5e9 100%, #0284c7 0%);
+  transform: scale(1.05) translateY(-2px); /* Grows and lifts slightly */
+  box-shadow: 0 20px 30px -8px rgba(14, 165, 233, 0.6); /* Wider, softer shadow */
+  filter: brightness(105%);
 }
 
 .btn-primary:disabled {
@@ -351,7 +354,7 @@
 }
 
 /* ---------------------------------------------------------
-   4. BETTER UI FOR RESULTS PAGE (LAST PAGE)
+   4. BEAUTIFUL UI FOR RESULTS PAGE (MAJOR UPGRADE)
    --------------------------------------------------------- */
 
 .results-wrapper {
@@ -359,224 +362,323 @@
   max-width: 650px;
   margin: 0 auto;
   padding: 0 20px;
-  animation: fadeIn 0.5s ease;
+  animation: slideUpFade 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .result-card {
-  background: #ffffff;
-  border-radius: 24px;
-  padding: 40px;
-  /* Richer shadow for depth */
-  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.15); 
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 32px; /* Smoother corners */
+  padding: 48px;
+  box-shadow: 0 30px 60px -10px rgba(14, 165, 233, 0.15), 0 0 0 1px rgba(226, 232, 240, 0.6);
   margin-top: 20px;
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(20px); /* Glassmorphism */
 }
 
+/* Shimmering Top Border */
 .result-card::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 8px; /* Thicker top accent */
-  background: linear-gradient(90deg, #3b82f6, #0ea5e9, #6366f1);
+  height: 6px;
+  background: linear-gradient(90deg, #3b82f6, #0ea5e9, #6366f1, #3b82f6);
+  background-size: 300% 100%;
+  animation: border-shimmer 4s linear infinite;
+}
+
+@keyframes border-shimmer {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 0%; }
 }
 
 .result-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 40px;
 }
 
 .result-badge {
-  background: #f0f9ff;
+  background: #e0f2fe;
   color: #0284c7;
-  padding: 8px 16px;
-  border-radius: 30px;
-  font-size: 0.85rem;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 0.8rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border: 1px solid #bae6fd;
+  letter-spacing: 0.1em;
+  border: 1px solid rgba(2, 132, 199, 0.1);
 }
 
 .action-row { display: flex; gap: 12px; }
 
+/* Diagnosis Section with Staggered Entrance */
 .diagnosis-section {
   text-align: center;
-  margin-bottom: 35px;
-  padding-bottom: 35px;
+  margin-bottom: 45px;
+  padding-bottom: 45px;
   border-bottom: 2px dashed #f1f5f9;
+  animation: fadeIn 0.8s ease-out 0.2s backwards; /* Delay */
 }
 
 .diagnosis-icon {
   font-size: 5rem;
   margin-bottom: 1.5rem;
   display: inline-block;
+  filter: drop-shadow(0 10px 10px rgba(14, 165, 233, 0.2));
+  animation: floatIcon 6s ease-in-out infinite;
 }
 
-/* Enhanced Title Typography */
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* "Living" Gradient Text */
 .condition-name {
-  font-size: 3rem; /* Larger */
-  /* Text Gradient */
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  font-size: 3.5rem;
+  background: linear-gradient(135deg, #0f172a 0%, #334155 40%, #0ea5e9 100%);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin: 0 0 12px 0;
+  margin: 0 0 16px 0;
   font-weight: 800;
   line-height: 1.1;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
+  animation: text-shine 5s linear infinite;
+}
+
+@keyframes text-shine {
+  to { background-position: 200% center; }
 }
 
 .condition-meta {
   color: #64748b;
-  font-size: 1.1rem;
-  margin: 0;
+  font-size: 1.15rem;
+  margin: 0 auto;
+  max-width: 80%;
   font-weight: 500;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
+/* Stats Grid with Hover Lift */
+/* Update this section in your CSS */
+/* ---------------------------------------------------------
+   1. FIX THE STATS GRID (Layout & Text Size)
+   --------------------------------------------------------- */
 .stats-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* FORCE 3 Columns */
+  grid-template-columns: repeat(3, 1fr); 
   gap: 20px;
   margin-bottom: 40px;
+  /* Ensure all cards stretch to the same height */
+  align-items: stretch; 
+}
+
+/* Mobile: Stack them vertically */
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Specific fix for the Specialist Card Text size */
+.stat-box.specialist-box .stat-value {
+  font-size: 1.4rem !important; /* Smaller than the big numbers */
+  line-height: 1.3;
+  word-wrap: break-word;
 }
 
 .stat-box {
-  padding: 24px;
-  border-radius: 20px;
+  padding: 28px;
+  border-radius: 24px;
   text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
   background: #f8fafc; 
-  border: 1px solid #f1f5f9;
-  transition: transform 0.2s;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .stat-box:hover {
-  transform: translateY(-2px);
-  background: #f1f5f9;
+  transform: translateY(-5px);
+  background: #ffffff;
+  box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.05);
+  border-color: #e0f2fe;
 }
 
 .stat-label {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   color: #64748b;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
 .stat-value {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 800;
   color: #1e293b;
 }
 
-/* Severity Colors */
-.severity-mild { background: #ecfdf5; color: #059669; border-color: #a7f3d0; } 
-.severity-moderate { background: #fffbeb; color: #b45309; border-color: #fde68a; }
-.severity-medium { background: #fffbeb; color: #b45309; border-color: #fde68a; }
-.severity-high { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
-.severity-severe { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+/* Dynamic Severity Badges with Pulse */
+.severity-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 99px;
+  font-size: 0.9rem;
+  margin-top: 8px;
+  font-weight: 700;
+  animation: pulse-soft 2s infinite;
+}
+
+@keyframes pulse-soft {
+  0% { box-shadow: 0 0 0 0 rgba(0,0,0, 0.1); }
+  70% { box-shadow: 0 0 0 6px rgba(0,0,0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,0,0, 0); }
+}
+
+.severity-mild { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; } 
+.severity-moderate { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+.severity-high, .severity-severe { 
+  background: #fef2f2; 
+  color: #dc2626; 
+  border: 1px solid #fecaca; 
+  animation: pulse-danger 2s infinite;
+}
+
+@keyframes pulse-danger {
+  0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.2); }
+  70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
 
 .confidence-box {
   background: #f0f9ff;
   color: #0284c7;
-  border-color: #bae6fd;
 }
 
-.info-block h3, .rec-block h3 {
+/* Info & Recommendations */
+.rec-block {
+  animation: fadeIn 0.8s ease-out 0.6s backwards; /* Delay */
+}
+
+.rec-block h3, .info-block h3 {
   font-size: 1.1rem;
   color: #1e293b;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.info-block p {
-  color: #475569;
-  line-height: 1.7;
-  font-size: 1rem;
-  margin-bottom: 40px;
-  background: #f8fafc;
-  padding: 24px;
-  border-radius: 16px;
-  border-left: 4px solid #e2e8f0; 
+  gap: 12px;
 }
 
 .rec-list-styled {
   list-style: none;
   padding: 0;
-  margin: 0 0 40px 0;
+  margin: 0 0 45px 0;
 }
 
-/* Enhanced Recommendation Cards */
+/* Actionable Cards */
 .rec-list-styled li {
   background: #ffffff;
   margin-bottom: 16px;
-  padding: 20px;
-  border-radius: 18px;
+  padding: 24px;
+  border-radius: 20px;
   display: flex;
   align-items: center; 
   color: #334155;
   font-size: 1.05rem;
-  font-weight: 500;
+  font-weight: 600;
   border: 1px solid #e2e8f0;
-  /* Soft Shadow for each item */
   box-shadow: 0 4px 6px -2px rgba(0,0,0,0.02);
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Green "Action" Accent on hover */
+.rec-list-styled li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #10b981;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .rec-list-styled li:hover {
-  border-color: #bae6fd;
-  transform: translateX(4px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  border-color: #10b981;
+  transform: translateX(6px) scale(1.01);
+  box-shadow: 0 12px 24px -6px rgba(16, 185, 129, 0.15);
 }
+
+.rec-list-styled li:hover::before { opacity: 1; }
 
 .rec-icon {
   color: #0ea5e9;
   margin-right: 20px;
   background: #e0f2fe;
-  width: 40px; 
-  height: 40px;
-  font-size: 1.25rem; 
-  border-radius: 12px;
+  width: 48px; 
+  height: 48px;
+  font-size: 1.5rem; 
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: transform 0.3s;
+}
+
+.rec-list-styled li:hover .rec-icon {
+  transform: rotate(10deg);
+  background: #10b981;
+  color: white;
+}
+
+/* Restart Button Area */
+.restart-container {
+  animation: fadeIn 0.8s ease-out 0.8s backwards;
 }
 
 .btn-restart {
   width: 100%;
-  padding: 1.25rem;
+  padding: 1.5rem;
   background: #1e293b;
   color: white;
   border: none;
-  border-radius: 99px;
-  font-size: 1.1rem;
+  border-radius: 24px;
+  font-size: 1.2rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 10px 20px -5px rgba(30, 41, 59, 0.3);
+  transition: all 0.3s;
+  box-shadow: 0 15px 30px -5px rgba(30, 41, 59, 0.3);
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .btn-restart:hover {
-  background: #334155;
-  transform: translateY(-2px);
-  box-shadow: 0 15px 25px -5px rgba(30, 41, 59, 0.4);
+  background: #0f172a;
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px -5px rgba(30, 41, 59, 0.5);
 }
 
 .error-box {
@@ -593,11 +695,11 @@
 }
 
 /* ---------------------------------------------------------
-   6. VIBRANT DARK MODE (DESIGN UPGRADE)
+   5. VIBRANT DARK MODE (DESIGN UPGRADE)
    --------------------------------------------------------- */
 
 .dark-theme .app-container {
-  background: radial-gradient(circle at top right, #1e293b, #0f172a, #020617);
+  background: radial-gradient(circle at top right, #0f172a, #020617, #000000);
   color: #f1f5f9;
 }
 
@@ -608,42 +710,45 @@
 .dark-theme .stat-value,
 .dark-theme .info-block h3,
 .dark-theme .rec-block h3 {
-  color: #f1f5f9; /* Bright White */
+  color: #f1f5f9;
 }
 
 .dark-theme .condition-name {
-    background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #94a3b8 40%, #38bdf8 100%);
+    background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    animation: text-shine 5s linear infinite;
 }
 
 .dark-theme .total-steps,
 .dark-theme .unit,
 .dark-theme .condition-meta,
 .dark-theme .stat-label {
-  color: #94a3b8; /* Muted Blue-Grey */
+  color: #94a3b8;
 }
 
 /* Inputs & Forms */
-.dark-theme .input-group { border-bottom-color: #475569; }
+.dark-theme .input-group { border-bottom-color: #334155; }
 .dark-theme .input-group::after { background: linear-gradient(90deg, #38bdf8, #0ea5e9); }
 .dark-theme .field-label {
-  background-color: rgba(14, 165, 233, 0.2);
+  background-color: rgba(14, 165, 233, 0.15);
   border: 1px solid rgba(14, 165, 233, 0.3);
   color: #7dd3fc;
 }
 
 .dark-theme .option-btn {
-  background: rgba(30, 41, 59, 0.6);
+  background: rgba(30, 41, 59, 0.4);
   border-color: rgba(255, 255, 255, 0.05);
   color: #cbd5e1;
+  backdrop-filter: blur(5px);
 }
 
 .dark-theme .option-btn:hover {
   border-color: #38bdf8;
-  background: rgba(30, 41, 59, 0.9);
+  background: rgba(14, 165, 233, 0.1);
   color: #38bdf8;
-  box-shadow: 0 0 15px rgba(56, 189, 248, 0.15); /* Subtle Neon Glow */
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
 }
 
 .dark-theme .option-btn.selected {
@@ -654,28 +759,38 @@
 }
 
 .dark-theme .text-area-input {
-  background-color: rgba(30, 41, 59, 0.6);
-  border-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(30, 41, 59, 0.4);
+  border-color: rgba(255, 255, 255, 0.08);
   color: #f1f5f9;
 }
 
-/* Result Card - Glassmorphism Style */
+/* Result Card - Enhanced Dark Glass */
 .dark-theme .result-card {
-  background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(14, 165, 233, 0.1);
-  backdrop-filter: blur(10px);
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.8));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6), 0 0 30px rgba(14, 165, 233, 0.05);
+}
+
+.dark-theme .result-badge {
+  background: rgba(14, 165, 233, 0.15);
+  border-color: rgba(14, 165, 233, 0.3);
+  color: #7dd3fc;
 }
 
 /* Stats & Info Boxes */
 .dark-theme .stat-box {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(15, 23, 42, 0.5);
   border-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark-theme .stat-box:hover {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: #38bdf8;
 }
 
 .dark-theme .info-block p,
 .dark-theme .rec-list-styled li {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(15, 23, 42, 0.5);
   color: #cbd5e1;
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -683,20 +798,23 @@
 .dark-theme .info-block p { border-left: 4px solid #38bdf8; }
 
 .dark-theme .rec-list-styled li:hover {
-  border-color: #38bdf8;
+  border-color: #34d399; /* Green accent in dark mode */
   background: rgba(30, 41, 59, 0.8);
+  box-shadow: 0 0 20px rgba(52, 211, 153, 0.1);
 }
 
+.dark-theme .rec-list-styled li:hover::before { background: #34d399; }
+.dark-theme .rec-list-styled li:hover .rec-icon { background: #34d399; color: #020617; }
+
 /* Vibrant Badges in Dark Mode */
-.dark-theme .severity-mild { background: rgba(5, 150, 105, 0.2); color: #6ee7b7; border-color: rgba(5, 150, 105, 0.5); }
-.dark-theme .severity-moderate { background: rgba(217, 119, 6, 0.2); color: #fcd34d; border-color: rgba(217, 119, 6, 0.5); }
+.dark-theme .severity-mild { background: rgba(5, 150, 105, 0.15); color: #6ee7b7; border-color: rgba(5, 150, 105, 0.4); }
+.dark-theme .severity-moderate { background: rgba(217, 119, 6, 0.15); color: #fcd34d; border-color: rgba(217, 119, 6, 0.4); }
 .dark-theme .severity-high, 
-.dark-theme .severity-severe { background: rgba(220, 38, 38, 0.2); color: #fca5a5; border-color: rgba(220, 38, 38, 0.5); }
-.dark-theme .confidence-box { background: rgba(3, 105, 161, 0.2); color: #7dd3fc; border-color: rgba(3, 105, 161, 0.5); }
+.dark-theme .severity-severe { background: rgba(220, 38, 38, 0.15); color: #fca5a5; border-color: rgba(220, 38, 38, 0.4); }
 
 /* Icons & Buttons */
 .dark-theme .icon-btn {
-  background: rgba(30, 41, 59, 0.8);
+  background: rgba(30, 41, 59, 0.6);
   border-color: rgba(255, 255, 255, 0.1);
   color: #e2e8f0;
 }
@@ -704,100 +822,123 @@
 .dark-theme .icon-btn:hover {
   border-color: #38bdf8;
   color: #38bdf8;
-  background: rgba(15, 23, 42, 1);
-  box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); /* Neon Glow on Hover */
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
 }
 
 .dark-theme .btn-primary, 
 .dark-theme .btn-restart {
-  box-shadow: 0 0 20px rgba(14, 165, 233, 0.3); /* Button Glow */
+  box-shadow: 0 0 25px rgba(14, 165, 233, 0.25);
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
 /* ---------------------------------------------------------
-   7. CRITICAL FIX: FORCE ICON VISIBILITY
+   6. CRITICAL FIX: FORCE ICON VISIBILITY
    --------------------------------------------------------- */
-
 .icon-btn svg {
-  width: 15px !important;
-  height: 15px !important;
-  min-width: 15px;
-  min-height: 15px;
+  width: 20px !important;  /* Increased slightly for better visibility */
+  height: 20px !important;
+  min-width: 20px;
+  min-height: 20px;
   display: block;
   fill: none;
   stroke: currentColor;
   stroke-width: 2px;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy icon transition */
 }
 
 .icon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
+  
+  /* Modern Base Style */
   background: #ffffff;
-  border: 2px solid #e2e8f0;
-  width: 32px;
-  height: 32px;
-  border-radius: 16px; 
+  border: 1px solid #e2e8f0; /* Thinner, lighter border */
+  width: 44px; /* Slightly larger touch target */
+  height: 44px;
+  border-radius: 14px; /* Softer corners */
+  
   cursor: pointer;
-  transition: all 0.2s ease;
   color: #64748b;
-  padding: 0;
-  margin: 0;
+  
+  /* Smooth Physics-based Transition */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* Subtle depth */
 }
 
+/* HOVER STATE: Lift & Color */
 .icon-btn:hover {
+  background: #f0f9ff; /* Light blue tint background */
   border-color: #0ea5e9;
-  color: #0ea5e9; 
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+  color: #0ea5e9;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px -3px rgba(14, 165, 233, 0.25); /* Colored glow */
 }
 
+/* HOVER STATE: Animate the Icon inside */
+.icon-btn:hover svg {
+  transform: scale(1.1) rotate(5deg); /* Subtle icon pop */
+}
+
+/* ACTIVE STATE: Click Feedback (Squish) */
+.icon-btn:active {
+  transform: translateY(-1px) scale(0.95);
+  box-shadow: 0 2px 4px rgba(14, 165, 233, 0.1);
+}
+
+/* SAVED/ACTIVE VARIANT */
 .icon-btn.saved-active {
   background: #ecfdf5;
   color: #059669;
   border-color: #059669;
+  box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.2);
 }
 
+.icon-btn.saved-active:hover {
+  background: #d1fae5;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.3);
+}
+
+/* DIAGNOSIS ICON OVERRIDE */
 .diagnosis-icon svg {
   width: 100px !important;
   height: 100px !important;
 }
 
 /* ---------------------------------------------------------
-   8. MOBILE RESPONSIVENESS (IMPROVED)
+   7. MOBILE RESPONSIVENESS (IMPROVED)
    --------------------------------------------------------- */
 
 @media (max-width: 768px) {
-  /* Layout adjustments */
   .app-container {
     padding: 30px 15px 15px 15px;
     align-items: flex-start;
   }
   
   .content-wrapper, .results-wrapper {
-    padding: 1rem;
+    padding: 0.5rem;
     max-width: 100%;
   }
 
   /* Font Scaling */
   .question-text {
-    font-size: 1.75rem; /* Smaller question text */
+    font-size: 1.75rem; 
     margin-bottom: 2rem;
   }
 
-  .medical-input {
-    font-size: 3rem; /* Smaller input numbers */
-  }
-
+  .medical-input { font-size: 3rem; }
   .unit { font-size: 1.5rem; }
 
   /* Grid Conversions */
   .symptoms-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 columns instead of 3 */
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
   }
 
   .stats-grid {
-    grid-template-columns: 1fr; /* Stack stats vertically */
+    grid-template-columns: 1fr;
     gap: 1rem;
   }
 
@@ -809,23 +950,13 @@
   /* Result Page Tweaks */
   .result-card {
     padding: 24px;
-    border-radius: 16px;
+    border-radius: 24px;
   }
 
-  .condition-name {
-    font-size: 2rem;
-  }
+  .condition-name { font-size: 2.25rem; }
+  .diagnosis-icon svg { width: 70px !important; height: 70px !important; }
 
-  .diagnosis-icon svg {
-    width: 70px !important;
-    height: 70px !important;
-  }
-
-  .action-row {
-    gap: 8px;
-  }
-
-  /* Navigation: Buttons Full Width or easier to tap */
+  /* Navigation */
   .nav-area {
     padding-top: 1rem;
     gap: 1rem;
@@ -835,4 +966,269 @@
     padding: 1rem 1.5rem;
     font-size: 1rem;
   }
+}
+/* SymptomChecker.css - Vibrant Dark Mode, Mobile Ready & Animated Results */
+
+/* --- GLOBAL LAYOUT --- */
+.app-container {
+  min-height: 100vh;
+  width: 100vw;
+  background: radial-gradient(circle at top right, #e0f2fe, #f0f9ff, #ffffff);
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; 
+  padding-top: 60px;
+  padding-bottom: 50px;
+  color: #1e293b;
+  box-sizing: border-box;
+  transition: background 0.5s ease, color 0.5s ease;
+}
+
+.content-wrapper, .results-wrapper {
+  width: 100%;
+  max-width: 800px;
+  padding: 2rem;
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- HEADER & PROGRESS --- */
+.header-section { margin-bottom: 3rem; }
+.header-top { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem; }
+.current-step { font-size: 2.5rem; font-weight: 800; color: #0ea5e9; line-height: 1; }
+.total-steps { color: #94a3b8; font-size: 1.25rem; font-weight: 600; }
+
+.progress-track {
+  width: 100%; height: 14px; background-color: #cbd5e1; border-radius: 99px; overflow: hidden; position: relative;
+}
+.progress-fill {
+  height: 100%; border-radius: 99px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  background-image: linear-gradient(45deg, #3b82f6 25%, #0ea5e9 25%, #0ea5e9 50%, #3b82f6 50%, #3b82f6 75%, #0ea5e9 75%, #0ea5e9 100%);
+  background-size: 20px 20px; animation: progress-move 1s linear infinite; box-shadow: 0 0 15px rgba(14, 165, 233, 0.6);
+}
+@keyframes progress-move { 0% { background-position: 0 0; } 100% { background-position: 20px 20px; } }
+
+/* --- FORM ELEMENTS --- */
+.field-label {
+  display: inline-block; font-size: 0.875rem; font-weight: 700; color: #0284c7; text-transform: uppercase; letter-spacing: 0.15em;
+  margin-bottom: 1rem; padding: 0.5rem 1rem; background-color: rgba(14, 165, 233, 0.1); border-radius: 99px;
+}
+.question-text { font-size: 2.25rem; font-weight: 700; color: #1e293b; margin: 0 0 2.5rem 0; line-height: 1.25; }
+
+.input-group { display: flex; align-items: baseline; border-bottom: 2px solid #e2e8f0; margin-bottom: 4rem; position: relative; }
+.medical-input { width: 100%; font-size: 4rem; font-weight: 200; color: #0f172a; border: none; background: transparent; outline: none; }
+.unit { font-size: 2rem; color: #94a3b8; margin-left: 1rem; }
+
+.options-grid { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 4rem; }
+.option-btn {
+  width: 100%; padding: 1.5rem 2rem; border-radius: 16px; border: 1px solid transparent; background: #ffffff; color: #64748b;
+  cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 1.2rem;
+  transition: all 0.2s ease; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+.option-btn:hover { transform: translateY(-2px); border-color: #7dd3fc; color: #0284c7; background-color: #f0f9ff; }
+.option-btn.selected { border: 2px solid #0ea5e9; background-color: rgba(14, 165, 233, 0.05); color: #0284c7; }
+.check-mark { color: #0ea5e9; }
+
+.symptoms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 4rem; }
+.symptom-btn {
+  padding: 1.5rem; border-radius: 20px; border: 1px solid transparent; background: #ffffff; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.3s ease; aspect-ratio: 1/1;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+}
+.symptom-btn.selected { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; transform: scale(1.02); }
+.symptom-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+
+.nav-area { display: flex; padding-top: 2rem; }
+.btn { padding: 1rem 2.5rem; border-radius: 99px; font-weight: 700; cursor: pointer; border: none; font-size: 1.1rem; transition: all 0.3s ease; }
+.btn-back { background: transparent; color: #94a3b8; }
+.btn-primary { margin-left: auto; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; }
+
+/* --- RESULT CARD UI --- */
+.result-card {
+  background: rgba(255, 255, 255, 0.95); border-radius: 32px; padding: 48px;
+  box-shadow: 0 30px 60px -10px rgba(14, 165, 233, 0.15); position: relative; overflow: hidden; backdrop-filter: blur(20px);
+}
+.result-card::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px;
+  background: linear-gradient(90deg, #3b82f6, #0ea5e9, #6366f1);
+}
+.result-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
+.result-badge { background: #e0f2fe; color: #0284c7; padding: 10px 20px; border-radius: 12px; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; }
+.action-row { display: flex; gap: 12px; }
+
+.diagnosis-section { text-align: center; margin-bottom: 45px; padding-bottom: 45px; border-bottom: 2px dashed #f1f5f9; }
+.diagnosis-icon svg { width: 100px; height: 100px; }
+.condition-name {
+  font-size: 3.5rem; background: linear-gradient(135deg, #0f172a 0%, #0ea5e9 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 16px 0; font-weight: 800;
+}
+
+/* --- STATS GRID FIX (3 Columns) --- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Forces 3 items side-by-side */
+  gap: 20px;
+  margin-bottom: 40px;
+}
+.stat-box {
+  padding: 24px; border-radius: 24px; text-align: center; background: #f8fafc; border: 1px solid #e2e8f0;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.stat-value { font-size: 1.75rem; font-weight: 800; color: #1e293b; }
+/* Specialist Text Fix */
+.stat-box.specialist-box .stat-value { font-size: 1.3rem; line-height: 1.3; }
+
+/* --- RECOMMENDATIONS (Green Style) --- */
+.rec-block h3, .info-block h3 { margin-bottom: 20px; color: #1e293b; font-weight: 700; }
+.rec-list-styled { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 15px; margin-bottom: 40px; }
+
+.rec-item {
+  background: #ffffff; border: 1px solid #e2e8f0; border-left: 5px solid #10b981; /* Green Accent */
+  border-radius: 16px; padding: 20px; display: flex; align-items: center; font-weight: 500;
+  box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05);
+}
+.rec-icon-box {
+  min-width: 40px; height: 40px; background: #ecfdf5; color: #059669; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold;
+}
+
+/* --- PRECAUTIONS (Red Style) --- */
+.precaution-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 40px; }
+.precaution-item {
+  background: #ffffff; border: 1px solid #e2e8f0; border-left: 5px solid #ef4444; /* Red Accent */
+  border-radius: 16px; padding: 20px; display: flex; align-items: center; font-weight: 500;
+  box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05);
+}
+.precaution-icon-box {
+  min-width: 40px; height: 40px; background: #fef2f2; color: #dc2626; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; margin-right: 15px;
+}
+
+.btn-restart { width: 100%; padding: 1.5rem; background: #1e293b; color: white; border: none; border-radius: 24px; font-weight: 700; cursor: pointer; }
+
+/* --- DARK MODE --- */
+.dark-theme .app-container { background: radial-gradient(circle at top right, #0f172a, #020617, #000000); color: #f1f5f9; }
+.dark-theme .header-section, .dark-theme .question-text, .dark-theme .medical-input, .dark-theme .stat-value, .dark-theme .info-block h3, .dark-theme .rec-block h3 { color: #f1f5f9; }
+.dark-theme .result-card { background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)); border-color: rgba(255,255,255,0.1); }
+.dark-theme .condition-name { background: linear-gradient(135deg, #ffffff 0%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+.dark-theme .stat-box { background: rgba(15, 23, 42, 0.5); border-color: rgba(255,255,255,0.05); }
+.dark-theme .option-btn { background: rgba(30, 41, 59, 0.6); color: #cbd5e1; border-color: rgba(255,255,255,0.05); }
+
+/* Dark Mode Lists */
+.dark-theme .rec-item { background: rgba(30, 41, 59, 0.6); border-color: rgba(255,255,255,0.05); color: #e2e8f0; }
+.dark-theme .rec-icon-box { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+.dark-theme .precaution-item { background: rgba(30, 41, 59, 0.6); border-color: rgba(255,255,255,0.05); color: #e2e8f0; }
+.dark-theme .precaution-icon-box { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+.dark-theme .input-group { border-bottom-color: #334155; }
+.dark-theme .field-label { background: rgba(14,165,233,0.15); color: #7dd3fc; }
+
+/* Icon Button Fix */
+.icon-btn { display: flex; align-items: center; justify-content: center; background: white; border: 1px solid #e2e8f0; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; color: #64748b; }
+.dark-theme .icon-btn { background: rgba(30,41,59,0.8); border-color: rgba(255,255,255,0.1); color: #cbd5e1; }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .symptoms-grid { grid-template-columns: repeat(2, 1fr); }
+  .result-card { padding: 24px; }
+  .condition-name { font-size: 2.5rem; }
+}
+/* ---------------------------------------------------------
+   8. SPECIFIC UI UPDATES (From Image Request)
+   --------------------------------------------------------- */
+
+/* The Yellow Recommendation Banner */
+.warning-banner {
+  background-color: #fffbeb; /* Light Amber */
+  border: 1px solid #fde68a;
+  border-left: 6px solid #f59e0b; /* Strong Amber Accent */
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  color: #92400e;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.8s ease-out;
+}
+
+.warning-icon {
+  font-size: 1.5rem;
+  color: #f59e0b;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* About Section Typography */
+.about-section {
+  margin-bottom: 3rem;
+  animation: fadeIn 0.8s ease-out 0.2s backwards;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.about-text {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: #475569;
+}
+
+/* Recommended Actions Header (Green Check) */
+.actions-header {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.check-icon-large {
+  color: #10b981;
+  background: #ecfdf5;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 1.5rem;
+}
+
+/* --- DARK MODE ADJUSTMENTS --- */
+.dark-theme .warning-banner {
+  background-color: rgba(245, 158, 11, 0.1); /* Low opacity amber */
+  border-color: rgba(245, 158, 11, 0.2);
+  border-left-color: #f59e0b;
+  color: #fcd34d; /* Light amber text */
+}
+
+.dark-theme .section-title,
+.dark-theme .actions-header {
+  color: #f1f5f9;
+}
+
+.dark-theme .about-text {
+  color: #cbd5e1;
+}
+
+.dark-theme .check-icon-large {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
 }

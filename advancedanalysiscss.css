@@ -853,56 +853,19 @@
   margin: 0 auto;
 }
 
-/* --- ROBOT BUTTON (Standalone on Left) --- */
-.new-robot-standalone-btn {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: white;
-  border: 1px solid #e2e8f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  cursor: pointer;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, background-color 0.2s;
-  flex-shrink: 0;
-}
-
-.new-robot-standalone-btn:hover {
-  background-color: #f8fafc;
-  transform: scale(1.05);
-}
-
-/* --- NEW FOOTER ROW LAYOUT & FLOATING BUTTON --- */
-.new-footer-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  max-width: 900px; 
-  margin: 0 auto;
-  position: relative; 
-}
-
 /* --- ROBOT/THREE-DOT BUTTON (Floating Top Left) --- */
 .new-robot-standalone-btn {
-  /* 1. FIXED POSITIONING: Locks it to the screen */
+  /* Fixed Positioning */
   position: fixed !important;
-  
-  /* 2. PLACEMENT: Moved down to 85px to clear the Header bar (which is ~72px tall) */
   top: 85px !important;      
   left: 20px !important;     
-  
-  /* 3. LAYERING: Maximum Z-Index to ensure it sits ON TOP of everything */
   z-index: 2147483647 !important; 
 
-  /* 4. VISIBILITY: Bright Blue background to make it pop */
-  background-color: #f5f4f4 !important; 
-  color: rgb(46, 45, 45) !important;
-  border: 2px solid white !important;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4) !important;
+  /* STYLE CHANGE: Transparent Background & No Border */
+  background-color: transparent !important; 
+  color: #475569 !important; /* Slate color for the dots */
+  border: none !important;
+  box-shadow: none !important;
 
   width: 50px;
   height: 50px;
@@ -916,7 +879,7 @@
 }
 
 .new-robot-standalone-btn:hover {
-  background-color: #2563eb !important;
+  background-color: rgba(0, 0, 0, 0.05) !important; /* Subtle hover effect */
   transform: scale(1.1);
 }
 
@@ -924,7 +887,16 @@
 .new-menu-wrapper {
   position: static; 
 }
+.dark-theme .new-robot-standalone-btn {
+  color: #e2e8f0 !important; /* Light dots on dark background */
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
 
+.dark-theme .new-robot-standalone-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
 .new-dropup-menu {
   position: fixed !important;
   /* Aligns menu right below the new button position */
@@ -1172,9 +1144,91 @@
   background-color: #334155;
 }
 
-@media (max-width: 640px) {
-  .new-sympto-header { padding: 0 1rem; }
-  .new-message-bubble { max-width: 90%; padding: 0.75rem 1rem; }
-  .new-input-bar { padding: 0.5rem; }
-  .new-logo-text h1 { font-size: 1.1rem; }
+/* =========================================================
+   MOBILE VIEW (Fixed Spacing & Floating Button)
+   ========================================================= */
+@media screen and (max-width: 768px) {
+
+  /* 1. CONTAINER: Locks vertical scroll */
+  .new-sympto-container {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: var(--bg-color);
+  }
+
+  /* 2. NAVBAR (Header): Fixed at top */
+  .new-sympto-header {
+    height: 60px;
+    padding: 0 16px;
+    flex-shrink: 0;
+    position: absolute; /* Ensures it sits on top */
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background-color: var(--bg-color); /* Ensure opaque background */
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  /* 3. CHAT AREA: Added Space for Navbar */
+  .new-sympto-chat-area {
+    flex: 1;
+    
+    /* CRITICAL FIX: Pushes text down so it doesn't hide behind Navbar */
+    padding-top: 85px !important; 
+    
+    padding-bottom: 20px;
+    padding-left: 12px;
+    padding-right: 12px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 4. THREE DOTS BUTTON: Floating Bottom Right (Above Mic) */
+  .new-robot-standalone-btn {
+    position: fixed !important;
+    bottom: 150px !important; /* High enough to clear the input area */
+    right: 16px !important;
+    top: auto !important;     /* Unset top */
+    left: auto !important;    /* Unset left */
+    
+    width: 44px;
+    height: 44px;
+    /* Glassmorphism style for visibility */
+    background-color: rgba(30, 41, 59, 0.8) !important; 
+    color: white !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+    z-index: 999;
+  }
+
+  /* Menu positioning relative to the new button location */
+  .new-dropup-menu {
+    position: fixed !important;
+    bottom: 200px !important;
+    right: 16px !important;
+    top: auto !important;
+    left: auto !important;
+  }
+
+  /* 5. FOOTER & INPUT */
+  .new-sympto-footer {
+    flex-shrink: 0;
+    background-color: var(--bg-color);
+    padding: 8px;
+    z-index: 200;
+  }
+
+  .new-input-bar {
+    width: 100%;
+    padding: 8px 12px;
+  }
+  
+  /* Text Color Fix for Dark Backgrounds */
+  .new-chat-input {
+    color: var(--assistant-text) !important;
+    font-size: 16px; 
+  }
 }

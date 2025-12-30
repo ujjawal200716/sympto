@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom'; 
 import { 
   MapPin, Navigation, Check, AlertTriangle, FileText, 
-  ExternalLink, Stethoscope, User, Trash2, ArrowLeft
+  ExternalLink, Stethoscope, User, Trash2, ArrowLeft, 
+  Activity, ShieldAlert, Thermometer, X, Info,
+  Download, MessageSquare 
 } from 'lucide-react'; 
 import './savedpage.css';
+import logo1 from './logo1.png';
 import Nav from './test.jsx'; 
 
 const SavedPages = () => {
@@ -13,10 +17,57 @@ const SavedPages = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const navigate = useNavigate(); 
+
   // --- Filter State ---
   const [filterType, setFilterType] = useState("All");
 
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+  // --- Dynamic CSS Variables for Theming ---
+  const themeStyles = `
+    /* Default (Light Mode) Variables */
+    :root {
+      --an-bg: #ffffff;
+      --an-text: #1e293b;
+      --an-subtext: #64748b;
+      --an-card-bg: #ffffff;
+      --an-card-border: #f1f5f9;
+      --an-title: #0ea5e9;
+      --an-heading: #0f172a;
+      --an-action-bg: #ffffff;
+      --an-action-border: #e2e8f0;
+      
+      --chat-bg: #ffffff;
+      --chat-text: #1f2937;
+      --chat-border: #e2e8f0;
+      --chat-avatar-bg: #f3f4f6;
+      
+      --sidebar-bg: #f8fafc;
+      --sidebar-text: inherit;
+    }
+
+    /* Dark Mode Overrides */
+    .dark-theme, .dark-theme body, body.dark-theme {
+      --an-bg: #0f172a;
+      --an-text: #e2e8f0;
+      --an-subtext: #94a3b8;
+      --an-card-bg: #1e293b;
+      --an-card-border: #334155;
+      --an-title: #38bdf8;
+      --an-heading: #f8fafc;
+      --an-action-bg: #1e293b;
+      --an-action-border: #334155;
+
+      --chat-bg: #111827;
+      --chat-text: #e5e7eb;
+      --chat-border: #374151;
+      --chat-avatar-bg: #1f2937;
+      
+      --sidebar-bg: #1e293b;
+      --sidebar-text: #ffffff;
+    }
+  `;
 
   // --- Fetch Logic ---
   useEffect(() => {
@@ -105,6 +156,115 @@ const SavedPages = () => {
     }
   };
 
+  // --- HELPER: Parse Data Safe ---
+  const parseContentSafe = (content) => {
+      let rawData = content;
+      try {
+          if (typeof rawData === 'string') rawData = JSON.parse(rawData);
+          if (typeof rawData === 'string') rawData = JSON.parse(rawData); 
+      } catch (e) { console.error("Parse error", e); }
+      return rawData?.result || rawData?.data || rawData?.analysis || rawData || {};
+  };
+
+  // --- ACTION: Download Report ---
+  const handleDownload = (item) => {
+    const data = parseContentSafe(item.content);
+    let htmlContent = '';
+
+    // CSS to embed in the HTML file so it looks like the report
+    const styleBlock = `
+      <style>
+        body { font-family: 'Inter', sans-serif; color: #1e293b; background: #fff; padding: 40px; max-width: 900px; margin: 0 auto; }
+        h1 { color: #0ea5e9; font-size: 2.5rem; text-align: center; margin-bottom: 10px; }
+        .sub-header { text-align: center; color: #64748b; font-size: 1.1rem; margin-bottom: 40px; }
+        .warning-box { background: #fff7ed; border-left: 5px solid #f97316; padding: 20px; border-radius: 8px; margin-bottom: 30px; color: #9a3412; }
+        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 40px; }
+        .metric-card { border: 1px solid #e2e8f0; padding: 20px; text-align: center; border-radius: 12px; }
+        .metric-label { font-weight: bold; color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        .metric-value { font-size: 1.5rem; font-weight: 800; color: #0f172a; }
+        .section-title { color: #0f172a; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-top: 30px; margin-bottom: 20px; }
+        .list-item { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
+        
+        /* Chat Styles */
+        .chat-msg { margin-bottom: 15px; padding: 15px; border-radius: 12px; line-height: 1.5; }
+        .user-msg { background: #eff6ff; color: #1e3a8a; text-align: right; border: 1px solid #bfdbfe; }
+        .ai-msg { background: #f9fafb; color: #374151; border: 1px solid #e5e7eb; }
+        .timestamp { text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 50px; border-top: 1px solid #e2e8f0; padding-top: 20px;}
+      </style>
+    `;
+
+    if (item.informationType.includes('analysis') && !item.informationType.includes('advanced')) {
+        // Simple Analysis HTML Construction
+        const keys = Object.keys(data);
+        const find = (arr) => { for(let k of arr) { const f = keys.find(key=>key.toLowerCase().includes(k)); if(f) return data[f]; } return null; };
+        
+        const condition = find(['condition','disease']) || "Health Assessment";
+        const severity = find(['severity','level']) || "Unknown";
+        const confidence = find(['confidence']) || "85%";
+        const specialist = find(['specialist']) || "General Practitioner";
+        const desc = find(['description','summary']) || "";
+        const rec = find(['recommendation','advice']) || "";
+        const actions = find(['recommendations','actions','steps']) || [];
+        const precautions = find(['precautions','avoid']) || [];
+
+        const renderList = (arr) => Array.isArray(arr) ? arr.map(a => `<div class="list-item">• ${a}</div>`).join('') : `<div class="list-item">${arr}</div>`;
+
+        htmlContent = `
+          <html><head><title>Report - ${condition}</title>${styleBlock}</head><body>
+            <h1>${condition}</h1>
+            <div class="sub-header">Medical Analysis Report</div>
+            <div class="warning-box"><strong>Recommendation:</strong> ${rec}</div>
+            <div class="metrics-grid">
+              <div class="metric-card"><span class="metric-label">Severity</span><span class="metric-value" style="color:${String(severity).toLowerCase().includes('high')?'#ef4444':'#0f172a'}">${severity}</span></div>
+              <div class="metric-card"><span class="metric-label">Confidence</span><span class="metric-value">${confidence}</span></div>
+              <div class="metric-card"><span class="metric-label">Specialist</span><span class="metric-value">${specialist}</span></div>
+            </div>
+            <h2 class="section-title">Description</h2>
+            <p>${desc}</p>
+            <h2 class="section-title">Recommended Actions</h2>
+            ${renderList(actions)}
+            <h2 class="section-title">Precautions</h2>
+            ${renderList(precautions)}
+            <div class="timestamp">Generated by Sympto on ${new Date().toLocaleString()}</div>
+          </body></html>
+        `;
+    } else {
+        // Advanced Analysis (Chat) HTML Construction
+        const messages = data.messages || (Array.isArray(data) ? data : []);
+        htmlContent = `
+          <html><head><title>Chat Export</title>${styleBlock}</head><body>
+            <h1>Consultation Transcript</h1>
+            <div class="sub-header">${item.title}</div>
+            <div style="max-width: 800px; margin: 0 auto;">
+              ${messages.map(m => `
+                <div class="chat-msg ${m.role === 'user' ? 'user-msg' : 'ai-msg'}">
+                  <strong>${m.role === 'user' ? 'You' : 'Sympto Assistant'}:</strong><br/>
+                  ${m.content.replace(/\n/g, '<br/>')}
+                </div>
+              `).join('')}
+            </div>
+            <div class="timestamp">Exported from Sympto on ${new Date().toLocaleString()}</div>
+          </body></html>
+        `;
+    }
+
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const element = document.createElement("a");
+    element.href = URL.createObjectURL(blob);
+    element.download = `${item.title.replace(/\s+/g, '_') || 'report'}.html`; // Downloads as HTML to preserve look
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  // --- ACTION: Load into Chat ---
+  const handleLoadChat = (item) => {
+      const data = parseContentSafe(item.content);
+      const messages = data.messages || (Array.isArray(data) ? data : []);
+      // Navigate to Advanced Analysis page with the history
+      navigate('/advancedanalysis', { state: { importedMessages: messages } });
+  };
+
   // --- RENDER CONTENT HELPER ---
   const renderItemContent = (item) => {
     const { content, informationType } = item;
@@ -165,7 +325,7 @@ const SavedPages = () => {
              <div className="news-detail-view" style={{ padding: '0 10px' }}>
                  <div style={{ marginBottom: '20px' }}>
                      <span style={{ background: '#f3e8ff', color: '#7e22ce', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold', textTransform:'uppercase' }}>
-                        Medical Article
+                       Medical Article
                      </span>
                  </div>
                  <h2 style={{ fontSize: '1.8rem', color: '#1e293b', marginBottom: '15px', lineHeight:'1.3' }}>
@@ -186,162 +346,174 @@ const SavedPages = () => {
         );
     }
 
-    // 3. SIMPLE ANALYSIS -> PDF PAPER STYLE (DESIGN MATCHED TO PDF)
-    if (informationType === 'simple-analysis') {
-        const data = typeof content === 'string' ? JSON.parse(content) : content;
+    // 3. ANALYSIS REPORT
+    if (['simple-analysis', 'sample analysis'].includes(informationType)) {
+        
+        const data = parseContentSafe(content);
+
+        // --- STEP 2: FLEXIBLE DATA FINDER ---
+        const findData = (possibleKeys) => {
+            if (!data) return null;
+            const keys = Object.keys(data);
+            for (let target of possibleKeys) {
+                // Case-insensitive search
+                const found = keys.find(k => k.toLowerCase() === target.toLowerCase() || k.toLowerCase().includes(target.toLowerCase()));
+                if (found && data[found]) return data[found];
+            }
+            return null;
+        };
+
+        // --- EXTRACT FIELDS ---
+        const conditionName = findData(['condition', 'disease', 'prediction']) || "Health Assessment";
+        const severityVal = findData(['severity', 'level']) || "Unknown";
+        const confidenceVal = findData(['confidence', 'accuracy', 'probability']) || "85%";
+        const specialistVal = findData(['specialist', 'doctor']) || "General Practitioner";
+        
+        const descriptionText = findData(['description', 'summary', 'about']) || "No description available.";
+        const recommendationText = findData(['recommendation', 'advice', 'conclusion']) || "Monitor symptoms closely.";
+
+        const rawActions = findData(['recommendations', 'actions', 'recommendedActions', 'treatment', 'steps']);
+        
+        const parseList = (rawInput) => {
+            if (!rawInput) return [];
+            if (Array.isArray(rawInput)) return rawInput;
+            if (typeof rawInput === 'string') {
+                return rawInput.split(/\n|•|- |\d+\.\s/)
+                    .map(s => s.trim())
+                    .filter(s => s.length > 3);
+            }
+            return [];
+        };
+        
+        const actionsList = parseList(rawActions);
+        const precautionsList = parseList(findData(['precautions', 'warnings', 'avoid']));
+
+        // Colors
+        const isHighSeverity = String(severityVal).toLowerCase().includes('high');
+        const severityColor = isHighSeverity ? '#ef4444' : 'var(--an-heading)'; 
 
         return (
             <div className="analysis-paper" style={{ 
-                background:'white', 
-                maxWidth:'100%', 
-                fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'
+                background: 'var(--an-bg)', maxWidth:'100%', fontFamily: '"Inter", sans-serif', color: 'var(--an-text)',
+                transition: 'background 0.3s, color 0.3s'
             }}>
-                
-                {/* Header Badge */}
-                <div style={{ display:'flex', justifyContent:'center', marginBottom:'25px' }}>
-                    <span style={{ 
-                        background:'#E0F2FE', color:'#0369A1', 
-                        padding:'8px 20px', borderRadius:'6px', 
-                        fontSize:'0.85rem', fontWeight:'700', letterSpacing:'1.5px', textTransform:'uppercase' 
-                    }}>
-                        AI ASSESSMENT
-                    </span>
-                </div>
-
-                {/* Title Section */}
-                <div style={{ textAlign:'center', marginBottom:'40px', paddingBottom: '20px', borderBottom: '2px solid #F1F5F9' }}>
-                    <div style={{ 
-                        width:'50px', height:'50px', background:'#F8FAFC', borderRadius:'50%', 
-                        display:'flex', alignItems:'center', justifyContent:'center', 
-                        margin:'0 auto 15px auto', color:'#334155' 
-                    }}>
-                        <FileText size={26} strokeWidth={1.5} />
-                    </div>
-                    <h1 style={{ fontSize: '2.2rem', color: '#0F172A', marginBottom: '10px', fontWeight: '800', lineHeight:'1.2' }}>
-                        {data.condition || "Viral Infection"}
+                {/* Header Title */}
+                <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                    <h1 style={{ fontSize: '3rem', fontWeight: '800', color: 'var(--an-title)', marginBottom: '10px', lineHeight: '1.1' }}>
+                        {conditionName}
                     </h1>
-                    <p style={{ color:'#64748B', fontSize:'1.1rem' }}>Based on your reported symptoms</p>
+                    <p style={{ fontSize: '1.1rem', color: 'var(--an-subtext)', fontWeight: '500', marginBottom: '20px' }}>
+                        Possible Condition Analysis
+                    </p>
+
+                    {/* --- BUTTON 1: DOWNLOAD REPORT (Simple Analysis) --- */}
+                    <button 
+                      onClick={() => handleDownload(item)}
+                      style={{
+                        padding: '10px 20px', borderRadius: '8px', 
+                        background: 'var(--an-title)', color: 'white', border: 'none',
+                        cursor: 'pointer', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '8px'
+                      }}
+                    >
+                      <Download size={18} /> Download Report
+                    </button>
                 </div>
 
-                {/* Metrics Grid (Matched to PDF Layout) */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '40px' }}>
-                   <div style={{ background: '#F8FAFC', padding: '20px', borderRadius: '8px', border:'1px solid #E2E8F0', textAlign:'center' }}>
-                      <span style={{ display:'block', fontSize:'0.8rem', color:'#64748B', fontWeight:'700', marginBottom:'8px', textTransform:'uppercase', letterSpacing:'1px' }}>SEVERITY</span>
-                      <span style={{ display:'block', fontSize:'1.4rem', fontWeight:'800', color: data.severity === 'High' ? '#EF4444' : '#0F172A' }}>
-                        {data.severity || "Moderate"}
-                      </span>
-                   </div>
-                   <div style={{ background: '#F8FAFC', padding: '20px', borderRadius: '8px', border:'1px solid #E2E8F0', textAlign:'center' }}>
-                      <span style={{ display:'block', fontSize:'0.8rem', color:'#64748B', fontWeight:'700', marginBottom:'8px', textTransform:'uppercase', letterSpacing:'1px' }}>AI CONFIDENCE</span>
-                      <span style={{ display:'block', fontSize:'1.4rem', fontWeight:'800', color:'#2563EB' }}>
-                        {data.confidence || "90%"}
-                      </span>
-                   </div>
+                {/* Recommendation Warning Box */}
+                <div style={{ 
+                    background: '#fff7ed', border: '1px solid #fed7aa', borderLeft: '5px solid #f97316',
+                    borderRadius: '8px', padding: '24px', marginBottom: '40px', display: 'flex', gap: '16px', alignItems: 'flex-start'
+                }}>
+                    <div style={{ background: '#ffedd5', padding: '8px', borderRadius: '50%', color: '#ea580c', marginTop: '2px' }}>
+                        <AlertTriangle size={24} />
+                    </div>
+                    <div>
+                        <p style={{ margin: 0, color: '#9a3412', fontSize: '1.05rem', lineHeight: '1.6', fontWeight: '500' }}>
+                            <strong>Recommendation:</strong> {recommendationText}
+                        </p>
+                    </div>
                 </div>
 
-                {/* Content Sections */}
-                <div style={{ marginBottom: '35px' }}>
-                   <h3 style={{ fontSize:'1.2rem', fontWeight:'800', color:'#1E293B', marginBottom:'12px', borderLeft:'4px solid #2563EB', paddingLeft:'12px' }}>
+                {/* About Section */}
+                <div style={{ marginBottom: '40px' }}>
+                    <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--an-heading)', marginBottom: '15px' }}>
                         About this condition
-                   </h3>
-                   <p style={{ lineHeight: '1.7', color: '#334155', fontSize:'1.05rem' }}>
-                      {data.description || "A common viral infection characterized by symptoms such as fever, cough, and fatigue."}
-                   </p>
+                    </h2>
+                    <p style={{ fontSize: '1.1rem', lineHeight: '1.8', color: 'var(--an-subtext)' }}>
+                        {descriptionText}
+                    </p>
                 </div>
 
-                <div style={{ marginBottom:'20px' }}>
-                   <h3 style={{ fontSize:'1.2rem', fontWeight:'800', color:'#1E293B', marginBottom:'15px', borderLeft:'4px solid #2563EB', paddingLeft:'12px' }}>
+                {/* --- METRICS GRID --- */}
+                <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: '1fr 1fr 1fr', 
+                    gap: '20px', 
+                    marginBottom: '40px',
+                    width: '100%'
+                }}>
+                    {/* Severity */}
+                    <div style={{ background: 'var(--an-card-bg)', padding: '30px 20px', borderRadius: '16px', textAlign: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', border: '1px solid var(--an-card-border)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <span style={{ display:'block', fontSize:'0.8rem', fontWeight:'700', color:'#94a3b8', textTransform:'uppercase', marginBottom: '10px' }}>SEVERITY</span>
+                        <h3 style={{ fontSize:'1.8rem', fontWeight:'800', color: severityColor, margin: 0 }}>{severityVal}</h3>
+                    </div>
+                    {/* Confidence */}
+                    <div style={{ background: 'var(--an-card-bg)', padding: '30px 20px', borderRadius: '16px', textAlign: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', border: '1px solid var(--an-card-border)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <span style={{ display:'block', fontSize:'0.8rem', fontWeight:'700', color:'#94a3b8', textTransform:'uppercase', marginBottom: '10px' }}>AI CONFIDENCE</span>
+                        <h3 style={{ fontSize:'1.8rem', fontWeight:'800', color: 'var(--an-heading)', margin: 0 }}>{confidenceVal}</h3>
+                    </div>
+                    {/* Specialist */}
+                    <div style={{ background: 'var(--an-card-bg)', padding: '30px 20px', borderRadius: '16px', textAlign: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', border: '1px solid var(--an-card-border)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <span style={{ display:'block', fontSize:'0.8rem', fontWeight:'700', color:'#94a3b8', textTransform:'uppercase', marginBottom: '10px' }}>SPECIALIST</span>
+                        <h3 style={{ fontSize:'1.4rem', fontWeight:'800', color: 'var(--an-heading)', margin: 0, lineHeight: '1.2' }}>{specialistVal}</h3>
+                    </div>
+                </div>
+
+                {/* Recommended Actions */}
+                <div style={{ marginBottom: '40px' }}>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: '#10b981', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ background: '#d1fae5', width:'12px', height:'12px', borderRadius:'50%', display:'inline-block' }}></span>
                         Recommended Actions
-                   </h3>
-                   <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                      {data.actions && data.actions.length > 0 ? (
-                          data.actions.map((action, idx) => (
-                            <li key={idx} style={{ display: 'flex', gap: '15px', marginBottom: '15px', color: '#334155', alignItems:'flex-start' }}>
-                                <div style={{ background:'#DCFCE7', color:'#166534', padding:'4px', borderRadius:'50%', flexShrink:0, marginTop:'2px' }}>
-                                    <Check size={14} strokeWidth={4} />
+                    </h3>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        {actionsList.length > 0 ? (
+                            actionsList.map((action, idx) => (
+                                <div key={idx} style={{ background: 'var(--an-action-bg)', border: '1px solid var(--an-action-border)', borderRadius: '12px', padding: '20px', display: 'flex', gap: '20px', alignItems: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                                    <div style={{ background: '#ecfdf5', color: '#059669', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '1.1rem', flexShrink: 0 }}>
+                                        {idx + 1}
+                                    </div>
+                                    <span style={{ fontSize: '1.05rem', color: 'var(--an-text)', fontWeight: '500', lineHeight: '1.5' }}>{action}</span>
                                 </div>
-                                <span style={{ lineHeight:'1.6', fontSize: '1rem' }}>{action}</span>
-                            </li>
-                          ))
-                      ) : (
-                          <li style={{ color:'#64748b', fontStyle:'italic' }}>No specific actions listed.</li>
-                      )}
-                   </ul>
-                </div>
-            </div>
-        );
-    }
-
-    // 4. ADVANCED ANALYSIS -> CHAT INTERFACE STYLE (DESIGN MATCHED TO SYMPTO BOT)
-    if (['advanced-analysis', 'medical-report'].includes(informationType)) {
-        const data = typeof content === 'string' ? JSON.parse(content) : content;
-        
-        return (
-            <div className="chat-interface" style={{ background: '#F3F4F6', padding: '30px', borderRadius: '16px', minHeight: '600px', fontFamily: 'Inter, system-ui, sans-serif' }}>
-                
-                {/* Bot Message Row */}
-                <div className="chat-row" style={{ display: 'flex', gap: '16px', marginBottom: '30px' }}>
-                    {/* Bot Avatar - Blue Circle with Icon */}
-                    <div style={{ width: '44px', height: '44px', background: '#2563EB', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0, boxShadow: '0 4px 6px rgba(37, 99, 235, 0.2)' }}>
-                        <Stethoscope size={24} />
-                    </div>
-                    
-                    {/* Bot Bubble */}
-                    <div style={{ background: 'white', padding: '24px', borderRadius: '0 20px 20px 20px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)', flex: 1, maxWidth: '90%' }}>
-                        
-                        <p style={{ marginTop: 0, color: '#1F2937', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '20px' }}>
-                            Hello! I'm Sympto, your medical symptom checker assistant. Based on the symptoms you provided, I have analyzed your condition.
-                        </p>
-
-                        {/* Yellow Disclaimer Box (Matched to Image 1) */}
-                        <div style={{ display: 'flex', gap: '12px', background: '#FEF3C7', border: '1px solid #FCD34D', padding: '16px', borderRadius: '8px', alignItems:'flex-start', marginBottom: '24px' }}>
-                            <AlertTriangle size={20} color="#D97706" style={{ flexShrink: 0, marginTop: '2px' }} />
-                            <p style={{ margin: 0, fontSize: '0.95rem', color: '#92400E', lineHeight: '1.5' }}>
-                                <strong>Important:</strong> I am not a doctor and cannot provide medical diagnoses. Always consult with a healthcare professional for medical advice.
-                            </p>
-                        </div>
-
-                        {/* Result Content */}
-                        <div style={{ borderTop: '1px solid #E5E7EB', paddingTop: '20px' }}>
-                            <h3 style={{ margin: '0 0 8px 0', color: '#111827', fontSize: '1.4rem' }}>{data.condition || "Health Assessment"}</h3>
-                            <p style={{ color: '#4B5563', marginBottom: '20px', lineHeight:'1.6' }}>
-                                {data.description}
-                            </p>
-                            
-                            <h4 style={{ fontSize: '1rem', fontWeight: '700', color: '#374151', marginBottom: '10px' }}>Recommended Actions:</h4>
-                            <div style={{ display:'flex', flexWrap:'wrap', gap:'10px' }}>
-                                {data.actions && data.actions.map((action, i) => (
-                                    <span key={i} style={{ background: '#EFF6FF', color: '#1E40AF', padding: '8px 16px', borderRadius: '20px', fontSize: '0.9rem', fontWeight: '500' }}>
-                                        {action}
-                                    </span>
-                                ))}
+                            ))
+                        ) : (
+                            <div style={{ color: 'var(--an-subtext)', fontStyle:'italic' }}>
+                                No specific actions found.
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 
-                {/* User Message Row (Right Aligned) */}
-                <div className="chat-row user" style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginBottom: '30px' }}>
-                    <div style={{ background: '#2563EB', color: 'white', padding: '16px 24px', borderRadius: '20px 20px 0 20px', boxShadow: '0 4px 6px rgba(37, 99, 235, 0.2)', maxWidth: '70%' }}>
-                        <p style={{ margin: 0, fontSize: '1rem', lineHeight: '1.5' }}>
-                            I have a headache and some fever.
-                        </p>
-                    </div>
-                    <div style={{ width: '44px', height: '44px', background: '#E5E7EB', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6B7280', flexShrink: 0 }}>
-                        <User size={24} />
-                    </div>
-                </div>
+                {/* Precautions */}
+                <div style={{ marginBottom: '40px' }}>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: '#ef4444', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ background: '#fee2e2', width:'12px', height:'12px', borderRadius:'50%', display:'inline-block' }}></span>
+                        Precautions
+                    </h3>
 
-                {/* Final Bot Response / Summary */}
-                <div className="chat-row" style={{ display: 'flex', gap: '16px' }}>
-                     <div style={{ width: '44px', height: '44px', background: '#2563EB', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}>
-                        <Stethoscope size={24} />
-                    </div>
-                    <div style={{ background: 'white', padding: '20px', borderRadius: '0 20px 20px 20px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
-                        <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-                            <div style={{ height:'10px', width:'10px', background:'#10B981', borderRadius:'50%' }}></div>
-                            <span style={{ color:'#374151', fontWeight:'500' }}>Analysis complete. Please see the details above.</span>
-                        </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        {precautionsList.length > 0 ? (
+                            precautionsList.map((precaution, idx) => (
+                                <div key={idx} style={{ background: 'var(--an-action-bg)', border: '1px solid #fee2e2', borderRadius: '12px', padding: '20px', display: 'flex', gap: '20px', alignItems: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                                    <div style={{ background: '#fef2f2', color: '#dc2626', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        <X size={20} strokeWidth={3} />
+                                    </div>
+                                    <span style={{ fontSize: '1.05rem', color: 'var(--an-text)', fontWeight: '500', lineHeight: '1.5' }}>{precaution}</span>
+                                </div>
+                            ))
+                        ) : (
+                             <div style={{ color: 'var(--an-subtext)', fontStyle:'italic' }}>No specific precautions listed.</div>
+                        )}
                     </div>
                 </div>
 
@@ -349,6 +521,107 @@ const SavedPages = () => {
         );
     }
 
+    // 4. ADVANCED ANALYSIS (Chat Style)
+   if (['advanced-analysis'].includes(informationType)) {
+       
+       const data = parseContentSafe(content);
+       const messages = data.messages || (Array.isArray(data) ? data : []);
+
+       return (
+           <div style={{ 
+               background: 'var(--chat-bg)', 
+               border: '1px solid var(--chat-border)',
+               padding: '40px', 
+               borderRadius: '16px', 
+               minHeight: '600px', 
+               fontFamily: 'Inter, sans-serif',
+               transition: 'background 0.3s' 
+            }}>
+               
+               {/* --- BUTTONS: DOWNLOAD & LOAD CHAT (Advanced) --- */}
+               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginBottom: '20px' }}>
+                  {/* Button 2: Download Advanced */}
+                  <button 
+                    onClick={() => handleDownload(item)}
+                    style={{
+                      padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--chat-border)',
+                      background: 'var(--chat-bg)', color: 'var(--chat-text)', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500'
+                    }}
+                  >
+                    <Download size={16} /> Download Chat
+                  </button>
+
+                  {/* Button 3: Load into Chat */}
+                  <button 
+                    onClick={() => handleLoadChat(item)}
+                    style={{
+                      padding: '8px 16px', borderRadius: '8px', border: 'none',
+                      background: '#2563eb', color: 'white', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500'
+                    }}
+                  >
+                    <MessageSquare size={16} /> Continue in Chat
+                  </button>
+               </div>
+
+               <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                   {messages.map((msg, idx) => {
+                       const isUser = msg.role === 'user';
+                       return (
+                           <div key={idx} style={{ 
+                               display: 'flex', 
+                               justifyContent: isUser ? 'flex-end' : 'flex-start',
+                               gap: '12px',
+                               alignItems: 'flex-start'
+                           }}>
+                               {/* Assistant Avatar (Logo1) - Full Size */}
+                               {!isUser && (
+                                   <div style={{ 
+                                       width: '45px', height: '45px', borderRadius: '50%', overflow:'hidden', flexShrink: 0,
+                                       background: 'var(--chat-avatar-bg)'
+                                   }}>
+                                       <img src={logo1} alt="Sympto" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                   </div>
+                               )}
+
+                               {/* Message Bubble */}
+                               <div style={{ 
+                                   background: isUser ? '#2563eb' : 'transparent', 
+                                   color: isUser ? '#ffffff' : 'var(--chat-text)', 
+                                   padding: '12px 16px', 
+                                   borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                                   maxWidth: '75%',
+                                   fontSize: '1rem',
+                                   lineHeight: '1.6',
+                                   border: isUser ? 'none' : '1px solid var(--chat-border)'
+                               }}>
+                                   {/* Handle Newlines in text */}
+                                   {msg.content.split('\n').map((line, i) => (
+                                       <p key={i} style={{ margin: '0 0 6px 0', minHeight: '1em' }}>
+                                           {/* Simple bold cleanup */}
+                                           {line.replace(/\*\*/g, '')} 
+                                       </p>
+                                   ))}
+                               </div>
+
+                               {/* User Avatar */}
+                               {isUser && (
+                                   <div style={{ 
+                                       width: '45px', height: '45px', borderRadius: '50%', 
+                                       background: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                       color: '#9ca3af', flexShrink: 0
+                                   }}>
+                                       <User size={24} />
+                                   </div>
+                               )}
+                           </div>
+                       );
+                   })}
+               </div>
+           </div>
+       );
+   }
     // 5. FALLBACK
     return (
         <pre className="content-pre">
@@ -362,6 +635,9 @@ const SavedPages = () => {
 
   return (
     <div className="saved-page-wrapper full-screen-mode">
+      {/* Inject CSS Variables */}
+      <style>{themeStyles}</style>
+
       <div className="saved-container">
         
         <Nav />
@@ -377,17 +653,12 @@ const SavedPages = () => {
               <span className="count-pill">{filteredItems.length} Result{filteredItems.length !== 1 && 's'}</span>
             </header>
 
-            {/* --- FILTER CONTROL --- */}
-            <div className="filter-controls-container" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+            <div className="filter-controls-container" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'flex-end', gap: '15px' }}>
+              
               <div className="filter-wrapper" style={{ minWidth: '200px' }}>
                 <select 
                   value={filterType} 
                   onChange={(e) => setFilterType(e.target.value)}
-                  style={{
-                    width: '100%', padding: '12px 15px', borderRadius: '8px',
-                    border: '1px solid #ddd', fontSize: '1rem', cursor: 'pointer',
-                    backgroundColor: '#fff', boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
-                  }}
                 >
                   {uniqueTypes.map(type => (
                     <option key={type} value={type}>
@@ -416,7 +687,6 @@ const SavedPages = () => {
                     role="button"
                     tabIndex={0}
                   >
-                    {/* --- DELETE BUTTON --- */}
                     <button 
                       className="card-delete-btn"
                       onClick={(e) => handleDelete(e, item._id)}
@@ -456,21 +726,23 @@ const SavedPages = () => {
         ) : (
           /* VIEW 2: DETAIL CARD */
           <div className="detail-view fade-in full-height-view">
-            <nav className="detail-nav">
-              <button className="back-btn-large" onClick={handleBackToLibrary}>
-                <ArrowLeft size={18} style={{marginRight: '8px'}}/> Back to Library
-              </button>
-              <button 
-                className="delete-text-btn" 
-                onClick={(e) => handleDelete(e, activeItem._id)}
-              >
-                Delete Page
-              </button>
+            <nav className="detail-nav" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '15px' }}>
+                <button className="back-btn-large" onClick={handleBackToLibrary}>
+                  <ArrowLeft size={18} style={{marginRight: '8px'}}/> Back to Library
+                </button>
+                <button 
+                  className="delete-text-btn" 
+                  onClick={(e) => handleDelete(e, activeItem._id)}
+                >
+                  Delete Page
+                </button>
+              </div>
             </nav>
 
-            <div className="expanded-card full-screen-card">
-              <aside className="card-sidebar">
-                <div className="large-date-badge">
+            <div className="expanded-card full-screen-card" style={{ background: 'var(--an-bg)', transition: 'background 0.3s' }}>
+              <aside className="card-sidebar" style={{ background: 'var(--sidebar-bg)', color: 'var(--sidebar-text)' }}>
+                <div className="large-date-badge" style={{ color: 'var(--sidebar-text)' }}>
                   <span className="d-day">
                     {new Date(activeItem.savedAt).getDate()}
                   </span>
@@ -485,16 +757,16 @@ const SavedPages = () => {
                   
                   {activeItem.informationType && (
                     <div className="sidebar-meta-item">
-                      <label>Type</label>
+                      <label style={{ color: 'var(--an-subtext)' }}>Type</label>
                       <strong>{activeItem.informationType}</strong>
                     </div>
                   )}
               </aside>
 
-              <main className="card-content-area">
+              <main className="card-content-area" style={{ background: 'var(--an-bg)', color: 'var(--an-text)' }}>
                 <header className="content-header">
-                  <h2>{activeItem.title || "Untitled Document"}</h2>
-                  <div className="timestamp">
+                  <h2 style={{ color: 'var(--an-heading)' }}>{activeItem.title || "Untitled Document"}</h2>
+                  <div className="timestamp" style={{ color: 'var(--an-subtext)' }}>
                     Archived at {new Date(activeItem.savedAt).toLocaleTimeString()}
                   </div>
                 </header>

@@ -31,7 +31,6 @@ const AuthPage = () => {
   const navigate = useNavigate(); 
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false); 
 
   const [error, setError] = useState('');
 
@@ -79,21 +78,40 @@ const AuthPage = () => {
     }
   };
 
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+  // Logic to handle logo switching via CSS based on parent .dark-theme class
+  const logoStyles = `
+    .app-logo.dark-mode { display: none; }
+    .app-logo.light-mode { display: block; }
+
+    /* When .dark-theme is present on body or wrapper, switch visibility */
+    .dark-theme .app-logo.light-mode, 
+    body.dark-theme .app-logo.light-mode {
+        display: none;
+    }
+    .dark-theme .app-logo.dark-mode, 
+    body.dark-theme .app-logo.dark-mode {
+        display: block;
+    }
+  `;
 
   return (
-    <div className={`auth-wrapper ${isDarkMode ? 'dark-theme' : ''}`}>
+    <div className="auth-wrapper">
+      <style>{logoStyles}</style>
       
       {/* --- LEFT SIDE --- */}
       <div className="auth-left">
         <div className="corner-logo-container">
             <Link to="/" className="nav-logo">
+               {/* Render both logos and let CSS hide one based on theme */}
                <img 
-                 src={isDarkMode ? logoDark : logoLight} 
+                 src={logoLight} 
                  alt="Sympto Logo" 
-                 className="app-logo"
+                 className="app-logo light-mode"
+               />
+               <img 
+                 src={logoDark} 
+                 alt="Sympto Logo" 
+                 className="app-logo dark-mode"
                />
             </Link>
         </div>
@@ -116,11 +134,6 @@ const AuthPage = () => {
 
       {/* --- RIGHT SIDE --- */}
       <div className="auth-right">
-
-        {/* ---------------------------------------------------- */}
-        {/* ADDED: THEME TOGGLE BUTTON WAS MISSING HERE          */}
-        {/* ---------------------------------------------------- */}
-       
         
         <div className="auth-form-container">
           <div className="auth-header">

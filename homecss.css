@@ -78,7 +78,7 @@ html, body {
   display: flex;
   align-items: center; 
   justify-content: center; 
-  padding: 100px 0 60px 0; 
+ padding: 60px 0 40px 0;
   overflow: hidden;
   width: 100%;
   z-index: 2;
@@ -165,14 +165,15 @@ html, body {
 }
 
 .scrolling-words-container {
-  height: 1.3em;
+  height: 1.2em;
   overflow: hidden;
   display: inline-block;
   vertical-align: bottom;
   position: relative;
-  top: 5px;
+  
+  /* CHANGED: Adjusted from 5px to 0px or -2px to align better */
+  top: -15px; 
 }
-
 .scrolling-words-wrapper {
   transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -235,10 +236,11 @@ html, body {
   flex-wrap: wrap;
 }
 
+/* --- Base Setup --- */
 .btn {
-  padding: 14px 32px; 
+  padding: 14px 32px;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700; /* Increased weight for visibility */
   border-radius: 12px;
   text-decoration: none;
   cursor: pointer;
@@ -246,49 +248,106 @@ html, body {
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
-  position: relative; 
-  overflow: hidden;   
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
+  position: relative;
+  overflow: hidden; /* Essential for the light sweep */
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   white-space: nowrap;
   user-select: none;
+  z-index: 1;
 }
 
+/* --- Shine Animation Effect --- */
+/* This creates the sweeping light beam */
+.btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+  transition: none;
+  z-index: -1;
+}
+
+.btn:hover::after {
+  animation: sweep 0.6s ease-in-out;
+}
+
+@keyframes sweep {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+/* --- Primary Button (The "Light Source") --- */
 .btn-primary {
   background: var(--primary);
   color: white;
-  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+  /* Multi-layered shadow for a deep neon glow */
+  box-shadow: 
+    0 4px 6px -1px rgba(37, 99, 235, 0.3),
+    0 0 15px rgba(37, 99, 235, 0.4), 
+    inset 0 0 10px rgba(255, 255, 255, 0.2); 
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  
+  /* Constant subtle pulse to stay visible */
+  animation: glow-pulse 3s infinite;
 }
 
 .btn-primary:hover {
-  background: var(--primary-dark);
-  transform: translateY(-3px); 
-  box-shadow: 0 12px 20px -5px rgba(37, 99, 235, 0.5);
+  background: var(--primary); /* Keep base color, let light do the work */
+  transform: translateY(-4px) scale(1.02);
+   color: white;
+  /* Intense Light Explosion on Hover */
+  box-shadow: 
+    0 15px 25px -5px rgba(37, 99, 235, 0.6),
+    0 0 30px rgba(37, 99, 235, 0.5),
+    0 0 60px rgba(37, 99, 235, 0.3),
+    inset 0 0 20px rgba(255, 255, 255, 0.4);
+  
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.8); /* Make text glow too */
 }
 
 .btn-primary:active {
-  transform: translateY(1px) scale(0.96); 
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  transform: translateY(1px) scale(0.96);
+  box-shadow: 0 5px 10px rgba(37, 99, 235, 0.4);
 }
 
+/* --- Secondary Button (Illuminated Glass) --- */
 .btn-secondary {
-  background: white;
+  background: rgba(255, 255, 255, 0.9);
   color: var(--text-main);
   border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-sm);
-  z-index: 2;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  backdrop-filter: blur(5px);
 }
 
 .btn-secondary:hover {
-  background: #f8fafc;
+  background: white;
   border-color: var(--primary);
+  color: var(--primary);
   transform: translateY(-3px);
-  box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.08);
-  color: var(--primary); 
+  
+  /* Colored glow reflection */
+  box-shadow: 
+    0 10px 20px -3px rgba(37, 99, 235, 0.15),
+    0 0 15px rgba(37, 99, 235, 0.2);
 }
 
 .btn-secondary:active {
   transform: translateY(1px) scale(0.96);
-  background: #f1f5f9;
+}
+
+/* --- Pulse Animation Definition --- */
+@keyframes glow-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
 }
 
 /* =========================================
@@ -1254,202 +1313,146 @@ html, body {
 .dark-theme .footer-copyright { border-top-color: var(--border-light); }
 
 /* =========================================
-   6. MEDIA QUERIES (NEW MOBILE UI)
+   6. MEDIA QUERIES (ENHANCED MOBILE UI)
    ========================================= */
 
+/* --- Tablet (Between 769px and 992px) --- */
 /* =========================================
-   6. MEDIA QUERIES (NEW MOBILE UI)
+   6. RESPONSIVE DESIGN (FIXED LAYOUT)
    ========================================= */
 
+/* --- TABLET ADJUSTMENTS (Max-Width: 992px) --- */
 @media (max-width: 992px) {
-  /* Tablet adjustments: Stack grid but keep images if space permits */
-  .hero-content, 
-  .info-grid {
-    flex-direction: column;
-    text-align: center;
-  }
   
-  .hero-text-wrapper {
-    margin-right: 0;
-    max-width: 100%;
-    margin-bottom: 50px;
-  }
-
-  .hero-actions,
-  .hero-checklist {
+  /* 1. HERO SECTION: Clean Stack */
+  .hero-content {
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
+    text-align: center; /* Center text alignment */
   }
-}
 
-@media (max-width: 768px) {
-  /* --- Global Container Adjustments --- */
-  .container {
+  .hero-text-wrapper {
+    margin: 0 auto 40px auto; /* Auto margins to center the box */
+    max-width: 580px; /* Constrain width for readability */
     padding: 0 20px;
   }
 
-  .home-container h1 {
-    font-size: 2.5rem; /* readable size */
-    line-height: 1.2;
-  }
-
-  .section-header {
-    font-size: 1.8rem;
-    text-align: center;
-  }
-
-  /* --- Hero Section Mobile --- */
-  .hero-section {
-    min-height: auto;
-    padding: 100px 0 60px 0; /* Extra top padding for mobile status bars */
-    display: block;
-  }
-
-  .hero-content {
-    flex-direction: column;
-    gap: 0;
-  }
-
-  /* CENTER EVERYTHING */
-  .hero-text-wrapper {
-    margin-right: 0;
-    margin-bottom: 40px;
-    text-align: center;
-    padding: 0;
-  }
-
-  /* REMOVE IMAGES AS REQUESTED: 
-     Hiding the complex 3D visual to make mobile clean and text-focused */
-  .hero-visual {
-    display: none; 
-  }
-
-  .hero-pre-title {
-    margin: 0 auto 16px auto;
-  }
-
-  .hero-checklist {
-    grid-template-columns: 1fr; /* Stack checks vertically */
-    gap: 10px;
-    margin: 24px auto;
-    max-width: 300px; /* Limit width to keep it neat */
-    justify-items: start;
-  }
-  
-  /* Make check items look like centered chips */
-  .check-item {
-    background: rgba(37, 99, 235, 0.05);
-    width: 100%;
-    justify-content: center;
-    padding: 8px;
-    border-radius: 8px;
-  }
-
-  /* Full Width Buttons for thumb-friendliness */
+  /* Fix: Ensure buttons stay side-by-side on tablet if there is space */
   .hero-actions {
-    flex-direction: column;
-    width: 100%;
-    gap: 16px;
-  }
-
-  .btn {
-    width: 100%;
     justify-content: center;
-    padding: 16px;
-    font-size: 1.1rem;
-  }
-
-  /* --- Info Section Mobile --- */
-  .info-section {
-    padding: 50px 0;
-  }
-
-  .info-grid {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-
-  /* Hide the large orbit circle on mobile to reduce scrolling */
-  .big-icon-circle {
-    display: none;
-  }
-
-  /* Or move it to bottom and shrink it if you really want it:
-  .big-icon-circle { order: 2; width: 200px; height: 200px; margin-top: 20px; } 
-  */
-
-  .step-card {
-    padding: 20px;
-  }
-
-  /* --- Carousel Mobile --- */
-  .carousel-card {
-    width: 240px; /* Slightly smaller cards */
-    height: 300px;
-  }
-
-  /* --- Features Section --- */
-  .features-grid {
-    grid-template-columns: 1fr; /* 1 column */
     gap: 16px;
   }
-  
-  .feature-card {
-    padding: 24px;
-  }
 
-  /* --- CTA Banner --- */
-  .cta-banner {
-    padding: 40px 20px;
-    border-radius: 16px;
-  }
-
-  .cta-banner h3 {
-    font-size: 1.5rem;
-  }
-
-  .bottom-links {
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .link-text {
-    width: 100%;
-    text-align: center;
-  }
-
-  /* --- Footer Mobile --- */
-  .site-footer {
-    padding: 40px 0 80px; /* Extra bottom padding for mobile gesture bar */
-    text-align: left;
-  }
-
+  /* 2. FOOTER ("POOTER") FIX 
+     This fixes the large gap between Logo and Text */
   .footer-primary-content {
     flex-direction: column;
-    gap: 32px;
+    gap: 40px; /* Space between the Logo section and the Links section */
+    text-align: center; /* Center align for tablet aesthetics */
   }
-  
+
   .footer-identity {
-    align-items: flex-start;
-    flex: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Aligns items down the center line */
+    gap: 16px; /* CONTROLLED GAP: Only 16px between logo and text */
+    max-width: 500px;
+    margin: 0 auto; /* Centers the whole block */
   }
 
-  .footer-nav-column {
-    width: 100%;
-    border-top: 1px solid var(--border-light);
-    padding-top: 20px;
+  .footer-logo {
+    margin-bottom: 0;
+    display: none; /* Remove old margins if any */
   }
 
-  /* --- Modal Mobile --- */
-  .modal-content {
-    width: 95%;
-    max-height: 90vh;
+  .footer-identity p {
+    margin-top: 0; /* Remove top margin from text to close the gap */
+    opacity: 0.8;
+    line-height: 1.6;
+  }
+
+  /* 3. INFO GRID: 2x2 Layout instead of 1 long column */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Keep 2 items per row */
+    gap: 20px;
+  }
+}
+
+/* --- MOBILE ADJUSTMENTS (Max-Width: 768px) --- */
+/* =========================================
+   MOBILE FIXES: Remove 'How it Works' & Fix Gaps
+   Paste this at the VERY BOTTOM of your CSS
+   ========================================= */
+
+@media (max-width: 768px) {
+
+  /* 1. REMOVE "How It Works" Section */
+  /* This hides the section with the 1-2-3 steps */
+  .info-section {
+    display: none !important;
+  }
+
+  /* 2. REMOVE EXTRA FOOTER GAP */
+  .site-footer {
+    /* Reduce the space inside the footer */
+    padding-top: 0px !important; 
+    padding-bottom: 30px !important; 
+    margin-top: 0 !important;
+    border-top: 1px solid #e2e8f0; /* Ensure border is visible */
+  }
+
+  /* 3. TIGHTEN THE SECTION ABOVE FOOTER */
+  /* This pulls the footer closer to the content above it */
+  .future-section {
+    padding-bottom: 20px !important;
   }
   
-  .modal-header {
-    padding: 1rem;
+  .cta-banner {
+    margin-bottom: 20px !important; /* Reduce margin below the blue banner */
   }
-  
-  .modal-body {
-    padding: 1.25rem;
+
+  /* 4. TIGHTEN GAP INSIDE FOOTER */
+  .footer-primary-content {
+    gap: 15px !important; /* Bring links closer to the text */
+  }
+}
+/* =========================================
+   MOBILE: REMOVE IMAGE & TIGHTEN GAPS
+   Paste this at the VERY BOTTOM
+   ========================================= */
+
+@media (max-width: 768px) {
+
+  /* 1. REMOVE IMAGE (Hero Visual) */
+  .hero-visual,
+  .hero-bg-gradient::before,
+  .hero-bg-gradient::after {
+    display: none !important;
+  }
+
+  /* 2. TIGHTEN GAP: HEADER LOGO -> HERO TEXT
+     This pulls "Hi, I'm Sympto" up closer to the top navigation bar. */
+  .hero-section {
+    padding-top: 100px !important; /* Reduced from 100px to 20px */
+    padding-bottom: 20px !important;
+  }
+
+  /* 3. TIGHTEN GAP: FOOTER AREA
+     Removes the space where the footer logo used to be. */
+  .footer-brand-logo {
+    display: none !important; /* Ensure it's hidden */
+  }
+
+  .footer-identity {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    gap: 0 !important; /* Remove flex gap */
+  }
+
+  .footer-identity p {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
   }
 }

@@ -5,8 +5,11 @@ import jsPDF from 'jspdf';
 import './advancedanalysiscss.css';
 import Nev from "./test.jsx";
 import logo1 from './logo1.png';
+import logoLight from './logo.png'; 
+import logoDark from './logodark.png';
+
 // 🔒 SECURE: Key loaded from environment variables
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyCpTpkRriy5TR8P4uldvomP2no9Zd-tCAg";
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY1 || import.meta.env.VITE_GEMINI_API_KEY2 ||import.meta.env.VITE_GEMINI_API_KEY3 || import.meta.env.VITE_GEMINI_API_KEY4 || import.meta.env.VITE_GEMINI_API_KEY5 || import.meta.env.VITE_GEMINI_API_KEY6 ||import.meta.env.VITE_GEMINI_API_KEY7 || import.meta.env.VITE_GEMINI_API_KEY8 || import.meta.env.VITE_GEMINI_API_KEY9;
 
 export default function Advancedanalysis() {
   const [messages, setMessages] = useState([
@@ -31,6 +34,13 @@ export default function Advancedanalysis() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [availableVoices, setAvailableVoices] = useState([]);
+
+  // --- NEW: TEXT TO SPEECH HIGHLIGHTING STATE ---
+  const [speakingMessageIndex, setSpeakingMessageIndex] = useState(null); // Tracks which message ID is speaking
+  const [currentCharIndex, setCurrentCharIndex] = useState(-1); // Tracks character position for highlighting
+
+  // --- NEW: USER DATA STATE ---
+  const [userData, setUserData] = useState(null);
   
   const isVoiceModeRef = useRef(false);
   const fileInputRef = useRef(null);
@@ -64,6 +74,40 @@ export default function Advancedanalysis() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // --- NEW: FETCH USER DATA (Same logic as Navbar) ---
+  useEffect(() => {
+    const fetchUserData = async () => {
+        const token = localStorage.getItem('token');
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        
+        // 1. Try LocalStorage first
+        const storedUser = localStorage.getItem('userData');
+        if (storedUser) {
+            setUserData(JSON.parse(storedUser));
+        }
+
+        // 2. Fetch fresh data if token exists
+        if (token) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/user-profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.fullName && !data.firstName) {
+                        data.firstName = data.fullName.split(' ')[0];
+                    }
+                    setUserData(data);
+                    localStorage.setItem('userData', JSON.stringify(data));
+                }
+            } catch (err) {
+                console.error("Error fetching user data in chat", err);
+            }
+        }
+    };
+    fetchUserData();
+  }, []);
+
   useEffect(() => {
     const loadVoices = () => {
       const voices = window.speechSynthesis.getVoices();
@@ -71,6 +115,13 @@ export default function Advancedanalysis() {
     };
     loadVoices();
     window.speechSynthesis.onvoiceschanged = loadVoices;
+  }, []);
+
+  // Cleanup speech on unmount
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
   }, []);
 
   const SYSTEM_INSTRUCTION = `You are Sympto, a medical symptom checker assistant. Your role is to:
@@ -92,46 +143,141 @@ CRITICAL RULES:
   CRITICAL: Keep your response extremely short (1-2 sentences maximum). 
   Be conversational and helpful.`;
 
-  // --- MENU ACTIONS ---
-  const handleDownloadPDF = async () => {
+ const handleDownloadPDF = async () => {
     setShowMenu(false);
     const element = chatContentRef.current;
     if (!element) return;
 
     try {
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff'
+      // 1. SELECT CORRECT LOGO FOR PDF
+      const logoSrc = logo1; 
+
+      // 2. Clone the chat
+      const clone = element.cloneNode(true);
+
+      // 3. Force "Paper Mode" (White Background, Black Text)
+      Object.assign(clone.style, {
+        width: `${element.offsetWidth}px`,
+        height: 'auto',
+        maxHeight: 'none',
+        overflow: 'visible',
+        position: 'absolute',
+        left: '-9999px',
+        top: '0px',
+        backgroundColor: '#ffffff',
+        color: '#000000', // STRICT BLACK
+        fontFamily: 'Arial, sans-serif'
       });
 
+      // 4. INJECT HEADER with FULL SIZE LOGO (NO PADDING)
+      const header = document.createElement('div');
+      header.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0px; 
+        border-bottom: 2px solid #2563eb;
+        margin-bottom: 20px;
+        background: #ffffff;
+        width: 100%;
+      `;
+
+      const logoStyle = `
+        width: 100%;
+        height: auto; 
+        max-width: 100%;
+        display: block;
+        object-fit: contain;
+        margin-bottom: 10px;
+      `;
+
+      header.innerHTML = `
+        ${logoSrc ? `<img src="${logoSrc}" style="${logoStyle}" />` : ''}
+        <div style="padding: 10px;">
+          <h1 style="color: #2563eb; margin: 0; font-size: 32px; font-weight: bold;">Sympto</h1>
+          <p style="color: #000000; margin: 5px 0 0 0; font-size: 14px;">Medical Symptom Report</p>
+          <p style="color: #666666; margin: 0; font-size: 12px;">Generated: ${new Date().toLocaleDateString()}</p>
+        </div>
+      `;
+
+      clone.insertBefore(header, clone.firstChild);
+
+      // 5. Text & Image Fixer
+      const allElements = clone.querySelectorAll('*');
+      allElements.forEach((el) => {
+        // Color fix
+        if (!el.classList.contains('new-spinner')) {
+             el.style.color = '#000000';
+             el.style.textShadow = 'none';
+        }
+        
+        // Background fix
+        const style = window.getComputedStyle(el);
+        if (style.backgroundColor && style.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+            el.style.backgroundColor = 'transparent'; 
+        }
+      });
+
+      // --- SPECIFIC FIX: Force Chat Avatar Logos to be Full Size in PDF ---
+      const botLogos = clone.querySelectorAll('.new-bot-logo');
+      botLogos.forEach(img => {
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.objectFit = 'cover';
+          img.style.padding = '0';
+          img.style.margin = '0';
+          img.style.borderRadius = '50%';
+          img.style.display = 'block';
+      });
+      
+      const avatars = clone.querySelectorAll('.new-avatar');
+      avatars.forEach(av => {
+          av.style.padding = '0';
+          av.style.display = 'flex';
+          av.style.alignItems = 'center';
+          av.style.justifyContent = 'center';
+      });
+
+      document.body.appendChild(clone);
+
+      // 6. Capture
+      const canvas = await html2canvas(clone, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight
+      });
+
+      document.body.removeChild(clone);
+
+      // 7. Save PDF
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = pdfWidth;
       const imgHeight = (canvas.height * pdfWidth) / canvas.width;
 
       let heightLeft = imgHeight;
       let position = 0;
 
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
       heightLeft -= pdfHeight;
 
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
         heightLeft -= pdfHeight;
       }
 
-      pdf.save(`Sympto-Report-${new Date().toLocaleDateString()}.pdf`);
+      pdf.save(`Sympto-Report.pdf`);
+
     } catch (err) {
       console.error("PDF Error:", err);
-      alert("Could not generate PDF.");
     }
   };
-
+  
   const handleShare = async () => {
     setShowMenu(false);
     if (navigator.share) {
@@ -148,13 +294,16 @@ CRITICAL RULES:
     }
   };
 
+
   const handleSave = async () => {
     setShowMenu(false);
     const token = localStorage.getItem('token');
+    
     if (!token) {
         alert("Please log in to save your session.");
         return;
     }
+
     const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
     try {
@@ -167,13 +316,18 @@ CRITICAL RULES:
             body: JSON.stringify({
                 title: `Sympto Check - ${new Date().toLocaleString()}`,
                 informationType: 'advanced-analysis',
-                pageData: { messages: messages } 
+                content: { messages: messages } 
             })
         });
 
         const data = await response.json();
-        if (response.ok) alert("✅ Session saved successfully!");
-        else alert(`❌ Error: ${data.message}`);
+        
+        if (response.ok) {
+            alert("✅ Session saved successfully!");
+        } else {
+            console.error("Backend Error:", data); 
+            alert(`❌ Error: ${data.message || "Invalid Data"}`);
+        }
     } catch (err) {
         console.error(err);
         alert("❌ Failed to connect to server");
@@ -181,26 +335,111 @@ CRITICAL RULES:
   };
 
   // --- SPEECH & CHAT LOGIC ---
-  const speakResponse = (text) => {
-    if (!('speechSynthesis' in window) || isMuted) return;
+
+  const handleSpeak = (text, index) => {
+    if (!('speechSynthesis' in window)) return;
+
+    // IF ALREADY SPEAKING THIS MESSAGE: STOP
+    if (speakingMessageIndex === index) {
+        window.speechSynthesis.cancel();
+        setSpeakingMessageIndex(null);
+        setCurrentCharIndex(-1);
+        setIsSpeaking(false);
+        return;
+    }
+
+    // IF SPEAKING SOMETHING ELSE: CANCEL PREVIOUS AND START NEW
     window.speechSynthesis.cancel();
     
-    const cleanText = text.replace(/[*#_]/g, '').replace(/\n/g, '. ');
+    // We speak a cleaner version (no asterisks) but we need to match indices visually.
+    // To keep simple word highlighting working, we will speak the text roughly as is.
+    // Punctuation is usually handled by the browser.
+    const cleanText = text.replace(/[*#_]/g, ''); 
     const utterance = new SpeechSynthesisUtterance(cleanText);
+
     const voices = availableVoices.length > 0 ? availableVoices : window.speechSynthesis.getVoices();
     const preferredVoice = voices.find(v => v.name.includes("David") || v.name.includes("Daniel") || (v.name.toLowerCase().includes("male") && v.lang.startsWith("en"))) || voices[0];
     
     if (preferredVoice) utterance.voice = preferredVoice;
-    utterance.rate = 1.0; utterance.pitch = 0.9; 
+    utterance.rate = 1.0; 
+    utterance.pitch = 0.9; 
 
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      if (isVoiceModeRef.current && !isMuted) setTimeout(() => startListening(), 500);
+    // START EVENT
+    utterance.onstart = () => {
+        setSpeakingMessageIndex(index);
+        setIsSpeaking(true);
+        setCurrentCharIndex(0);
     };
+
+    // BOUNDARY EVENT (The "Which word is it?" logic)
+    utterance.onboundary = (event) => {
+        // event.charIndex tells us the character index of the word currently being spoken
+        setCurrentCharIndex(event.charIndex);
+    };
+
+    // END EVENT
+    utterance.onend = () => {
+        setSpeakingMessageIndex(null);
+        setCurrentCharIndex(-1);
+        setIsSpeaking(false);
+        if (isVoiceModeRef.current && !isMuted) setTimeout(() => startListening(), 500);
+    };
+
+    utterance.onerror = () => {
+        setSpeakingMessageIndex(null);
+        setCurrentCharIndex(-1);
+        setIsSpeaking(false);
+    };
+
     utteranceRef.current = utterance;
     window.speechSynthesis.speak(utterance);
   };
+
+  // --- RENDER HELPER FOR HIGHLIGHTING WORDS ---
+  const renderMessageContent = (msg, index) => {
+    // If not speaking this message, just return content (formatted normal way)
+    if (speakingMessageIndex !== index) {
+        return <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div>;
+    }
+
+    // If speaking, split by spaces to highlight current word
+    // Note: This matches the "Clean Text" logic we sent to SpeechSynthesis
+    const text = msg.content.replace(/[*#_]/g, ''); 
+    const words = text.split(/(\s+)/); // Split by whitespace but keep delimiters to preserve spacing
+    
+    let charCount = 0;
+
+    return (
+        <div style={{ whiteSpace: 'pre-wrap' }}>
+            {words.map((word, i) => {
+                const start = charCount;
+                const end = charCount + word.length;
+                charCount += word.length;
+
+                // Check if this word segment contains the currentCharIndex
+                const isActive = currentCharIndex >= start && currentCharIndex < end;
+
+                // Only highlight actual words, not just whitespace spaces
+                const isWord = word.trim().length > 0;
+
+                return (
+                    <span 
+                        key={i} 
+                        style={{ 
+                            backgroundColor: (isActive && isWord) ? '#fef08a' : 'transparent', // Yellow highlight
+                            color: (isActive && isWord) ? '#000' : 'inherit',
+                            transition: 'background-color 0.1s ease',
+                            borderRadius: '2px'
+                        }}
+                    >
+                        {word}
+                    </span>
+                );
+            })}
+        </div>
+    );
+  };
+
 
   const startListening = () => {
     if (isListening || isSpeaking) return;
@@ -238,6 +477,7 @@ CRITICAL RULES:
       stopListening();
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
+      setSpeakingMessageIndex(null);
     } else {
       setIsVoiceMode(true);
       setTimeout(() => startListening(), 500);
@@ -253,6 +493,7 @@ CRITICAL RULES:
       stopListening();
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
+      setSpeakingMessageIndex(null);
     }
   };
 
@@ -268,8 +509,12 @@ CRITICAL RULES:
       const result = await chat.sendMessage([{ text: voiceText }]);
       const text = result.response.text();
       setMessages(prev => [...prev, { role: 'assistant', content: text }]);
-      speakResponse(text);
-    } catch (error) { speakResponse("Connection error."); } finally { setLoading(false); }
+      // Auto speak for voice mode - using last index approximation
+      setTimeout(() => handleSpeak(text, messages.length + 1), 100); 
+    } catch (error) { 
+        const errText = "Connection error.";
+        handleSpeak(errText, -1);
+    } finally { setLoading(false); }
   };
 
   const sendMessage = async () => {
@@ -349,19 +594,43 @@ CRITICAL RULES:
           {messages.map((msg, idx) => (
             <div key={idx} className={`new-message-row ${msg.role === 'user' ? 'new-user-row' : 'new-assistant-row'}`}>
              <div className={`new-avatar ${msg.role === 'assistant' ? 'new-assistant-avatar' : 'new-user-avatar'}`}>
-  {msg.role === 'assistant' ? (
-    <img src={logo1} alt="Sympto" className="new-bot-logo" />
-  ) : (
-    '👤'
-  )}
-</div>
+              {msg.role === 'assistant' ? (
+                /* --- Chat Interface Logo Fix --- */
+                <img 
+                  src={logo1} 
+                  alt="Sympto" 
+                  className="new-bot-logo" 
+                  onClick={() => handleSpeak(msg.content, idx)} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', padding: 0, cursor: 'pointer' }} 
+                />
+              ) : (
+                <div style={{
+                    width: '100%',
+                    height: '100%',
+                    background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                    color: 'white',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 'bold',
+                    fontSize: '14px',
+                    boxShadow: '0 2px 4px rgba(59, 130, 246, 0.3)'
+                }}>
+                    {userData && userData.firstName 
+                        ? userData.firstName.charAt(0).toUpperCase() 
+                        : "U"}
+                </div>
+              )}
+            </div>
               <div className={`new-message-bubble ${msg.role === 'user' ? 'new-user-bubble' : 'new-assistant-bubble'}`}>
                 {msg.images?.length > 0 && (
                   <div className="new-chat-images-grid">
                     {msg.images.map((imgSrc, i) => <img key={i} src={imgSrc} alt="Symptom" className="new-chat-image-item" />)}
                   </div>
                 )}
-                <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div>
+                {/* REPLACED PLAIN TEXT WITH HIGHLIGHTER HELPER */}
+                {renderMessageContent(msg, idx)}
               </div>
             </div>
           ))}
@@ -408,16 +677,15 @@ CRITICAL RULES:
                 onClick={() => setShowMenu(!showMenu)} 
                 className="new-robot-standalone-btn"
                 title="Options"
-                // --- UPDATED STYLES FOR BUTTON ---
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   background: '#ffffff',
                   border: 'none',
-                  borderRadius: '50%', // Perfect circle
-                  width: '40px',       // Fixed large size
-                  height: '40px',      // Fixed large size
+                  borderRadius: '50%', 
+                  width: '40px',       
+                  height: '40px',      
                   cursor: 'pointer',
                   boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)',
                   transition: 'all 0.2s ease',
@@ -425,7 +693,6 @@ CRITICAL RULES:
                   padding: 0
                 }}
               >
-               {/* ONLY THREE DOTS - FULL SIZE */}
                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="12" cy="5" r="2" fill="currentColor"/>
                   <circle cx="12" cy="12" r="2" fill="currentColor"/>

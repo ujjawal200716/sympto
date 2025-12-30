@@ -1,11 +1,11 @@
 /* ========================================= */
-/* Navbar.css / textcss.css - Fixed & Static */
+/* Navbar.css - Updated UI */
 /* ========================================= */
 
 /* --- RESET & BASICS --- */
 * {
     box-sizing: border-box;
-    margin: 0;
+    margin: 0 ;
     padding: 0;
 }
 
@@ -15,30 +15,72 @@ nav.navbar {
     top: 0;
     left: 0;
     width: 100%;
-    height: 60px; /* Standard fixed height */
+    height: 60px; /* Slightly taller for better visibility */
     
-    /* STATIC BACKGROUND (No Scroll Animation) */
-    background: #ffffff; 
+    /* STATIC BACKGROUND */
+    background: #ffffff63; 
     border-bottom: 1px solid #e2e8f0;
     
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Pushes Logo Left, Links/Profile Right */
+    justify-content: space-between; 
     
-    /* SPACING: Exact equal gap from left and right edges */
-    padding: 0 20px; 
+    /* SPACING UPDATE: 
+       Changed padding to % to keep equal gaps on both ends 
+       regardless of screen size. 
+    */
+    padding: 0 3% !important; 
     
     z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03); /* Subtle shadow for depth */
+}
+/* ... existing navbar css ... */
+
+/* UPDATED PROFILE BUTTON CONTAINER */
+.nav-profile-btn {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50%;
+    /* Remove the old border/background so the new avatar shines through */
+    background: transparent; 
+    border: none; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0; /* Ensure no padding affects size */
 }
 
+/* NEW AVATAR STYLE (Based on your code, resized for Navbar) */
+.nav-avatar-placeholder {
+    width: 80%;
+    height: 80%;
+    /* The Rich Blue Gradient you requested */
+    background: linear-gradient(135deg, #3b82f6, #2563eb); 
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem; /* Adjusted for navbar size */
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25); /* Softer shadow for navbar */
+    border: 2px solid #54a5f1 !important; /* White Ring (slightly thinner for small size) */
+    transition: transform 0.2s;
+}
+
+.nav-profile-btn:hover .nav-avatar-placeholder {
+    transform: scale(1.05); /* subtle zoom effect on hover */
+}
 /* --- LEFT SIDE: LOGO --- */
 .nav-left {
     display: flex;
     align-items: center;
+  
 }
 
 .nav-logo img {
-    height: 15px; /* Adjusted logo size */
+    height: 38px !important; /* Increased size for better visibility */
     width: auto;
     display: block;
 }
@@ -47,23 +89,22 @@ nav.navbar {
 .nav-right-container {
     display: flex;
     align-items: center;
-    gap: 40px; /* Consistent gap between Links and Profile section */
+    gap: 40px; 
 }
 
 /* --- LINKS --- */
 .nav-links {
     list-style: none;
     display: flex;
-    gap: 32px; /* Even spacing between links */
+    gap: 40px !important; /* Increased gap between text links */
 }
 
 .nav-links a {
     text-decoration: none;
-    color: #475569;
-    font-weight: 500;
-    font-size: 15px;
-    position: relative;
-    transition: color 0.2s;
+    color: #334155 ; /* Darker grey for better contrast/visibility */
+    font-weight: 600; /* Bolder text */
+    font-size: 16px; /* Slightly larger text */
+    transition: color 0.2s ease-in-out;
 }
 
 .nav-links a:hover,
@@ -71,29 +112,19 @@ nav.navbar {
     color: #007aff;
 }
 
-/* Active Link Blue Dot */
-.nav-links a.active-link::after {
-    content: '';
-    position: absolute;
-    bottom: -6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px; height: 4px;
-    background-color: #007aff;
-    border-radius: 50%;
-}
+/* REMOVED: Blue Dot Code (active-link::after) */
 
 /* --- ACTIONS (Profile, Login, Mobile Toggle) --- */
 .nav-actions {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
 }
 
 /* Profile Button */
 .nav-profile-btn {
-    width: 42px;
-    height: 42px;
+    width: 45px; /* Slightly larger */
+    height: 45px;
     border-radius: 50%;
     border: 1px solid #e2e8f0;
     background: white;
@@ -106,24 +137,24 @@ nav.navbar {
 
 .nav-profile-btn:hover {
     border-color: #007aff;
-    background: #f8fafc;
+    background: #f0f7ff; /* Light blue tint on hover */
 }
 
 .nav-profile-btn svg {
     display: block;
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     color: #1e293b;
 }
 
 /* Login Button */
 .nav-btn {
-    padding: 9px 24px;
+    padding: 8px 25px;
     border-radius: 50px;
     border: none;
     background-color: #007aff;
     color: white;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.3s;
@@ -140,7 +171,7 @@ nav.navbar {
 
 .profile-dropdown {
     position: absolute;
-    top: 130%;
+    top: 140%;
     right: 0;
     width: 220px;
     background: white;
@@ -164,7 +195,7 @@ nav.navbar {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 12px;
+    padding: 12px 12px;
     color: #334155;
     text-decoration: none;
     border-radius: 8px;
@@ -213,8 +244,9 @@ nav.navbar {
 }
 
 /* --- DARK MODE OVERRIDES --- */
-.dark-theme nav.navbar { background: #0f172a; border-bottom: 1px solid #1e293b; }
+.dark-theme nav.navbar { background: #0f172a83; border-bottom: 1px solid #1e293b; }
 .dark-theme .nav-links a { color: #cbd5e1; }
+.dark-theme .nav-links a:hover { color: #fff; }
 .dark-theme .nav-profile-btn { background: #1e293b; border-color: #334155; }
 .dark-theme .nav-profile-btn svg { color: #f8fafc; }
 .dark-theme .profile-dropdown { background: #1e293b; border-color: #334155; }
