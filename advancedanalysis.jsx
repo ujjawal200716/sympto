@@ -143,120 +143,154 @@ CRITICAL RULES:
   CRITICAL: Keep your response extremely short (1-2 sentences maximum). 
   Be conversational and helpful.`;
 
- const handleDownloadPDF = async () => {
+const handleDownloadPDF = async () => {
     setShowMenu(false);
     const element = chatContentRef.current;
     if (!element) return;
 
+    // Visual feedback
+    const originalCursor = document.body.style.cursor;
+    document.body.style.cursor = 'wait';
+
     try {
-      // 1. SELECT CORRECT LOGO FOR PDF
-      const logoSrc = logo1; 
-
-      // 2. Clone the chat
+      // 1. PREPARE THE CLONE
       const clone = element.cloneNode(true);
-
-      // 3. Force "Paper Mode" (White Background, Black Text)
+      const originalWidth = element.offsetWidth;
+      
+      // 2. APPLY "PAPER MODE" STYLES
       Object.assign(clone.style, {
-        width: `${element.offsetWidth}px`,
-        height: 'auto',
-        maxHeight: 'none',
-        overflow: 'visible',
         position: 'absolute',
-        left: '-9999px',
-        top: '0px',
+        top: '-10000px', 
+        left: '0',
+        width: `${originalWidth}px`, 
+        height: 'auto',       
+        maxHeight: 'none',    
+        overflow: 'visible',  
         backgroundColor: '#ffffff',
-        color: '#000000', // STRICT BLACK
-        fontFamily: 'Arial, sans-serif'
+        color: '#000000',
+        fontFamily: 'Arial, sans-serif',
+        zIndex: '-1'
       });
 
-      // 4. INJECT HEADER with FULL SIZE LOGO (NO PADDING)
+      // 3. INJECT HEADER (Logo + Title)
       const header = document.createElement('div');
       header.style.cssText = `
         display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 0px; 
+        flex-direction: row; 
+        align-items: center;
+        padding: 20px; 
         border-bottom: 2px solid #2563eb;
         margin-bottom: 20px;
         background: #ffffff;
         width: 100%;
+        box-sizing: border-box;
       `;
 
-      const logoStyle = `
-        width: 100%;
-        height: auto; 
-        max-width: 100%;
-        display: block;
-        object-fit: contain;
-        margin-bottom: 10px;
-      `;
-
+      // Header Logo - Hardcoded sizing
       header.innerHTML = `
-        ${logoSrc ? `<img src="${logoSrc}" style="${logoStyle}" />` : ''}
-        <div style="padding: 10px;">
+        <img 
+          src="${logo1}" 
+          style="width: 80px; height: 80px; min-width: 80px; margin-right: 20px; display: block;" 
+        />
+        <div>
           <h1 style="color: #2563eb; margin: 0; font-size: 32px; font-weight: bold;">Sympto</h1>
-          <p style="color: #000000; margin: 5px 0 0 0; font-size: 14px;">Medical Symptom Report</p>
-          <p style="color: #666666; margin: 0; font-size: 12px;">Generated: ${new Date().toLocaleDateString()}</p>
+          <p style="color: #444; margin: 5px 0 0 0; font-size: 14px;">Medical Symptom Report</p>
+          <p style="color: #666; margin: 5px 0 0 0; font-size: 12px;">Generated: ${new Date().toLocaleString()}</p>
         </div>
       `;
 
       clone.insertBefore(header, clone.firstChild);
 
-      // 5. Text & Image Fixer
-      const allElements = clone.querySelectorAll('*');
-      allElements.forEach((el) => {
-        // Color fix
-        if (!el.classList.contains('new-spinner')) {
-             el.style.color = '#000000';
-             el.style.textShadow = 'none';
+      // 4. CRITICAL: CSS INJECTION (THE FIX)
+      const styleTag = document.createElement('style');
+      styleTag.innerHTML = `
+        * {
+          print-color-adjust: exact !important;
+          -webkit-print-color-adjust: exact !important;
         }
         
-        // Background fix
-        const style = window.getComputedStyle(el);
-        if (style.backgroundColor && style.backgroundColor !== 'rgba(0, 0, 0, 0)') {
-            el.style.backgroundColor = 'transparent'; 
+        /* --- FIX: PREVENT SQUASHING --- */
+        .new-avatar {
+             width: 50px !important;
+             height: 50px !important;
+             min-width: 50px !important; 
+             
+             /* This is the magic rule: Don't Grow, Don't Shrink, Stay 50px */
+             flex: 0 0 50px !important; 
+             
+             margin-right: 15px !important;
+             display: flex !important;
+             align-items: center !important;
+             justify-content: center !important;
+        }
+
+        /* Force image to fill the 50px container */
+        .new-bot-logo, .new-avatar img {
+             width: 100% !important;
+             height: 100% !important;
+             object-fit: contain !important; 
+             display: block !important;
+             border-radius: 50% !important;
+        }
+
+        /* Reset Text Colors */
+        .new-message-bubble {
+            color: #000000 !important;
+            border: 1px solid #ccc !important;
+            box-shadow: none !important;
+        }
+
+        /* Hide spinners */
+        .new-loading-bubble, .new-spinner { display: none !important; }
+      `;
+      clone.appendChild(styleTag);
+
+      // 5. COLOR CORRECTION 
+      const allElements = clone.querySelectorAll('*');
+      allElements.forEach((el) => {
+        if (window.getComputedStyle(el).color !== 'rgba(0, 0, 0, 0)') {
+             el.style.color = '#000000';
+        }
+        // Remove dark backgrounds but keep yellow highlights
+        const bg = window.getComputedStyle(el).backgroundColor;
+        if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+            if (!el.style.backgroundColor?.includes('254') && !el.classList.contains('new-user-avatar')) { 
+               el.style.backgroundColor = 'transparent'; 
+            }
         }
       });
 
-      // --- SPECIFIC FIX: Force Chat Avatar Logos to be Full Size in PDF ---
-      const botLogos = clone.querySelectorAll('.new-bot-logo');
-      botLogos.forEach(img => {
-          img.style.width = '100%';
-          img.style.height = '100%';
-          img.style.objectFit = 'cover';
-          img.style.padding = '0';
-          img.style.margin = '0';
-          img.style.borderRadius = '50%';
-          img.style.display = 'block';
-      });
-      
-      const avatars = clone.querySelectorAll('.new-avatar');
-      avatars.forEach(av => {
-          av.style.padding = '0';
-          av.style.display = 'flex';
-          av.style.alignItems = 'center';
-          av.style.justifyContent = 'center';
-      });
-
+      // 6. APPEND TO DOM
       document.body.appendChild(clone);
 
-      // 6. Capture
+      // 7. CAPTURE IMAGE
+      await new Promise(resolve => setTimeout(resolve, 250)); // Wait for render
+
+      const cloneHeight = clone.scrollHeight;
+
       const canvas = await html2canvas(clone, {
-        scale: 2,
-        useCORS: true,
+        scale: 2, 
+        useCORS: true, 
+        allowTaint: true,
         backgroundColor: '#ffffff',
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight
+        windowHeight: cloneHeight + 2000, 
+        y: 0,
+        scrollY: 0
       });
 
+      // 8. REMOVE CLONE
       document.body.removeChild(clone);
+      document.body.style.cursor = originalCursor;
 
-      // 7. Save PDF
+      // 9. GENERATE PDF
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
+      
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      const imgProps = pdf.getImageProperties(imgData);
+      const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
       let heightLeft = imgHeight;
       let position = 0;
@@ -271,10 +305,12 @@ CRITICAL RULES:
         heightLeft -= pdfHeight;
       }
 
-      pdf.save(`Sympto-Report.pdf`);
+      pdf.save(`Sympto-Report-${new Date().toISOString().slice(0,10)}.pdf`);
 
     } catch (err) {
       console.error("PDF Error:", err);
+      document.body.style.cursor = originalCursor;
+      alert("Could not generate PDF. Please try again.");
     }
   };
   
@@ -352,15 +388,39 @@ CRITICAL RULES:
     window.speechSynthesis.cancel();
     
     // We speak a cleaner version (no asterisks) but we need to match indices visually.
-    // To keep simple word highlighting working, we will speak the text roughly as is.
-    // Punctuation is usually handled by the browser.
     const cleanText = text.replace(/[*#_]/g, ''); 
     const utterance = new SpeechSynthesisUtterance(cleanText);
 
     const voices = availableVoices.length > 0 ? availableVoices : window.speechSynthesis.getVoices();
-    const preferredVoice = voices.find(v => v.name.includes("David") || v.name.includes("Daniel") || (v.name.toLowerCase().includes("male") && v.lang.startsWith("en"))) || voices[0];
+    
+    // --- LANGUAGE DETECTION LOGIC (Supports "Every Language") ---
+    // Instead of forcing English, we try to detect the script or fallback to default
+    let preferredVoice = null;
+    let targetLang = null;
+
+    // 1. Heuristic Script Detection for non-Latin languages
+    if (/[\u0900-\u097F]/.test(cleanText)) targetLang = 'hi'; // Hindi
+    else if (/[\u0600-\u06FF]/.test(cleanText)) targetLang = 'ar'; // Arabic
+    else if (/[\u0400-\u04FF]/.test(cleanText)) targetLang = 'ru'; // Russian
+    else if (/[\u4E00-\u9FFF]/.test(cleanText)) targetLang = 'zh'; // Chinese
+    else if (/[\u3040-\u309F\u30A0-\u30FF]/.test(cleanText)) targetLang = 'ja'; // Japanese
+    else if (/[\uAC00-\uD7AF]/.test(cleanText)) targetLang = 'ko'; // Korean
+    
+    // 2. Select voice based on detected script
+    if (targetLang) {
+        preferredVoice = voices.find(v => v.lang.startsWith(targetLang));
+    }
+
+    // 3. Fallback for Latin scripts (En, Fr, Es, De, etc.) or if specific voice not found
+    if (!preferredVoice) {
+        // Use the system default voice (this respects the user's OS language setting)
+        // This effectively enables speaking in French, Spanish, German, etc. if the OS is set to it.
+        preferredVoice = voices.find(v => v.default) || voices[0];
+    }
     
     if (preferredVoice) utterance.voice = preferredVoice;
+    // -----------------------------------------------------------
+
     utterance.rate = 1.0; 
     utterance.pitch = 0.9; 
 
@@ -373,7 +433,6 @@ CRITICAL RULES:
 
     // BOUNDARY EVENT (The "Which word is it?" logic)
     utterance.onboundary = (event) => {
-        // event.charIndex tells us the character index of the word currently being spoken
         setCurrentCharIndex(event.charIndex);
     };
 
@@ -403,9 +462,8 @@ CRITICAL RULES:
     }
 
     // If speaking, split by spaces to highlight current word
-    // Note: This matches the "Clean Text" logic we sent to SpeechSynthesis
     const text = msg.content.replace(/[*#_]/g, ''); 
-    const words = text.split(/(\s+)/); // Split by whitespace but keep delimiters to preserve spacing
+    const words = text.split(/(\s+)/); 
     
     let charCount = 0;
 
@@ -416,10 +474,7 @@ CRITICAL RULES:
                 const end = charCount + word.length;
                 charCount += word.length;
 
-                // Check if this word segment contains the currentCharIndex
                 const isActive = currentCharIndex >= start && currentCharIndex < end;
-
-                // Only highlight actual words, not just whitespace spaces
                 const isWord = word.trim().length > 0;
 
                 return (
@@ -447,7 +502,8 @@ CRITICAL RULES:
     if (!SpeechRecognition) return;
 
     const recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
+    // CHANGED: Use browser's default language (User's Native Language) instead of forcing en-US
+    recognition.lang = navigator.language || 'en-US'; 
     recognition.continuous = false;
     recognition.interimResults = false;
 

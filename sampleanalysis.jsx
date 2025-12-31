@@ -7,7 +7,7 @@ import "./sample.css"; // Ensure this matches your CSS filename
 import Nev from "./test.jsx";    // Ensure this matches your Navbar filename
 
 // 🔒 SECURE: Key loaded from environment variables
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY10 || import.meta.env.VITE_GEMINI_API_KEY11 || "AIzaSyABU46dmL39WlMA9rtBpS1NLgsRVHh4zGs";
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY10 || import.meta.env.VITE_GEMINI_API_KEY11 ;
 
 export default function SymptomChecker() {
   const [currentStep, setCurrentStep] = useState(0);

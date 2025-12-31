@@ -1,21 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import './textcss.css'; 
+import './textcss.css';
 
 import logoLight from './logo.png';
 import logoDark from './logodark.png';
 import FindInPageModal from './find';
 
-// 1. API Configuration (Same as your Profile Page)
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-// Icons configuration
 const Icons = {
-    dashboard: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z",
-    profile: "M12 4a4 4 0 0 1 4 4 4 4 0 0 1 -4 4 4 4 0 0 1 -4 -4 4 4 0 0 1 4 -4zM12 14c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4z",
-    settings: "M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.2-.15.24-.43.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.09-.75-1.7-.99L15 3h-4L9.49 5.03c-.61.22-1.18.59-1.7.99l-2.49-1c-.23-.08-.5-.01-.61.22l-2 3.46c-.12.21-.08.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.2.15-.24.43-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.09.75 1.7.99L11 21h4l.51-2.03c.61-.24 1.18-.59 1.7-.99l2.49 1c.23.08.5.01.61-.22l2-3.46c.12-.21.08-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z",
-    orders: "M16 6h-2v2h-4V6H6l4-4 4 4zm-4-4V2zM2 12c0-5.33 1.95-9.69 5.25-11.5L8.5 2c-2.73 1.5-4.5 4.54-4.5 8 0 3.86 2.65 7.15 6.2 7.82l.8.18v2.05c-2.45-.66-4.38-2.68-5.32-5.11L4 14.5c.34 2.22 1.95 3.96 4.1 4.71l-.15.14c-1.76 1.76-2.58 3.59-2.58 5.65h2.16c0-1.28.37-2.31 1.1-3.04.73-.73 1.77-1.1 3.05-1.1s2.32.37 3.05 1.1c.73.73 1.1 1.77 1.1 3.05h2.16c0-2.06-.82-3.89-2.58-5.65l-.15-.14c2.15-.75 3.76-2.49 4.1-4.71l.53 1.18c-.94 2.43-2.87 4.45-5.32 5.11v-2.05l.8-.18c3.55-.67 6.2-3.96 6.2-7.82 0-3.46-1.77-6.5-4.5-8l1.25-1.5z",
-    help: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.44 12.63 13 13.5 13 14h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.83.59-1.34 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z",
+    profile: "M12 4a4 4 0 0 1 4 4 4 4 0 0 1 -4 4 4 4 0 0 1 4 -4zM12 14c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4z",
     logout: "M17 7l-1.41 1.41L18.17 12H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z",
     sun: "M12 7a5 5 0 100 10 5 5 0 000-10zM2 13h2a1 1 0 100-2H2a1 1 0 100 2zm18 0h2a1 1 0 100-2h-2a1 1 0 100 2zM11 2v2a1 1 0 102 0V2a1 1 0 102 0zm0 18v2a1 1 0 102 0v-2a1 1 0 102 0zM5.99 4.58a1 1 0 10-1.41 1.41l1.41 1.41a1 1 0 101.41-1.41L5.99 4.58zm12.02 12.02a1 1 0 10-1.41 1.41l1.41 1.41a1 1 0 101.41-1.41l-1.41-1.41zM4.58 18.01a1 1 0 101.41 1.41l1.41-1.41a1 1 0 10-1.41-1.41l-1.41 1.41zm12.02-12.02a1 1 0 101.41-1.41l-1.41-1.41a1 1 0 10-1.41 1.41l1.41 1.41z",
     moon: "M12.1 20.9c-.1 0-.2 0-.3 0-5.5-.4-9.8-5.2-9.4-10.7.3-3.8 2.9-7 6.4-8.2.5-.2 1 .1 1.2.5s0 1-.4 1.3c-2.4 1.6-3.5 4.6-2.7 7.4.8 2.8 3.4 4.7 6.3 4.5 1.1-.1 2.1-.4 3-1 .5-.3 1.1-.2 1.4.3s.2 1.1-.3 1.5c-1.6 1.1-3.5 1.7-5.2 1.7z",
@@ -24,54 +18,40 @@ const Icons = {
 };
 
 function Navbar() {
-    // State Management
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [isFindModalOpen, setIsFindModalOpen] = useState(false);
     const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
     const [scrolled, setScrolled] = useState(false);
-    // NEW: User Data state to hold name
     const [userData, setUserData] = useState({});
 
-    // Refs & Hooks
     const profileRef = useRef(null);
     const navigate = useNavigate();
     const location = useLocation();
     const contentToSearchRef = useRef(document.body);
 
-    // Handle Scroll for Glass Effect
     useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 50);
-        };
+        const handleScroll = () => setScrolled(window.scrollY > 20);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // 2. UPDATED USE EFFECT TO FETCH REAL DATA
     useEffect(() => {
         const fetchUserData = async () => {
             const token = localStorage.getItem('token');
             if (token) {
                 setIsLoggedIn(true);
                 try {
-                    // Fetch user profile from Server
                     const response = await fetch(`${API_BASE_URL}/api/user-profile`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
-                    
                     if (response.ok) {
                         const data = await response.json();
-                        // If backend sends 'fullName', split it to get firstName
-                        if (data.fullName && !data.firstName) {
-                            data.firstName = data.fullName.split(' ')[0];
-                        }
+                        if (data.fullName && !data.firstName) data.firstName = data.fullName.split(' ')[0];
                         setUserData(data);
                     }
                 } catch (err) {
-                    console.error("Failed to fetch user in Navbar", err);
-                    // Fallback to localStorage if API fails
                     const storedUser = localStorage.getItem('userData'); 
                     if (storedUser) setUserData(JSON.parse(storedUser));
                 }
@@ -79,11 +59,9 @@ function Navbar() {
                 setIsLoggedIn(false);
             }
         };
-
         fetchUserData();
     }, []);
 
-    // Dark Mode Toggle
     useEffect(() => {
         if (darkMode) {
             document.body.classList.add('dark-theme');
@@ -94,7 +72,6 @@ function Navbar() {
         }
     }, [darkMode]);
 
-    // Click Outside Listener for Dropdown
     useEffect(() => {
         function handleClickOutside(event) {
             if (profileRef.current && !profileRef.current.contains(event.target)) {
@@ -105,7 +82,6 @@ function Navbar() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Handlers
     const showSidebar = () => setSidebarOpen(true);
     const hideSidebar = () => setSidebarOpen(false);
     const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
@@ -117,19 +93,13 @@ function Navbar() {
         navigate('/login');
     };
 
-    const handleFindInPage = (e) => {
-        e.preventDefault();
-        setIsFindModalOpen(true);
+    const handleMenuAction = (item) => {
+        if (item.path === '#logout') handleLogout();
+        else if (item.path === '##theme') setDarkMode(!darkMode);
+        else if (item.path === '##find') setIsFindModalOpen(true);
         setDropdownOpen(false);
     };
 
-    const toggleTheme = (e) => {
-        e.preventDefault();
-        setDarkMode(!darkMode);
-        setDropdownOpen(false);
-    };
-
-    // Profile Menu Items
     const MENU_ITEMS = [
         { name: 'My Profile', path: '/myprofile', icon: Icons.profile },
         { name: darkMode ? 'Light Mode' : 'Dark Mode', path: '##theme', icon: darkMode ? Icons.sun : Icons.moon },
@@ -142,106 +112,17 @@ function Navbar() {
 
     return (
         <>
-            <style>
-                {`
-                /* Essential CSS to enforce the layout request */
-                .navbar {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    /* Ensure gap is same on left (logo) and right (content) */
-                    padding: 15px 4%; 
-                    width: 100%;
-                    position: fixed;
-                    top: 0;
-                    z-index: 1000;
-                    background: transparent;
-                    transition: all 0.3s ease;
-                }
-                
-                .navbar.scrolled {
-                    background: ${darkMode ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.8)'};
-                    backdrop-filter: blur(10px);
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                }
-
-                .nav-right-container {
-                    display: flex;
-                    align-items: center;
-                    gap: 30px; /* Space between Links and Login/Profile */
-                }
-
-                /* Desktop Links Style */
-                .nav-links {
-                    display: flex;
-                    list-style: none;
-                    gap: 25px;
-                    margin: 0;
-                    padding: 0;
-                }
-
-                .nav-links a {
-                    text-decoration: none;
-                    color: inherit;
-                    font-weight: 500;
-                }
-
-                /* --- NEW AVATAR CSS --- */
-                /* Container button styling */
-                .nav-profile-btn {
-                    width: 45px;
-                    height: 45px;
-                    border-radius: 50%;
-                    background: transparent; /* No background */
-                    border: none;
-                    padding: 0;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    cursor: pointer;
-                    transition: transform 0.2s;
-                }
-
-                .nav-profile-btn:hover {
-                    transform: scale(1.05);
-                }
-
-                /* The actual colorful circle */
-                .nav-avatar-placeholder {
-                    width: 100%;
-                    height: 100%;
-                    background: linear-gradient(135deg, #3b82f6, #2563eb); /* Rich Blue Gradient */
-                    color: white;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 1.2rem;
-                    font-weight: 700;
-                    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25); /* Soft Glow */
-                    border: 2px solid #ffffff; /* White Ring */
-                }
-                
-                /* Hide desktop links on mobile */
-                @media (max-width: 768px) {
-                    .nav-links { display: none; }
-                }
-                `}
-            </style>
-
             <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
-
-                {/* 1. LEFT SECTION: Logo */}
-                <div className="nav-left">
-                    <p className="nav-logo">
-                        <img src={darkMode ? logoDark : logoLight} alt="Sympto Logo" />
-                    </p>
-                </div>
-
-                {/* 2. RIGHT SECTION: Links + Auth (Grouped together to be on the right) */}
-                <div className="nav-right-container">
+                <div className="nav-container">
                     
-                    {/* Navigation Links (Moved here from center) */}
+                    {/* 1. LEFT: Logo */}
+                    <div className="nav-section-left">
+                        <Link to="/home" className="nav-logo">
+                            <img src={darkMode ? logoDark : logoLight} alt="Sympto" />
+                        </Link>
+                    </div>
+
+                    {/* 2. CENTER: Links (Moved out of the right container) */}
                     <ul className="nav-links">
                         <li><Link to="/home" className={isActive('/home')}>Home</Link></li>
                         <li><Link to="/appointment" className={isActive('/appointment')}>Appointment</Link></li>
@@ -249,76 +130,64 @@ function Navbar() {
                         <li><Link to="/about" className={isActive('/about')}>About</Link></li>
                     </ul>
 
-                    {/* Profile & Actions */}
+                    {/* 3. RIGHT: Actions (Profile/Login) */}
                     <div className="nav-actions">
                         {isLoggedIn ? (
-                            <div ref={profileRef} className="profile-dropdown-container">
-                                
-                                {/* --- UPDATED PROFILE AVATAR --- */}
-                                <div 
+                            <div ref={profileRef} className="profile-wrapper">
+                                <button 
                                     onClick={toggleDropdown} 
-                                    className={`nav-profile-btn ${dropdownOpen ? 'active' : ''}`}
+                                    className={`nav-avatar-btn ${dropdownOpen ? 'active' : ''}`}
                                 >
-                                    <div className="nav-avatar-placeholder">
-                                        {/* Since we fetch data now, this will show the real initial */}
-                                        {userData && userData.firstName 
-                                            ? userData.firstName.charAt(0).toUpperCase() 
-                                            : "U"
-                                        }
+                                    <div className="avatar-circle">
+                                        {userData?.firstName?.charAt(0).toUpperCase() || "U"}
                                     </div>
-                                </div>
-
-                                {/* Dropdown Menu */}
-                                <div className={`profile-dropdown ${dropdownOpen ? 'active' : ''}`}>
+                                </button>
+                                <div className={`dropdown-menu ${dropdownOpen ? 'open' : ''}`}>
                                     {MENU_ITEMS.map((item) => (
                                         <Link
                                             key={item.name}
                                             to={item.path}
-                                            onClick={item.path === '#logout' ? handleLogout : (item.path === '##theme' ? toggleTheme : (item.path === '##find' ? handleFindInPage : null))}
-                                            className={`dropdown-item ${item.path === '#logout' ? 'logout-option' : ''}`}
+                                            onClick={() => handleMenuAction(item)}
+                                            className={`dropdown-item ${item.path === '#logout' ? 'danger' : ''}`}
                                         >
-                                            <svg width="18px" height="18px" viewBox="0 0 24 24" fill="currentColor"><path d={item.icon} /></svg>
+                                            <svg viewBox="0 0 24 24" fill="currentColor"><path d={item.icon} /></svg>
                                             <span>{item.name}</span>
                                         </Link>
                                     ))}
                                 </div>
                             </div>
                         ) : (
-                            <div className="auth-element">
-                                <Link to="/login">
-                                    <button className="nav-btn">Sign In</button>
-                                </Link>
-                            </div>
+                            <Link to="/login" className="login-btn-link">
+                                <button className="nav-primary-btn">Sign In</button>
+                            </Link>
                         )}
-
-                        {/* Mobile Toggle Button */}
-                        <button className="menu-button" onClick={showSidebar} style={{ marginLeft: '10px' }}>
-                            <svg viewBox="0 -960 960 960" width="26px" height="26px" fill="currentColor"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" /></svg>
+                        <button className="mobile-toggle" onClick={showSidebar}>
+                            <svg viewBox="0 -960 960 960" fill="currentColor"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" /></svg>
                         </button>
                     </div>
                 </div>
             </nav>
 
-            {/* Mobile Sidebar (Drawer) */}
-            <div className={`mobile-sidebar ${sidebarOpen ? 'active' : ''}`}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', paddingBottom: '10px', borderBottom: '1px solid #eee' }}>
-                    <span style={{ fontWeight: 'bold', fontSize: '20px', color: darkMode ? '#fff' : '#000' }}>Menu</span>
-                    <button onClick={hideSidebar} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                        <svg viewBox="0 -960 960 960" height="28px" width="28px" fill={darkMode ? "#fff" : "#1e293b"}><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" /></svg>
+            <div className={`sidebar-overlay ${sidebarOpen ? 'active' : ''}`} onClick={hideSidebar}></div>
+            <aside className={`mobile-sidebar ${sidebarOpen ? 'active' : ''}`}>
+                <div className="sidebar-header">
+                    <span className="sidebar-title">Menu</span>
+                    <button onClick={hideSidebar} className="close-btn">
+                        <svg viewBox="0 -960 960 960" fill="currentColor"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" /></svg>
                     </button>
                 </div>
-
-                <ul>
+                <ul className="sidebar-links">
                     <li><Link to="/home" onClick={hideSidebar}>Home</Link></li>
                     <li><Link to="/appointment" onClick={hideSidebar}>Appointment</Link></li>
                     <li><Link to="/blog" onClick={hideSidebar}>News</Link></li>
                     <li><Link to="/about" onClick={hideSidebar}>About</Link></li>
-
-                    <li className="auth-element-mobile" style={{ marginTop: '20px', border: 'none' }}>
-                        {!isLoggedIn && <Link to="/login" onClick={hideSidebar}><button className="nav-btn" style={{ width: '100%' }}>Sign In</button></Link>}
-                    </li>
+                    {!isLoggedIn && (
+                        <li className="sidebar-action">
+                            <Link to="/login" onClick={hideSidebar} className="nav-primary-btn mobile">Sign In</Link>
+                        </li>
+                    )}
                 </ul>
-            </div>
+            </aside>
 
             <FindInPageModal isOpen={isFindModalOpen} onClose={() => setIsFindModalOpen(false)} targetRef={contentToSearchRef} />
         </>
