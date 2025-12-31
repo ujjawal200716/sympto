@@ -657,7 +657,7 @@ const handleDownloadPDF = async () => {
                   alt="Sympto" 
                   className="new-bot-logo" 
                   onClick={() => handleSpeak(msg.content, idx)} 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%', padding: 0, cursor: 'pointer' }} 
+                  style={{ width: '80%', height: '80%', objectFit: 'cover', borderRadius: '50%', padding: 0, cursor: 'pointer' }} 
                 />
               ) : (
                 <div style={{

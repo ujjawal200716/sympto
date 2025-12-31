@@ -894,7 +894,7 @@ html, body {
 }
 
 .footer-brand-logo {
-  height: 50px; 
+  height: 30px; 
   width: auto;
   object-fit: contain;
   margin-bottom: 12px;
@@ -1160,7 +1160,7 @@ html, body {
 /* --- Footer Logo Switching --- */
 
 .footer-brand-logo {
-  height: 50px; /* Adjust size as needed */
+  height: 40px !important; /* Adjust size as needed */
   width: auto;
   object-fit: contain;
   margin-bottom: 12px;

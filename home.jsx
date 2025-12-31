@@ -161,7 +161,7 @@ const Home = () => {
   return (
     <div className="home-container">
       <Nav />
-
+     
       {/* --- HERO SECTION --- */}
       <section className="hero-section">
         <div className="hero-bg-gradient"></div>
@@ -169,6 +169,7 @@ const Home = () => {
         <div className="hero-content">
           <div className="hero-text-wrapper">
             <h1>
+              
               <span className="hero-pre-title">Hi, I'm Sympto.</span>
               <div className="hero-main-title">
                 <span>Your AI Health Companion for&nbsp;</span>
@@ -356,6 +357,7 @@ const Home = () => {
 
           {/* Bottom Copyright Section */}
           <div className="footer-copyright">
+            
             <p>&copy; {currentYear} Sympto.in All rights reserved.</p>
           </div>
           
@@ -371,6 +373,7 @@ const Home = () => {
               <button className="close-btn" onClick={closeModal}>&times;</button>
             </div>
             <div className="modal-body">
+              
               {modalData[activeModal].content}
             </div>
           </div>

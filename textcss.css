@@ -93,7 +93,7 @@ body.dark-theme {
 
 .nav-logo img {
   /* ADJUST SIZE HERE: 40px is a good balance for a 55px navbar */
-  height: 40px; 
+  height: 30px; 
   width: auto; 
   object-fit: contain; /* Keeps the logo sharp */
   display: block;
