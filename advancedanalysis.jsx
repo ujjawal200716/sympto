@@ -8,26 +8,8 @@ import logo1 from './logo1.png';
 import logoLight from './logo.png'; 
 import logoDark from './logodark.png';
 
-// --- 🔒 SMART KEY ROTATION ---
-// This creates a pool of all available keys.
-const API_KEYS = [
-  import.meta.env.VITE_GEMINI_API_KEY,
-  import.meta.env.VITE_GEMINI_API_KEY1,
-  import.meta.env.VITE_GEMINI_API_KEY2,
-  import.meta.env.VITE_GEMINI_API_KEY3,
-  import.meta.env.VITE_GEMINI_API_KEY4,
-  import.meta.env.VITE_GEMINI_API_KEY5,
-  import.meta.env.VITE_GEMINI_API_KEY6,
-  import.meta.env.VITE_GEMINI_API_KEY7,
-  import.meta.env.VITE_GEMINI_API_KEY8,
-  import.meta.env.VITE_GEMINI_API_KEY9
-].filter(key => key); // Removes any undefined/empty keys
-
-// Helper: Pick a random key to distribute load
-const getRandomKey = () => {
-  if (API_KEYS.length === 0) return null;
-  return API_KEYS[Math.floor(Math.random() * API_KEYS.length)];
-};
+// 🔒 SECURE: Key loaded from environment variables
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY1 || import.meta.env.VITE_GEMINI_API_KEY2 ||import.meta.env.VITE_GEMINI_API_KEY3 || import.meta.env.VITE_GEMINI_API_KEY4 || import.meta.env.VITE_GEMINI_API_KEY5 || import.meta.env.VITE_GEMINI_API_KEY6 ||import.meta.env.VITE_GEMINI_API_KEY7 || import.meta.env.VITE_GEMINI_API_KEY8 || import.meta.env.VITE_GEMINI_API_KEY9;
 
 export default function Advancedanalysis() {
   const [messages, setMessages] = useState([
@@ -53,11 +35,11 @@ export default function Advancedanalysis() {
   const [isMuted, setIsMuted] = useState(false);
   const [availableVoices, setAvailableVoices] = useState([]);
 
-  // --- TEXT TO SPEECH HIGHLIGHTING STATE ---
-  const [speakingMessageIndex, setSpeakingMessageIndex] = useState(null); 
-  const [currentCharIndex, setCurrentCharIndex] = useState(-1); 
+  // --- NEW: TEXT TO SPEECH HIGHLIGHTING STATE ---
+  const [speakingMessageIndex, setSpeakingMessageIndex] = useState(null); // Tracks which message ID is speaking
+  const [currentCharIndex, setCurrentCharIndex] = useState(-1); // Tracks character position for highlighting
 
-  // --- USER DATA STATE ---
+  // --- NEW: USER DATA STATE ---
   const [userData, setUserData] = useState(null);
   
   const isVoiceModeRef = useRef(false);
@@ -92,17 +74,19 @@ export default function Advancedanalysis() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // --- FETCH USER DATA ---
+  // --- NEW: FETCH USER DATA (Same logic as Navbar) ---
   useEffect(() => {
     const fetchUserData = async () => {
         const token = localStorage.getItem('token');
         const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         
+        // 1. Try LocalStorage first
         const storedUser = localStorage.getItem('userData');
         if (storedUser) {
             setUserData(JSON.parse(storedUser));
         }
 
+        // 2. Fetch fresh data if token exists
         if (token) {
             try {
                 const response = await fetch(`${API_BASE_URL}/api/user-profile`, {
@@ -133,6 +117,7 @@ export default function Advancedanalysis() {
     window.speechSynthesis.onvoiceschanged = loadVoices;
   }, []);
 
+  // Cleanup speech on unmount
   useEffect(() => {
     return () => {
       window.speechSynthesis.cancel();
@@ -158,18 +143,21 @@ CRITICAL RULES:
   CRITICAL: Keep your response extremely short (1-2 sentences maximum). 
   Be conversational and helpful.`;
 
-  const handleDownloadPDF = async () => {
+const handleDownloadPDF = async () => {
     setShowMenu(false);
     const element = chatContentRef.current;
     if (!element) return;
 
+    // Visual feedback
     const originalCursor = document.body.style.cursor;
     document.body.style.cursor = 'wait';
 
     try {
+      // 1. PREPARE THE CLONE
       const clone = element.cloneNode(true);
       const originalWidth = element.offsetWidth;
       
+      // 2. APPLY "PAPER MODE" STYLES
       Object.assign(clone.style, {
         position: 'absolute',
         top: '-10000px', 
@@ -184,6 +172,7 @@ CRITICAL RULES:
         zIndex: '-1'
       });
 
+      // 3. INJECT HEADER (Logo + Title)
       const header = document.createElement('div');
       header.style.cssText = `
         display: flex;
@@ -197,6 +186,7 @@ CRITICAL RULES:
         box-sizing: border-box;
       `;
 
+      // Header Logo - Hardcoded sizing
       header.innerHTML = `
         <img 
           src="${logo1}" 
@@ -211,22 +201,30 @@ CRITICAL RULES:
 
       clone.insertBefore(header, clone.firstChild);
 
+      // 4. CRITICAL: CSS INJECTION (THE FIX)
       const styleTag = document.createElement('style');
       styleTag.innerHTML = `
         * {
           print-color-adjust: exact !important;
           -webkit-print-color-adjust: exact !important;
         }
+        
+        /* --- FIX: PREVENT SQUASHING --- */
         .new-avatar {
              width: 50px !important;
              height: 50px !important;
              min-width: 50px !important; 
+             
+             /* This is the magic rule: Don't Grow, Don't Shrink, Stay 50px */
              flex: 0 0 50px !important; 
+             
              margin-right: 15px !important;
              display: flex !important;
              align-items: center !important;
              justify-content: center !important;
         }
+
+        /* Force image to fill the 50px container */
         .new-bot-logo, .new-avatar img {
              width: 100% !important;
              height: 100% !important;
@@ -234,20 +232,26 @@ CRITICAL RULES:
              display: block !important;
              border-radius: 50% !important;
         }
+
+        /* Reset Text Colors */
         .new-message-bubble {
             color: #000000 !important;
             border: 1px solid #ccc !important;
             box-shadow: none !important;
         }
+
+        /* Hide spinners */
         .new-loading-bubble, .new-spinner { display: none !important; }
       `;
       clone.appendChild(styleTag);
 
+      // 5. COLOR CORRECTION 
       const allElements = clone.querySelectorAll('*');
       allElements.forEach((el) => {
         if (window.getComputedStyle(el).color !== 'rgba(0, 0, 0, 0)') {
              el.style.color = '#000000';
         }
+        // Remove dark backgrounds but keep yellow highlights
         const bg = window.getComputedStyle(el).backgroundColor;
         if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
             if (!el.style.backgroundColor?.includes('254') && !el.classList.contains('new-user-avatar')) { 
@@ -256,10 +260,14 @@ CRITICAL RULES:
         }
       });
 
+      // 6. APPEND TO DOM
       document.body.appendChild(clone);
-      await new Promise(resolve => setTimeout(resolve, 250));
+
+      // 7. CAPTURE IMAGE
+      await new Promise(resolve => setTimeout(resolve, 250)); // Wait for render
 
       const cloneHeight = clone.scrollHeight;
+
       const canvas = await html2canvas(clone, {
         scale: 2, 
         useCORS: true, 
@@ -270,9 +278,11 @@ CRITICAL RULES:
         scrollY: 0
       });
 
+      // 8. REMOVE CLONE
       document.body.removeChild(clone);
       document.body.style.cursor = originalCursor;
 
+      // 9. GENERATE PDF
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       
@@ -320,6 +330,7 @@ CRITICAL RULES:
     }
   };
 
+
   const handleSave = async () => {
     setShowMenu(false);
     const token = localStorage.getItem('token');
@@ -364,6 +375,7 @@ CRITICAL RULES:
   const handleSpeak = (text, index) => {
     if (!('speechSynthesis' in window)) return;
 
+    // IF ALREADY SPEAKING THIS MESSAGE: STOP
     if (speakingMessageIndex === index) {
         window.speechSynthesis.cancel();
         setSpeakingMessageIndex(null);
@@ -372,39 +384,47 @@ CRITICAL RULES:
         return;
     }
 
+    // Stop anything else playing
     window.speechSynthesis.cancel();
     
-    // Chunking text into sentences
+    // Clean text and SPLIT INTO SENTENCES (Chunking to prevent voice breaking/timeout)
     const cleanText = text.replace(/[*#_]/g, ''); 
+    // This regex splits by punctuation (. ! ?) followed by whitespace, keeping the punctuation
     const sentences = cleanText.match(/[^.!?]+[.!?]+(\s+|$)|[^.!?]+$/g) || [cleanText];
 
     const voices = availableVoices.length > 0 ? availableVoices : window.speechSynthesis.getVoices();
     
-    // --- LANGUAGE DETECTION ---
+    // --- IMPROVED LANGUAGE DETECTION ---
     let targetLang = null;
-    if (/[\u0900-\u097F]/.test(cleanText)) targetLang = 'hi'; 
-    else if (/[\u0600-\u06FF]/.test(cleanText)) targetLang = 'ar'; 
-    else if (/[\u0400-\u04FF]/.test(cleanText)) targetLang = 'ru'; 
-    else if (/[\u4E00-\u9FFF]/.test(cleanText)) targetLang = 'zh'; 
-    else if (/[\u3040-\u309F\u30A0-\u30FF]/.test(cleanText)) targetLang = 'ja'; 
-    else if (/[\uAC00-\uD7AF]/.test(cleanText)) targetLang = 'ko'; 
-    else if (/[à-ÿ]/.test(cleanText)) targetLang = 'es'; 
+    // 1. Script-based detection
+    if (/[\u0900-\u097F]/.test(cleanText)) targetLang = 'hi'; // Hindi
+    else if (/[\u0600-\u06FF]/.test(cleanText)) targetLang = 'ar'; // Arabic
+    else if (/[\u0400-\u04FF]/.test(cleanText)) targetLang = 'ru'; // Russian
+    else if (/[\u4E00-\u9FFF]/.test(cleanText)) targetLang = 'zh'; // Chinese
+    else if (/[\u3040-\u309F\u30A0-\u30FF]/.test(cleanText)) targetLang = 'ja'; // Japanese
+    else if (/[\uAC00-\uD7AF]/.test(cleanText)) targetLang = 'ko'; // Korean
+    else if (/[à-ÿ]/.test(cleanText)) targetLang = 'es'; // Spanish/French heuristic
 
     let preferredVoice = null;
 
     if (targetLang) {
+        // Try to find a voice matching the specific script language
         preferredVoice = voices.find(v => v.lang.startsWith(targetLang));
     }
 
+    // 2. FALLBACK: Use Browser System Language (Fixes "Every Language" issue)
+    // If no specific script detected (e.g. English, French, Spanish), try to match the user's OS language
     if (!preferredVoice) {
         preferredVoice = voices.find(v => v.lang.startsWith(navigator.language)) || voices.find(v => v.default) || voices[0];
     }
     
+    // --- RECURSIVE FUNCTION TO PLAY CHUNKS ---
     let currentSentenceIndex = 0;
-    let globalCharOffset = 0; 
+    let globalCharOffset = 0; // To keep highlighter synced
 
     const speakNextSentence = () => {
         if (currentSentenceIndex >= sentences.length) {
+            // Finished all chunks
             setSpeakingMessageIndex(null);
             setCurrentCharIndex(-1);
             setIsSpeaking(false);
@@ -426,6 +446,7 @@ CRITICAL RULES:
             }
         };
 
+        // Update highlighting relative to the full text
         utterance.onboundary = (event) => {
             setCurrentCharIndex(globalCharOffset + event.charIndex);
         };
@@ -433,11 +454,12 @@ CRITICAL RULES:
         utterance.onend = () => {
             globalCharOffset += sentenceText.length;
             currentSentenceIndex++;
-            speakNextSentence(); 
+            speakNextSentence(); // Trigger next chunk
         };
 
         utterance.onerror = (e) => {
             console.error("Voice Error", e);
+            // On error, try to skip to next chunk
             globalCharOffset += sentenceText.length;
             currentSentenceIndex++;
             speakNextSentence();
@@ -447,14 +469,18 @@ CRITICAL RULES:
         window.speechSynthesis.speak(utterance);
     };
 
+    // Start the chain
     speakNextSentence();
   };
 
+  // --- RENDER HELPER FOR HIGHLIGHTING WORDS ---
   const renderMessageContent = (msg, index) => {
+    // If not speaking this message, just return content (formatted normal way)
     if (speakingMessageIndex !== index) {
         return <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div>;
     }
 
+    // If speaking, split by spaces to highlight current word
     const text = msg.content.replace(/[*#_]/g, ''); 
     const words = text.split(/(\s+)/); 
     
@@ -474,7 +500,7 @@ CRITICAL RULES:
                     <span 
                         key={i} 
                         style={{ 
-                            backgroundColor: (isActive && isWord) ? '#fef08a' : 'transparent', 
+                            backgroundColor: (isActive && isWord) ? '#fef08a' : 'transparent', // Yellow highlight
                             color: (isActive && isWord) ? '#000' : 'inherit',
                             transition: 'background-color 0.1s ease',
                             borderRadius: '2px'
@@ -488,12 +514,14 @@ CRITICAL RULES:
     );
   };
 
+
   const startListening = () => {
     if (isListening || isSpeaking) return;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
     const recognition = new SpeechRecognition();
+    // CHANGED: Use browser's default language (User's Native Language) instead of forcing en-US
     recognition.lang = navigator.language || 'en-US'; 
     recognition.continuous = false;
     recognition.interimResults = false;
@@ -548,42 +576,25 @@ CRITICAL RULES:
     const userMessage = { role: 'user', content: voiceText };
     setMessages(prev => [...prev, userMessage]);
     setLoading(true);
-    
-    // --- KEY ROTATION & MODEL FIX ---
-    const apiKey = getRandomKey();
-    if (!apiKey) {
-        const errText = "Error: No API Keys found.";
-        setMessages(prev => [...prev, { role: 'assistant', content: errText }]);
-        handleSpeak(errText, -1);
-        setLoading(false);
-        return;
-    }
-
     try {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      // FIXED MODEL NAME: gemini-1.5-flash
+      const genAI = new GoogleGenerativeAI(API_KEY);
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", systemInstruction: VOICE_SYSTEM_INSTRUCTION });
       const history = messages.slice(1).map(msg => ({ role: msg.role === 'assistant' ? 'model' : 'user', parts: [{ text: msg.content }] }));
       const chat = model.startChat({ history: history });
       const result = await chat.sendMessage([{ text: voiceText }]);
       const text = result.response.text();
       setMessages(prev => [...prev, { role: 'assistant', content: text }]);
-      
+      // Auto speak for voice mode - using last index approximation
       setTimeout(() => handleSpeak(text, messages.length + 1), 100); 
     } catch (error) { 
-        console.error("AI Error:", error);
-        // If 429, you might want to retry here, but simple rotation usually solves it next turn
-        const errText = "I'm having trouble connecting (Rate Limit). Please try again.";
+        const errText = "Connection error.";
         handleSpeak(errText, -1);
     } finally { setLoading(false); }
   };
 
   const sendMessage = async () => {
     if ((!input.trim() && selectedImages.length === 0) || loading) return;
-    
-    // --- KEY ROTATION LOGIC ---
-    const apiKey = getRandomKey();
-    if (!apiKey) { alert("API Keys are missing!"); return; }
+    if (!API_KEY) { alert("API Key is missing!"); return; }
 
     const userMessageText = input.trim() || `I have uploaded ${selectedImages.length} image(s). Please analyze them.`;
     const imagePreviews = selectedImages.map(img => img.preview);
@@ -595,8 +606,7 @@ CRITICAL RULES:
     if (fileInputRef.current) fileInputRef.current.value = '';
 
     try {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      // FIXED MODEL NAME: gemini-1.5-flash
+      const genAI = new GoogleGenerativeAI(API_KEY);
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", systemInstruction: SYSTEM_INSTRUCTION });
       const history = messages.slice(1).map(msg => ({ role: msg.role === 'assistant' ? 'model' : 'user', parts: [{ text: msg.content }] }));
       const chat = model.startChat({ history: history });
@@ -606,8 +616,7 @@ CRITICAL RULES:
       const text = result.response.text();
       setMessages(prev => [...prev, { role: 'assistant', content: text }]);
     } catch (error) {
-      console.error("AI Error:", error);
-      setMessages(prev => [...prev, { role: 'assistant', content: '⚠️ Error connecting to AI. (Likely Rate Limit, try again)' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: '⚠️ Error connecting to AI.' }]);
     } finally { setLoading(false); }
   };
 
@@ -661,6 +670,7 @@ CRITICAL RULES:
             <div key={idx} className={`new-message-row ${msg.role === 'user' ? 'new-user-row' : 'new-assistant-row'}`}>
              <div className={`new-avatar ${msg.role === 'assistant' ? 'new-assistant-avatar' : 'new-user-avatar'}`}>
               {msg.role === 'assistant' ? (
+                /* --- Chat Interface Logo Fix --- */
                 <img 
                   src={logo1} 
                   alt="Sympto" 
@@ -694,6 +704,7 @@ CRITICAL RULES:
                     {msg.images.map((imgSrc, i) => <img key={i} src={imgSrc} alt="Symptom" className="new-chat-image-item" />)}
                   </div>
                 )}
+                {/* REPLACED PLAIN TEXT WITH HIGHLIGHTER HELPER */}
                 {renderMessageContent(msg, idx)}
               </div>
             </div>
@@ -732,8 +743,10 @@ CRITICAL RULES:
             </div>
           )}
 
+          {/* --- NEW FOOTER ROW (Layout for Robot + Input) --- */}
           <div className="new-footer-row">
 
+            {/* 1. ROBOT MENU (Far Left, Independent) */}
             <div className="new-menu-wrapper" ref={menuRef}>
               <button 
                 onClick={() => setShowMenu(!showMenu)} 
@@ -762,6 +775,7 @@ CRITICAL RULES:
                </svg>
               </button>
 
+              {/* DROP-UP MENU */}
               {showMenu && (
                 <div className="new-dropup-menu">
                   <div className="new-dropdown-item" onClick={handleShare}>
@@ -777,7 +791,9 @@ CRITICAL RULES:
               )}
             </div>
 
+            {/* 2. INPUT BAR (Right Side) */}
             <div className="new-input-bar">
+              
               <input type="file" ref={fileInputRef} onChange={handleImageSelect} accept="image/*" style={{ display: 'none' }} />
               
               <button onClick={() => fileInputRef.current?.click()} disabled={loading} className="new-icon-btn new-camera-btn" title="Upload Image">
@@ -819,6 +835,7 @@ CRITICAL RULES:
                   </button>
               )}
             </div>
+
           </div>
         </div>
       </div>
