@@ -5,7 +5,7 @@ import "./chatcss.css";
 
 // 1. SETUP GEMINI API
 // -------------------
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyAifOEDMD_BfPxMQg70eIhOVHHLOtChJGQ"; 
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY4 ; 
 // Note: If using Create React App, use process.env.REACT_APP_GEMINI_API_KEY
 
 const genAI = new GoogleGenerativeAI(API_KEY);
@@ -48,7 +48,7 @@ const FAQ_DATA = [
     category: "Safety & Emergencies",
     subtitle: "When to seek urgent care",
     items: [
-      { q: "When should I call 911?", a: "Seek immediate emergency care for severe chest pain, difficulty breathing, or uncontrolled bleeding." },
+      { q: "When should I call 112?", a: "Seek immediate emergency care for severe chest pain, difficulty breathing, or uncontrolled bleeding." },
       { q: "Can I use this for my child?", a: "Yes, provided you have accurate information about their current condition." }
     ]
   },

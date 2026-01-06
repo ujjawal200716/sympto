@@ -1,24 +1,25 @@
 /* =========================================
-   1. RESET & BASE
+   1. RESET & VARIABLES
    ========================================= */
 .cw-widget-wrapper * {
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* =========================================
-   2. MAIN WIDGET WRAPPER & VARIABLES
-   ========================================= */
 .cw-widget-wrapper {
-  /* --- VARIABLES --- */
-  --primary-blue: #2563eb;
-  --primary-hover: #1d4ed8;
-  --emergency-red: #dc2626;
-  --bg-gray: #f8fafc;
-  --border-color: #e2e8f0;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  /* --- LIGHT THEME (Based on Screenshots) --- */
+  --cw-primary: #2563eb;       /* Sympto Blue */
+  --cw-bg-body: #ffffff;       /* Main White Background */
+  --cw-bg-subtle: #f8fafc;     /* Light Gray for backgrounds/tabs */
+  --cw-bg-card: #ffffff;       /* Card Background */
+  --cw-text-main: #0f172a;     /* Dark text */
+  --cw-text-muted: #64748b;    /* Gray text */
+  --cw-border: #e2e8f0;        /* Light Border */
+  
+  /* --- SHADOWS --- */
+  --cw-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --cw-shadow-float: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
 
   /* --- POSITIONING --- */
   position: fixed !important;
@@ -28,27 +29,27 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  pointer-events: none; /* Allows clicks to pass through wrapper */
+  pointer-events: none; /* Let clicks pass through the wrapper area */
 }
 
 /* =========================================
-   3. THE POPUP WINDOW
+   2. MAIN POPUP WINDOW
    ========================================= */
 .cw-popup {
-  width: 380px !important;
+  width: 360px !important;
   height: 600px;
   max-height: 80vh;
-  background-color: white;
-  border-radius: 16px;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--border-color);
+  background-color: var(--cw-bg-body);
+  border-radius: 16px; /* Matches screenshot rounded corners */
+  box-shadow: var(--cw-shadow-float);
+  border: 1px solid var(--cw-border);
   overflow: hidden;
-  margin-bottom: 16px;
-  pointer-events: auto; /* Re-enable clicks */
+  margin-bottom: 20px;
+  pointer-events: auto; /* Re-enable clicks inside popup */
   display: flex;
   flex-direction: column;
   transform-origin: bottom right;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cw-popup.cw-hidden {
@@ -59,368 +60,242 @@
 }
 
 /* =========================================
-   4. HEADER & TABS
+   3. HEADER & SEGMENTED TABS
    ========================================= */
 .cw-header-area {
-  background: white;
-  border-bottom: 1px solid var(--border-color);
-  padding: 20px 20px 0 20px;
+  background: var(--cw-bg-body);
+  padding: 24px 20px 0 20px; /* Spacing matches screenshot */
   flex-shrink: 0;
 }
 
 .cw-header-area h3 {
   margin: 0 0 16px 0;
   font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--text-main);
+  font-weight: 800;
+  color: var(--cw-text-main);
   letter-spacing: -0.025em;
 }
 
+/* --- Segmented Control (The Pill Tabs) --- */
 .cw-tabs {
   display: flex;
-  gap: 20px;
+  padding: 4px;
+  background: var(--cw-bg-subtle); /* Gray container */
+  border-radius: 10px;
+  border: 1px solid var(--cw-border);
+  margin-bottom: 16px;
 }
 
 .cw-tab-btn {
-  background: none;
+  flex: 1;
+  background: transparent;
   border: none;
-  padding-bottom: 12px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--text-muted);
+  padding: 8px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--cw-text-muted);
   cursor: pointer;
-  border-bottom: 2px solid transparent;
+  border-radius: 7px;
   transition: all 0.2s ease;
+  text-align: center;
 }
 
-.cw-tab-btn:hover { color: var(--primary-blue); }
+.cw-tab-btn:hover { color: var(--cw-text-main); }
 
 .cw-tab-btn.active {
-  color: var(--primary-blue);
-  border-bottom-color: var(--primary-blue);
+  background: var(--cw-bg-card); /* White pill */
+  color: var(--cw-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Subtle lift */
 }
 
 /* =========================================
-   5. CONTENT AREA
+   4. CONTENT & LIST ITEMS
    ========================================= */
 .cw-content {
   flex: 1;
   overflow-y: auto;
-  background-color: var(--bg-gray);
+  padding: 0 20px 20px 20px;
+  background-color: var(--cw-bg-body);
   display: flex;
   flex-direction: column;
 }
 
-/* --- FAQ List Items --- */
-.cw-list { 
-  list-style: none; padding: 16px; margin: 0; 
-  display: flex; flex-direction: column; gap: 10px; 
+/* --- The List Cards --- */
+.cw-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 12px;
 }
 
 .cw-list-item {
-  background: white;
+  background: var(--cw-bg-subtle); /* Light gray card bg like screenshot */
   padding: 16px;
   border-radius: 12px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--cw-border);
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: space-between; /* Pushes Text Left, Icon Right */
   transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
-.cw-list-item:hover { 
-  border-color: var(--primary-blue); 
-  transform: translateY(-1px); 
-}
-
-.cw-list-item div { flex: 1; }
-.cw-list-item h4 { margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--text-main); }
-.cw-list-item p { margin: 4px 0 0 0; font-size: 0.85rem; color: var(--text-muted); }
-
-/* --- FAQ Drill Down --- */
-.cw-qa-header {
-  padding: 12px 16px;
+.cw-list-item:hover {
+  border-color: var(--cw-primary);
   background: white;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid var(--border-color);
-  flex-shrink: 0;
+  transform: translateY(-1px);
+  box-shadow: var(--cw-shadow-sm);
 }
 
-.cw-back-btn {
-  background: none; border: none; cursor: pointer; color: var(--primary-blue);
-  display: flex; align-items: center; gap: 4px; font-size: 0.9rem; font-weight: 600;
+/* Text Container */
+.cw-list-item div {
+  display: flex; flex-direction: column; gap: 4px;
 }
 
-.cw-qa-list { padding: 0; }
-.cw-qa-item { border-bottom: 1px solid var(--border-color); background: white; }
-
-.cw-question-btn {
-  width: 100%; text-align: left; background: white; border: none;
-  padding: 16px; display: flex; justify-content: space-between; align-items: center;
-  cursor: pointer; font-size: 0.95rem; font-weight: 500; color: var(--text-main);
+.cw-list-item h4 {
+  margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--cw-text-main);
 }
 
-.cw-rotate { transform: rotate(180deg); transition: transform 0.3s; }
-
-.cw-answer {
-  max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;
-  background: #f8fafc; padding: 0 16px;
+.cw-list-item p {
+  margin: 0; font-size: 0.85rem; color: var(--cw-text-muted);
 }
-.cw-answer-open { max-height: 300px; padding: 0 16px 16px 16px; }
-.cw-answer p { font-size: 0.9rem; line-height: 1.6; color: #475569; }
+
+/* Arrow / Icons */
+.cw-list-item svg, .cw-list-item i {
+  color: var(--cw-text-main);
+  opacity: 0.6;
+}
 
 /* =========================================
-   6. CHAT INTERFACE (UPDATED INPUT)
+   5. CHAT INTERFACE
    ========================================= */
 .cw-chat-view {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+  display: flex; flex-direction: column; height: 100%;
 }
 
 .cw-messages-area {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  background: var(--bg-gray);
+  flex: 1; overflow-y: auto; padding: 10px 0;
+  display: flex; flex-direction: column; gap: 16px;
 }
 
-.cw-msg-bubble {
-  max-width: 85%;
-  padding: 12px 16px;
-  border-radius: 16px;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-.cw-msg-user {
-  align-self: flex-end;
-  background: var(--primary-blue);
-  color: white;
-  border-bottom-right-radius: 4px;
-}
-
+/* Bot Message Bubble (Card Style) */
 .cw-msg-bot {
   align-self: flex-start;
-  background: white;
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-  border-bottom-left-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  background: var(--cw-bg-subtle);
+  color: var(--cw-text-main);
+  border: 1px solid var(--cw-border);
+  border-radius: 12px;
+  padding: 16px;
+  max-width: 90%;
+  box-shadow: var(--cw-shadow-sm);
 }
 
-/* --- New Sleek Input Area --- */
+/* User Message Bubble */
+.cw-msg-user {
+  align-self: flex-end;
+  background: var(--cw-primary);
+  color: white;
+  border-radius: 12px;
+  border-bottom-right-radius: 2px;
+  padding: 10px 14px;
+  max-width: 85%;
+}
+
+/* --- Input Area --- */
 .cw-chat-input-area {
-  padding: 16px;
-  background: white;
-  border-top: 1px solid var(--border-color);
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid transparent;
   display: flex;
   gap: 10px;
-  flex-shrink: 0;
+  align-items: center;
 }
 
 .cw-chat-input-area input {
   flex: 1;
-  padding: 12px 16px;
-  border-radius: 24px;
-  border: 1px solid var(--border-color);
+  padding: 14px 20px;
+  border-radius: 30px; /* Pill shape */
+  border: 1px solid var(--cw-primary);
   outline: none;
+  background: white;
+  color: var(--cw-text-main);
   font-size: 0.95rem;
-  background: #f1f5f9; /* Light gray background initially */
-  color: var(--text-main);
-  transition: all 0.2s ease;
 }
-
-.cw-chat-input-area input::placeholder { color: #94a3b8; }
 
 .cw-chat-input-area input:focus {
-  border-color: var(--primary-blue);
-  background: white;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); /* Nice focus ring */
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
+/* Send Button (Blue Circle) */
 .cw-chat-input-area button {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: var(--primary-blue);
+  background: var(--cw-primary);
   color: white;
   border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 5px rgba(37, 99, 235, 0.2);
+  transition: transform 0.2s;
+  flex-shrink: 0;
 }
 
-.cw-chat-input-area button:hover { 
-  background: var(--primary-hover); 
-  transform: scale(1.05);
-}
-.cw-chat-input-area button:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; box-shadow: none; }
-
-.cw-chat-cta { background: #eff6ff; border: 1px dashed var(--primary-blue); margin-top: 8px; }
-.cw-chat-cta h4 { color: var(--primary-blue); }
+.cw-chat-input-area button:hover { transform: scale(1.05); }
 
 /* =========================================
-   7. FAB TOGGLE BUTTON (SMALLER & MODERN)
+   6. FAB (TOGGLE BUTTON)
    ========================================= */
 .cw-fab {
-  width: 50px !important; /* Reduced from 60/64px */
-  height: 50px !important;
+  width: 60px !important;
+  height: 60px !important;
   border-radius: 50%;
-  
-  /* Modern Gradient Background */
-  background: linear-gradient(135deg, var(--primary-blue), #4f46e5) !important;
+  background: var(--cw-primary) !important;
   color: white;
-  
-  /* Subtle border + Deep Shadow */
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4), inset 0 2px 0 rgba(255,255,255,0.2);
-  
+  border: 2px solid white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   pointer-events: auto;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.2s;
   z-index: 10002;
-  backdrop-filter: blur(4px);
 }
-
-/* Make the icon inside smaller */
-.cw-fab svg {
-  width: 22px !important;
-  height: 22px !important;
-}
-
-/* Hover Effect */
-.cw-fab:hover {
-  background: linear-gradient(135deg, #3b82f6, #4338ca) !important;
-  transform: translateY(-4px) scale(1.05);
-  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.5);
-}
-
-.cw-fab:active { transform: scale(0.95) translateY(0); }
-
-/* Pulse Animation for idle state */
-.cw-fab::after {
-  content: ''; position: absolute;
-  top: -4px; left: -4px; right: -4px; bottom: -4px;
-  border-radius: 50%;
-  border: 2px solid var(--primary-blue);
-  opacity: 0; z-index: -1;
-  animation: cw-pulse-ring 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
-}
-
-@keyframes cw-pulse-ring {
-  0% { transform: scale(0.8); opacity: 0.8; }
-  100% { transform: scale(1.5); opacity: 0; }
-}
+.cw-fab:hover { transform: scale(1.05); }
 
 /* =========================================
-   8. MOBILE RESPONSIVENESS (UPDATED)
+   7. DARK MODE (Based on Deep Navy Screenshot)
    ========================================= */
-@media (max-width: 480px) {
-  .cw-widget-wrapper {
-    bottom: 0 !important; right: 0 !important; left: 0 !important;
-    width: 100%; height: auto;
-    z-index: 99999 !important; padding: 0;
-    align-items: flex-end;
-  }
-
-  .cw-popup.cw-hidden { display: none; }
-
-  /* Full Screen on Mobile */
-  .cw-popup.cw-visible {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    width: 100% !important; height: 100dvh !important;
-    max-height: 100dvh !important;
-    border-radius: 0; margin: 0; z-index: 10000;
-  }
-
-  /* Adjust Header */
-  .cw-header-area { padding-top: 50px; background: #fff; }
-
-  /* FAB becomes Close Button on Mobile */
-  .cw-fab.cw-fab-open {
-    position: fixed; top: 15px; right: 15px;
-    width: 36px !important; height: 36px !important; /* Smaller close btn */
-    background: rgba(241, 245, 249, 0.9) !important; /* Subtle gray */
-    color: #334155;
-    border: 1px solid #e2e8f0;
-    box-shadow: none;
-    z-index: 10001;
-    animation: none;
-  }
-  .cw-fab.cw-fab-open svg { width: 18px !important; height: 18px !important; }
-  .cw-fab.cw-fab-open::after { display: none; }
-
-  /* FAB Position when closed */
-  .cw-fab:not(.cw-fab-open) {
-    position: fixed; bottom: 20px; right: 20px;
-  }
-
-  .cw-chat-input-area {
-    padding-bottom: max(16px, env(safe-area-inset-bottom));
-  }
+.dark-theme .cw-widget-wrapper {
+  /* Sympto Dark Palette */
+  --cw-bg-body: #0b1121;     /* Deep Navy */
+  --cw-bg-subtle: #151e32;   /* Lighter Navy for cards */
+  --cw-bg-card: #1e293b;     /* Highlight/Active state */
+  --cw-text-main: #f8fafc;   /* White text */
+  --cw-text-muted: #94a3b8;  /* Muted blue-gray text */
+  --cw-border: #1e293b;      /* Dark border */
+  --cw-primary: #3b82f6;     /* Brighter Blue */
 }
 
-/* =========================================
-   9. DARK MODE OVERRIDES (REFINED)
-   ========================================= */
-.dark-theme .cw-popup { background-color: #0f172a; border-color: #1e293b; }
-.dark-theme .cw-content, .dark-theme .cw-answer { background-color: #020617; }
-.dark-theme .cw-header-area { background-color: #0f172a; border-bottom-color: #1e293b; }
-.dark-theme .cw-header-area h3 { color: #f8fafc; }
-
-.dark-theme .cw-tab-btn { color: #94a3b8; }
-.dark-theme .cw-tab-btn.active { color: #60a5fa; border-bottom-color: #60a5fa; }
-
-/* Lists & Items */
-.dark-theme .cw-list-item { background-color: #1e293b; border-color: #334155; }
-.dark-theme .cw-list-item:hover { border-color: #3b82f6; }
-.dark-theme h4, .dark-theme span, .dark-theme .cw-question-btn { color: #f1f5f9; }
-.dark-theme p, .dark-theme .cw-answer p { color: #94a3b8; }
-
-/* Chat Messages */
-.dark-theme .cw-messages-area { background-color: #020617; }
-.dark-theme .cw-msg-bot { background-color: #1e293b; color: #f1f5f9; border-color: #334155; }
-.dark-theme .cw-msg-user { background-color: #2563eb; color: #fff; }
-
-/* Dark Input Area */
-.dark-theme .cw-chat-input-area { background-color: #0f172a; border-top-color: #1e293b; }
-.dark-theme .cw-chat-input-area input { 
-  background-color: #1e293b; 
-  border-color: #334155; 
-  color: #fff; 
-}
-.dark-theme .cw-chat-input-area input:focus { 
-  border-color: #60a5fa; 
-  background-color: #1e293b;
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+/* Specific Dark Overrides */
+.dark-theme .cw-tabs {
+  background: #151e32;
+  border-color: #1e293b;
 }
 
-.dark-theme .cw-qa-header, .dark-theme .cw-qa-item { background-color: #0f172a; border-color: #1e293b; }
+.dark-theme .cw-tab-btn.active {
+  background: #1e293b; /* Active tab is slightly lighter */
+  color: #60a5fa;
+  box-shadow: none;
+}
 
-/* Mobile Dark Close Button */
-@media (max-width: 480px) {
-  .dark-theme .cw-fab.cw-fab-open {
-    background: #1e293b !important;
-    color: #f1f5f9;
-    border-color: #334155;
-  }
+.dark-theme .cw-list-item {
+  background: #151e32; /* Matches dark cards in screenshot */
+  border-color: #1e293b;
+}
+.dark-theme .cw-list-item:hover {
+  background: #1e293b;
+  border-color: #3b82f6;
+}
+
+.dark-theme .cw-chat-input-area input {
+  background: #0b1121;
+  border-color: #334155;
+  color: white;
 }

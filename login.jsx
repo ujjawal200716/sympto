@@ -151,7 +151,7 @@ const AuthPage = () => {
                 <label>Full Name</label>
                 <div className="custom-input-wrapper">
                   <span className="input-icon"><UserIcon /></span>
-                  <input type="text" name="fullName" placeholder="John Doe" required value={formData.fullName} onChange={handleChange} />
+                  <input type="text" name="fullName" placeholder="sympto user" required value={formData.fullName} onChange={handleChange} />
                 </div>
               </div>
             )}

@@ -384,74 +384,93 @@ const handleDownloadPDF = async () => {
         return;
     }
 
-    // IF SPEAKING SOMETHING ELSE: CANCEL PREVIOUS AND START NEW
+    // Stop anything else playing
     window.speechSynthesis.cancel();
     
-    // We speak a cleaner version (no asterisks) but we need to match indices visually.
+    // Clean text and SPLIT INTO SENTENCES (Chunking to prevent voice breaking/timeout)
     const cleanText = text.replace(/[*#_]/g, ''); 
-    const utterance = new SpeechSynthesisUtterance(cleanText);
+    // This regex splits by punctuation (. ! ?) followed by whitespace, keeping the punctuation
+    const sentences = cleanText.match(/[^.!?]+[.!?]+(\s+|$)|[^.!?]+$/g) || [cleanText];
 
     const voices = availableVoices.length > 0 ? availableVoices : window.speechSynthesis.getVoices();
     
-    // --- LANGUAGE DETECTION LOGIC (Supports "Every Language") ---
-    // Instead of forcing English, we try to detect the script or fallback to default
-    let preferredVoice = null;
+    // --- IMPROVED LANGUAGE DETECTION ---
     let targetLang = null;
-
-    // 1. Heuristic Script Detection for non-Latin languages
+    // 1. Script-based detection
     if (/[\u0900-\u097F]/.test(cleanText)) targetLang = 'hi'; // Hindi
     else if (/[\u0600-\u06FF]/.test(cleanText)) targetLang = 'ar'; // Arabic
     else if (/[\u0400-\u04FF]/.test(cleanText)) targetLang = 'ru'; // Russian
     else if (/[\u4E00-\u9FFF]/.test(cleanText)) targetLang = 'zh'; // Chinese
     else if (/[\u3040-\u309F\u30A0-\u30FF]/.test(cleanText)) targetLang = 'ja'; // Japanese
     else if (/[\uAC00-\uD7AF]/.test(cleanText)) targetLang = 'ko'; // Korean
-    
-    // 2. Select voice based on detected script
+    else if (/[à-ÿ]/.test(cleanText)) targetLang = 'es'; // Spanish/French heuristic
+
+    let preferredVoice = null;
+
     if (targetLang) {
+        // Try to find a voice matching the specific script language
         preferredVoice = voices.find(v => v.lang.startsWith(targetLang));
     }
 
-    // 3. Fallback for Latin scripts (En, Fr, Es, De, etc.) or if specific voice not found
+    // 2. FALLBACK: Use Browser System Language (Fixes "Every Language" issue)
+    // If no specific script detected (e.g. English, French, Spanish), try to match the user's OS language
     if (!preferredVoice) {
-        // Use the system default voice (this respects the user's OS language setting)
-        // This effectively enables speaking in French, Spanish, German, etc. if the OS is set to it.
-        preferredVoice = voices.find(v => v.default) || voices[0];
+        preferredVoice = voices.find(v => v.lang.startsWith(navigator.language)) || voices.find(v => v.default) || voices[0];
     }
     
-    if (preferredVoice) utterance.voice = preferredVoice;
-    // -----------------------------------------------------------
+    // --- RECURSIVE FUNCTION TO PLAY CHUNKS ---
+    let currentSentenceIndex = 0;
+    let globalCharOffset = 0; // To keep highlighter synced
 
-    utterance.rate = 1.0; 
-    utterance.pitch = 0.9; 
+    const speakNextSentence = () => {
+        if (currentSentenceIndex >= sentences.length) {
+            // Finished all chunks
+            setSpeakingMessageIndex(null);
+            setCurrentCharIndex(-1);
+            setIsSpeaking(false);
+            if (isVoiceModeRef.current && !isMuted) setTimeout(() => startListening(), 500);
+            return;
+        }
 
-    // START EVENT
-    utterance.onstart = () => {
-        setSpeakingMessageIndex(index);
-        setIsSpeaking(true);
-        setCurrentCharIndex(0);
+        const sentenceText = sentences[currentSentenceIndex];
+        const utterance = new SpeechSynthesisUtterance(sentenceText);
+        
+        if (preferredVoice) utterance.voice = preferredVoice;
+        utterance.rate = 1.0; 
+        utterance.pitch = 1.0; 
+
+        utterance.onstart = () => {
+            if (currentSentenceIndex === 0) {
+                setSpeakingMessageIndex(index);
+                setIsSpeaking(true);
+            }
+        };
+
+        // Update highlighting relative to the full text
+        utterance.onboundary = (event) => {
+            setCurrentCharIndex(globalCharOffset + event.charIndex);
+        };
+
+        utterance.onend = () => {
+            globalCharOffset += sentenceText.length;
+            currentSentenceIndex++;
+            speakNextSentence(); // Trigger next chunk
+        };
+
+        utterance.onerror = (e) => {
+            console.error("Voice Error", e);
+            // On error, try to skip to next chunk
+            globalCharOffset += sentenceText.length;
+            currentSentenceIndex++;
+            speakNextSentence();
+        };
+
+        utteranceRef.current = utterance;
+        window.speechSynthesis.speak(utterance);
     };
 
-    // BOUNDARY EVENT (The "Which word is it?" logic)
-    utterance.onboundary = (event) => {
-        setCurrentCharIndex(event.charIndex);
-    };
-
-    // END EVENT
-    utterance.onend = () => {
-        setSpeakingMessageIndex(null);
-        setCurrentCharIndex(-1);
-        setIsSpeaking(false);
-        if (isVoiceModeRef.current && !isMuted) setTimeout(() => startListening(), 500);
-    };
-
-    utterance.onerror = () => {
-        setSpeakingMessageIndex(null);
-        setCurrentCharIndex(-1);
-        setIsSpeaking(false);
-    };
-
-    utteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
+    // Start the chain
+    speakNextSentence();
   };
 
   // --- RENDER HELPER FOR HIGHLIGHTING WORDS ---
