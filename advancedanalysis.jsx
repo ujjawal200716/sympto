@@ -562,7 +562,7 @@ CRITICAL RULES:
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
       // FIXED MODEL NAME: gemini-1.5-flash
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", systemInstruction: VOICE_SYSTEM_INSTRUCTION });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", systemInstruction: VOICE_SYSTEM_INSTRUCTION });
       const history = messages.slice(1).map(msg => ({ role: msg.role === 'assistant' ? 'model' : 'user', parts: [{ text: msg.content }] }));
       const chat = model.startChat({ history: history });
       const result = await chat.sendMessage([{ text: voiceText }]);
@@ -597,7 +597,7 @@ CRITICAL RULES:
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
       // FIXED MODEL NAME: gemini-1.5-flash
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", systemInstruction: SYSTEM_INSTRUCTION });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", systemInstruction: SYSTEM_INSTRUCTION });
       const history = messages.slice(1).map(msg => ({ role: msg.role === 'assistant' ? 'model' : 'user', parts: [{ text: msg.content }] }));
       const chat = model.startChat({ history: history });
       let messageParts = [{ text: userMessageText }];
