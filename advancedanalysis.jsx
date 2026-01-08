@@ -5,28 +5,28 @@ import jsPDF from 'jspdf';
 import './advancedanalysiscss.css';
 import Nev from "./test.jsx";
 import logo1 from './logo1.png';
-import logoLight from './logo.png'; 
+import logoLight from './logo.png';
 import logoDark from './logodark.png';
 
 // 🔒 SECURE: Key loaded from environment variables
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY1 || import.meta.env.VITE_GEMINI_API_KEY2 ||import.meta.env.VITE_GEMINI_API_KEY3 || import.meta.env.VITE_GEMINI_API_KEY4 || import.meta.env.VITE_GEMINI_API_KEY5 || import.meta.env.VITE_GEMINI_API_KEY6 ||import.meta.env.VITE_GEMINI_API_KEY7 || import.meta.env.VITE_GEMINI_API_KEY8 || import.meta.env.VITE_GEMINI_API_KEY9;
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY1 || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY2|| import.meta.env.VITE_GEMINI_API_KEY3 || import.meta.env.VITE_GEMINI_API_KEY4 || import.meta.env.VITE_GEMINI_API_KEY5 || import.meta.env.VITE_GEMINI_API_KEY6 || import.meta.env.VITE_GEMINI_API_KEY7 || import.meta.env.VITE_GEMINI_API_KEY8 ;
 
 export default function Advancedanalysis() {
   const [messages, setMessages] = useState([
-    { 
-      role: 'assistant', 
-      content: 'Hello! I\'m Sympto, your medical symptom checker assistant. I\'m here to help you understand your symptoms better.\n\n⚠️ Important: I am not a doctor and cannot provide medical diagnoses. Always consult with a healthcare professional for medical advice.\n\nTo get started, please tell me:\n1. What symptoms are you experiencing?\n2. When did they start?\n3. How severe are they (mild, moderate, severe)?\n\nYou can also upload multiple images of visible symptoms using the camera button.' 
+    {
+      role: 'assistant',
+      content: 'Hello! I\'m Sympto, your medical symptom checker assistant. I\'m here to help you understand your symptoms better.\n\n⚠️ Important: I am not a doctor and cannot provide medical diagnoses. Always consult with a healthcare professional for medical advice.\n\nTo get started, please tell me:\n1. What symptoms are you experiencing?\n2. When did they start?\n3. How severe are they (mild, moderate, severe)?\n\nYou can also upload multiple images of visible symptoms using the camera button.'
     }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  
+ 
   // --- STATE FOR MENU ---
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
 
   // --- STATE FOR MULTIPLE IMAGES ---
-  const [selectedImages, setSelectedImages] = useState([]); 
+  const [selectedImages, setSelectedImages] = useState([]);
 
   // --- STATE FOR VOICE MODE ---
   const [isVoiceMode, setIsVoiceMode] = useState(false);
@@ -35,21 +35,23 @@ export default function Advancedanalysis() {
   const [isMuted, setIsMuted] = useState(false);
   const [availableVoices, setAvailableVoices] = useState([]);
 
-  // --- NEW: TEXT TO SPEECH HIGHLIGHTING STATE ---
-  const [speakingMessageIndex, setSpeakingMessageIndex] = useState(null); // Tracks which message ID is speaking
-  const [currentCharIndex, setCurrentCharIndex] = useState(-1); // Tracks character position for highlighting
+  // --- HIGHLIGHTING STATE ---
+  const [speakingMessageIndex, setSpeakingMessageIndex] = useState(null); 
+  const [currentCharIndex, setCurrentCharIndex] = useState(-1); 
 
   // --- NEW: USER DATA STATE ---
   const [userData, setUserData] = useState(null);
-  
+ 
   const isVoiceModeRef = useRef(false);
   const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
-  const utteranceRef = useRef(null);
-  
-  // REF FOR PDF CAPTURE
   const chatContentRef = useRef(null);
+
+  // --- SPEECH QUEUE REFS ---
+  const speechQueueRef = useRef([]); 
+  const isSpeakingRef = useRef(false);
+  const accumulatedLengthRef = useRef(0); // Tracks character count across sentences for highlighting
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -61,6 +63,16 @@ export default function Advancedanalysis() {
 
   useEffect(() => {
     isVoiceModeRef.current = isVoiceMode;
+    // Hard reset when leaving voice mode
+    if (!isVoiceMode) {
+        window.speechSynthesis.cancel();
+        speechQueueRef.current = [];
+        isSpeakingRef.current = false;
+        setIsSpeaking(false);
+        setSpeakingMessageIndex(null);
+        setCurrentCharIndex(-1);
+        stopListening();
+    }
   }, [isVoiceMode]);
 
   // Click outside to close menu
@@ -74,19 +86,17 @@ export default function Advancedanalysis() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // --- NEW: FETCH USER DATA (Same logic as Navbar) ---
+  // --- FETCH USER DATA ---
   useEffect(() => {
     const fetchUserData = async () => {
         const token = localStorage.getItem('token');
         const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         
-        // 1. Try LocalStorage first
         const storedUser = localStorage.getItem('userData');
         if (storedUser) {
             setUserData(JSON.parse(storedUser));
         }
 
-        // 2. Fetch fresh data if token exists
         if (token) {
             try {
                 const response = await fetch(`${API_BASE_URL}/api/user-profile`, {
@@ -121,6 +131,7 @@ export default function Advancedanalysis() {
   useEffect(() => {
     return () => {
       window.speechSynthesis.cancel();
+      if (recognitionRef.current) recognitionRef.current.stop();
     };
   }, []);
 
@@ -140,8 +151,11 @@ CRITICAL RULES:
 - Ask one or two questions at a time, not overwhelming lists`;
 
   const VOICE_SYSTEM_INSTRUCTION = `You are Sympto. 
-  CRITICAL: Keep your response extremely short (1-2 sentences maximum). 
-  Be conversational and helpful.`;
+  CRITICAL: 
+  1. Detect the language the user is speaking (English, Hindi, Marathi, etc.) and REPLY IN THAT EXACT SAME LANGUAGE.
+  2. Keep your response extremely short (5-6 sentences maximum).
+  3. Be conversational, helpful, and empathetic. 
+  4. Do not use special characters like asterisks or markdown, just plain text.`;
 
 const handleDownloadPDF = async () => {
     setShowMenu(false);
@@ -160,10 +174,10 @@ const handleDownloadPDF = async () => {
       // 2. APPLY "PAPER MODE" STYLES
       Object.assign(clone.style, {
         position: 'absolute',
-        top: '-10000px', 
+        top: '-10000px',
         left: '0',
-        width: `${originalWidth}px`, 
-        height: 'auto',       
+        width: `${originalWidth}px`,
+        height: 'auto',      
         maxHeight: 'none',    
         overflow: 'visible',  
         backgroundColor: '#ffffff',
@@ -176,9 +190,9 @@ const handleDownloadPDF = async () => {
       const header = document.createElement('div');
       header.style.cssText = `
         display: flex;
-        flex-direction: row; 
+        flex-direction: row;
         align-items: center;
-        padding: 20px; 
+        padding: 20px;
         border-bottom: 2px solid #2563eb;
         margin-bottom: 20px;
         background: #ffffff;
@@ -188,9 +202,9 @@ const handleDownloadPDF = async () => {
 
       // Header Logo - Hardcoded sizing
       header.innerHTML = `
-        <img 
-          src="${logo1}" 
-          style="width: 80px; height: 80px; min-width: 80px; margin-right: 20px; display: block;" 
+        <img
+          src="${logo1}"
+          style="width: 80px; height: 80px; min-width: 80px; margin-right: 20px; display: block;"
         />
         <div>
           <h1 style="color: #2563eb; margin: 0; font-size: 32px; font-weight: bold;">Sympto</h1>
@@ -209,86 +223,70 @@ const handleDownloadPDF = async () => {
           -webkit-print-color-adjust: exact !important;
         }
         
-        /* --- FIX: PREVENT SQUASHING --- */
         .new-avatar {
              width: 50px !important;
              height: 50px !important;
-             min-width: 50px !important; 
-             
-             /* This is the magic rule: Don't Grow, Don't Shrink, Stay 50px */
-             flex: 0 0 50px !important; 
-             
+             min-width: 50px !important;
+             flex: 0 0 50px !important;
              margin-right: 15px !important;
              display: flex !important;
              align-items: center !important;
              justify-content: center !important;
         }
 
-        /* Force image to fill the 50px container */
         .new-bot-logo, .new-avatar img {
              width: 100% !important;
              height: 100% !important;
-             object-fit: contain !important; 
+             object-fit: contain !important;
              display: block !important;
              border-radius: 50% !important;
         }
 
-        /* Reset Text Colors */
         .new-message-bubble {
             color: #000000 !important;
             border: 1px solid #ccc !important;
             box-shadow: none !important;
         }
 
-        /* Hide spinners */
         .new-loading-bubble, .new-spinner { display: none !important; }
       `;
       clone.appendChild(styleTag);
 
-      // 5. COLOR CORRECTION 
+      // 5. COLOR CORRECTION
       const allElements = clone.querySelectorAll('*');
       allElements.forEach((el) => {
         if (window.getComputedStyle(el).color !== 'rgba(0, 0, 0, 0)') {
              el.style.color = '#000000';
         }
-        // Remove dark backgrounds but keep yellow highlights
         const bg = window.getComputedStyle(el).backgroundColor;
         if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-            if (!el.style.backgroundColor?.includes('254') && !el.classList.contains('new-user-avatar')) { 
-               el.style.backgroundColor = 'transparent'; 
+            if (!el.style.backgroundColor?.includes('254') && !el.classList.contains('new-user-avatar')) {
+               el.style.backgroundColor = 'transparent';
             }
         }
       });
 
-      // 6. APPEND TO DOM
       document.body.appendChild(clone);
-
-      // 7. CAPTURE IMAGE
       await new Promise(resolve => setTimeout(resolve, 250)); // Wait for render
 
       const cloneHeight = clone.scrollHeight;
-
       const canvas = await html2canvas(clone, {
-        scale: 2, 
-        useCORS: true, 
+        scale: 2,
+        useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
-        windowHeight: cloneHeight + 2000, 
+        windowHeight: cloneHeight + 2000,
         y: 0,
         scrollY: 0
       });
 
-      // 8. REMOVE CLONE
       document.body.removeChild(clone);
       document.body.style.cursor = originalCursor;
 
-      // 9. GENERATE PDF
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
-      
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      
       const imgProps = pdf.getImageProperties(imgData);
       const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
@@ -313,7 +311,7 @@ const handleDownloadPDF = async () => {
       alert("Could not generate PDF. Please try again.");
     }
   };
-  
+ 
   const handleShare = async () => {
     setShowMenu(false);
     if (navigator.share) {
@@ -329,7 +327,6 @@ const handleDownloadPDF = async () => {
       alert("Link copied to clipboard!");
     }
   };
-
 
   const handleSave = async () => {
     setShowMenu(false);
@@ -352,16 +349,15 @@ const handleDownloadPDF = async () => {
             body: JSON.stringify({
                 title: `Sympto Check - ${new Date().toLocaleString()}`,
                 informationType: 'advanced-analysis',
-                content: { messages: messages } 
+                content: { messages: messages }
             })
         });
 
         const data = await response.json();
-        
         if (response.ok) {
             alert("✅ Session saved successfully!");
         } else {
-            console.error("Backend Error:", data); 
+            console.error("Backend Error:", data);
             alert(`❌ Error: ${data.message || "Invalid Data"}`);
         }
     } catch (err) {
@@ -370,119 +366,139 @@ const handleDownloadPDF = async () => {
     }
   };
 
-  // --- SPEECH & CHAT LOGIC ---
+  // ==========================================
+  // 🚀 QUEUE-BASED SPEECH ENGINE (NO BREAKING + HIGHLIGHT)
+  // ==========================================
 
-  const handleSpeak = (text, index) => {
+  const getVoiceForLang = (langCode) => {
+    const voices = window.speechSynthesis.getVoices();
+    // 1. Exact match
+    let voice = voices.find(v => v.lang === langCode);
+    // 2. Base match
+    if (!voice) voice = voices.find(v => v.lang.startsWith(langCode.split('-')[0]));
+    // 3. Fallback to default
+    if (!voice) voice = voices.find(v => v.default);
+    return voice;
+  };
+
+  const detectLanguage = (text) => {
+    if (/[\u0900-\u097F]/.test(text)) return 'hi-IN'; // Hindi
+    if (/[\u0980-\u09FF]/.test(text)) return 'mr-IN'; // Marathi 
+    if (/[\u0600-\u06FF]/.test(text)) return 'ar-SA'; // Arabic
+    if (/[\u4E00-\u9FFF]/.test(text)) return 'zh-CN'; // Chinese
+    if (/[\u3040-\u309F\u30A0-\u30FF]/.test(text)) return 'ja-JP'; // Japanese
+    if (/[\u0400-\u04FF]/.test(text)) return 'ru-RU'; // Russian
+    return 'en-US'; // Default
+  };
+
+  const speakChunk = () => {
+    if (speechQueueRef.current.length === 0) {
+        isSpeakingRef.current = false;
+        setIsSpeaking(false);
+        setSpeakingMessageIndex(null);
+        setCurrentCharIndex(-1);
+        
+        // Seamlessly start listening again
+        if (isVoiceModeRef.current && !isMuted) {
+             setTimeout(() => startListening(), 300);
+        }
+        return;
+    }
+
+    isSpeakingRef.current = true;
+    setIsSpeaking(true);
+
+    const text = speechQueueRef.current.shift(); // Dequeue next sentence
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Critical: Attach to window to prevent Garbage Collection bug in Chrome/Edge
+    window.currentUtterance = utterance;
+
+    const lang = detectLanguage(text);
+    utterance.lang = lang;
+    
+    const voice = getVoiceForLang(lang);
+    if (voice) utterance.voice = voice;
+
+    utterance.rate = 1.0; 
+    utterance.pitch = 1.0;
+
+    // --- HIGHLIGHTING LOGIC ---
+    // We capture the current accumulated length to calculate global position
+    const startOffset = accumulatedLengthRef.current;
+    
+    utterance.onboundary = (event) => {
+       // Update global index = start position of this chunk + current word position
+       setCurrentCharIndex(startOffset + event.charIndex);
+    };
+
+    utterance.onend = () => {
+        // Add length of this chunk to accumulator + 1 for space/punctuation
+        accumulatedLengthRef.current += text.length; 
+        speakChunk(); // Trigger next chunk
+    };
+
+    utterance.onerror = (e) => {
+        console.error("Speech Error", e);
+        speakChunk(); // Skip to next on error
+    };
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleSpeak = (fullText, index) => {
     if (!('speechSynthesis' in window)) return;
-
-    // IF ALREADY SPEAKING THIS MESSAGE: STOP
+    
+    // --- 1. TOGGLE STOP LOGIC ---
+    // If clicking the same message that is currently speaking, STOP it.
     if (speakingMessageIndex === index) {
         window.speechSynthesis.cancel();
         setSpeakingMessageIndex(null);
         setCurrentCharIndex(-1);
         setIsSpeaking(false);
+        speechQueueRef.current = [];
+        isSpeakingRef.current = false;
         return;
     }
 
-    // Stop anything else playing
+    // --- 2. START LOGIC ---
+    // Hard stop previous
     window.speechSynthesis.cancel();
+    speechQueueRef.current = [];
+    accumulatedLengthRef.current = 0; // Reset highlighter tracker
+    setSpeakingMessageIndex(index);
     
-    // Clean text and SPLIT INTO SENTENCES (Chunking to prevent voice breaking/timeout)
-    const cleanText = text.replace(/[*#_]/g, ''); 
-    // This regex splits by punctuation (. ! ?) followed by whitespace, keeping the punctuation
-    const sentences = cleanText.match(/[^.!?]+[.!?]+(\s+|$)|[^.!?]+$/g) || [cleanText];
+    // Clean text (remove markdown for speech engine)
+    const cleanText = fullText
+      .replace(/[*#_`~]/g, '') 
+      .replace(/https?:\/\/\S+/g, '') 
+      .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
+      .trim();
 
-    const voices = availableVoices.length > 0 ? availableVoices : window.speechSynthesis.getVoices();
+    if (!cleanText) return;
+
+    // Split into sentences/chunks to avoid "breaking"
+    // We try to keep punctuation attached to the sentence
+    const sentences = cleanText.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [cleanText];
     
-    // --- IMPROVED LANGUAGE DETECTION ---
-    let targetLang = null;
-    // 1. Script-based detection
-    if (/[\u0900-\u097F]/.test(cleanText)) targetLang = 'hi'; // Hindi
-    else if (/[\u0600-\u06FF]/.test(cleanText)) targetLang = 'ar'; // Arabic
-    else if (/[\u0400-\u04FF]/.test(cleanText)) targetLang = 'ru'; // Russian
-    else if (/[\u4E00-\u9FFF]/.test(cleanText)) targetLang = 'zh'; // Chinese
-    else if (/[\u3040-\u309F\u30A0-\u30FF]/.test(cleanText)) targetLang = 'ja'; // Japanese
-    else if (/[\uAC00-\uD7AF]/.test(cleanText)) targetLang = 'ko'; // Korean
-    else if (/[à-ÿ]/.test(cleanText)) targetLang = 'es'; // Spanish/French heuristic
+    sentences.forEach(s => {
+        // We push the raw sentence chunk
+        if (s.trim()) speechQueueRef.current.push(s); 
+    });
 
-    let preferredVoice = null;
-
-    if (targetLang) {
-        // Try to find a voice matching the specific script language
-        preferredVoice = voices.find(v => v.lang.startsWith(targetLang));
-    }
-
-    // 2. FALLBACK: Use Browser System Language (Fixes "Every Language" issue)
-    // If no specific script detected (e.g. English, French, Spanish), try to match the user's OS language
-    if (!preferredVoice) {
-        preferredVoice = voices.find(v => v.lang.startsWith(navigator.language)) || voices.find(v => v.default) || voices[0];
-    }
-    
-    // --- RECURSIVE FUNCTION TO PLAY CHUNKS ---
-    let currentSentenceIndex = 0;
-    let globalCharOffset = 0; // To keep highlighter synced
-
-    const speakNextSentence = () => {
-        if (currentSentenceIndex >= sentences.length) {
-            // Finished all chunks
-            setSpeakingMessageIndex(null);
-            setCurrentCharIndex(-1);
-            setIsSpeaking(false);
-            if (isVoiceModeRef.current && !isMuted) setTimeout(() => startListening(), 500);
-            return;
-        }
-
-        const sentenceText = sentences[currentSentenceIndex];
-        const utterance = new SpeechSynthesisUtterance(sentenceText);
-        
-        if (preferredVoice) utterance.voice = preferredVoice;
-        utterance.rate = 1.0; 
-        utterance.pitch = 1.0; 
-
-        utterance.onstart = () => {
-            if (currentSentenceIndex === 0) {
-                setSpeakingMessageIndex(index);
-                setIsSpeaking(true);
-            }
-        };
-
-        // Update highlighting relative to the full text
-        utterance.onboundary = (event) => {
-            setCurrentCharIndex(globalCharOffset + event.charIndex);
-        };
-
-        utterance.onend = () => {
-            globalCharOffset += sentenceText.length;
-            currentSentenceIndex++;
-            speakNextSentence(); // Trigger next chunk
-        };
-
-        utterance.onerror = (e) => {
-            console.error("Voice Error", e);
-            // On error, try to skip to next chunk
-            globalCharOffset += sentenceText.length;
-            currentSentenceIndex++;
-            speakNextSentence();
-        };
-
-        utteranceRef.current = utterance;
-        window.speechSynthesis.speak(utterance);
-    };
-
-    // Start the chain
-    speakNextSentence();
+    speakChunk();
   };
 
-  // --- RENDER HELPER FOR HIGHLIGHTING WORDS ---
+  // --- HIGHLIGHTER COMPONENT ---
   const renderMessageContent = (msg, index) => {
-    // If not speaking this message, just return content (formatted normal way)
+    // If not speaking this message, just return text
     if (speakingMessageIndex !== index) {
         return <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div>;
     }
 
-    // If speaking, split by spaces to highlight current word
-    const text = msg.content.replace(/[*#_]/g, ''); 
-    const words = text.split(/(\s+)/); 
+    // Prepare text for highlighting (Must match speech cleaning roughly)
+    const text = msg.content.replace(/[*#_`~]/g, '');
+    const words = text.split(/(\s+)/); // Split by whitespace but keep delimiters
     
     let charCount = 0;
 
@@ -493,14 +509,15 @@ const handleDownloadPDF = async () => {
                 const end = charCount + word.length;
                 charCount += word.length;
 
+                // Check if the current highlighter index is within this word
                 const isActive = currentCharIndex >= start && currentCharIndex < end;
                 const isWord = word.trim().length > 0;
 
                 return (
-                    <span 
-                        key={i} 
-                        style={{ 
-                            backgroundColor: (isActive && isWord) ? '#fef08a' : 'transparent', // Yellow highlight
+                    <span
+                        key={i}
+                        style={{
+                            backgroundColor: (isActive && isWord) ? '#fef08a' : 'transparent', // Yellow Highlight
                             color: (isActive && isWord) ? '#000' : 'inherit',
                             transition: 'background-color 0.1s ease',
                             borderRadius: '2px'
@@ -514,27 +531,39 @@ const handleDownloadPDF = async () => {
     );
   };
 
-
   const startListening = () => {
-    if (isListening || isSpeaking) return;
+    if (isSpeakingRef.current) return;
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
+    if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch(e){}
+    }
+
     const recognition = new SpeechRecognition();
-    // CHANGED: Use browser's default language (User's Native Language) instead of forcing en-US
     recognition.lang = navigator.language || 'en-US'; 
     recognition.continuous = false;
     recognition.interimResults = false;
 
     recognition.onstart = () => setIsListening(true);
+    
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
+      if (!transcript) return;
+
       setIsListening(false);
-      if (isVoiceModeRef.current) processVoiceMessage(transcript);
-      else setInput(prev => prev + (prev ? ' ' : '') + transcript);
+      
+      if (isVoiceModeRef.current) {
+          processVoiceMessage(transcript);
+      } else {
+          setInput(prev => prev + (prev ? ' ' : '') + transcript);
+      }
     };
+
     recognition.onerror = () => setIsListening(false);
     recognition.onend = () => setIsListening(false);
+    
     recognitionRef.current = recognition;
     recognition.start();
   };
@@ -551,6 +580,8 @@ const handleDownloadPDF = async () => {
       setIsVoiceMode(false);
       stopListening();
       window.speechSynthesis.cancel();
+      speechQueueRef.current = [];
+      isSpeakingRef.current = false;
       setIsSpeaking(false);
       setSpeakingMessageIndex(null);
     } else {
@@ -567,29 +598,39 @@ const handleDownloadPDF = async () => {
       setIsMuted(true);
       stopListening();
       window.speechSynthesis.cancel();
+      isSpeakingRef.current = false;
       setIsSpeaking(false);
-      setSpeakingMessageIndex(null);
     }
   };
 
   const processVoiceMessage = async (voiceText) => {
+    if (!voiceText.trim()) return;
+
     const userMessage = { role: 'user', content: voiceText };
     setMessages(prev => [...prev, userMessage]);
     setLoading(true);
+    
     try {
       const genAI = new GoogleGenerativeAI(API_KEY);
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", systemInstruction: VOICE_SYSTEM_INSTRUCTION });
       const history = messages.slice(1).map(msg => ({ role: msg.role === 'assistant' ? 'model' : 'user', parts: [{ text: msg.content }] }));
+      
       const chat = model.startChat({ history: history });
       const result = await chat.sendMessage([{ text: voiceText }]);
       const text = result.response.text();
+      
       setMessages(prev => [...prev, { role: 'assistant', content: text }]);
-      // Auto speak for voice mode - using last index approximation
-      setTimeout(() => handleSpeak(text, messages.length + 1), 100); 
-    } catch (error) { 
-        const errText = "Connection error.";
+      
+      // Auto speak for voice mode
+      handleSpeak(text, messages.length + 1);
+
+    } catch (error) {
+        const errText = "I'm having trouble connecting. Please try again.";
+        setMessages(prev => [...prev, { role: 'assistant', content: errText }]);
         handleSpeak(errText, -1);
-    } finally { setLoading(false); }
+    } finally { 
+        setLoading(false); 
+    }
   };
 
   const sendMessage = async () => {
@@ -601,7 +642,7 @@ const handleDownloadPDF = async () => {
     setMessages(prev => [...prev, { role: 'user', content: userMessageText, images: imagePreviews }]);
     setInput('');
     setLoading(true);
-    const currentImages = [...selectedImages]; 
+    const currentImages = [...selectedImages];
     setSelectedImages([]);
     if (fileInputRef.current) fileInputRef.current.value = '';
 
@@ -615,6 +656,11 @@ const handleDownloadPDF = async () => {
       const result = await chat.sendMessage(messageParts);
       const text = result.response.text();
       setMessages(prev => [...prev, { role: 'assistant', content: text }]);
+      
+      // If we are in voice mode, speak the result
+      if (isVoiceMode) {
+          handleSpeak(text, messages.length + 1);
+      }
     } catch (error) {
       setMessages(prev => [...prev, { role: 'assistant', content: '⚠️ Error connecting to AI.' }]);
     } finally { setLoading(false); }
@@ -671,12 +717,12 @@ const handleDownloadPDF = async () => {
              <div className={`new-avatar ${msg.role === 'assistant' ? 'new-assistant-avatar' : 'new-user-avatar'}`}>
               {msg.role === 'assistant' ? (
                 /* --- Chat Interface Logo Fix --- */
-                <img 
-                  src={logo1} 
-                  alt="Sympto" 
-                  className="new-bot-logo" 
-                  onClick={() => handleSpeak(msg.content, idx)} 
-                  style={{ width: '80%', height: '80%', objectFit: 'cover', borderRadius: '50%', padding: 0, cursor: 'pointer' }} 
+                <img
+                  src={logo1}
+                  alt="Sympto"
+                  className="new-bot-logo"
+                  onClick={() => handleSpeak(msg.content, idx)}
+                  style={{ width: '80%', height: '80%', objectFit: 'cover', borderRadius: '50%', padding: 0, cursor: 'pointer' }}
                 />
               ) : (
                 <div style={{
@@ -704,7 +750,7 @@ const handleDownloadPDF = async () => {
                     {msg.images.map((imgSrc, i) => <img key={i} src={imgSrc} alt="Symptom" className="new-chat-image-item" />)}
                   </div>
                 )}
-                {/* REPLACED PLAIN TEXT WITH HIGHLIGHTER HELPER */}
+                {/* TEXT CONTENT WITH HIGHLIGHTING */}
                 {renderMessageContent(msg, idx)}
               </div>
             </div>
@@ -748,8 +794,8 @@ const handleDownloadPDF = async () => {
 
             {/* 1. ROBOT MENU (Far Left, Independent) */}
             <div className="new-menu-wrapper" ref={menuRef}>
-              <button 
-                onClick={() => setShowMenu(!showMenu)} 
+              <button
+                onClick={() => setShowMenu(!showMenu)}
                 className="new-robot-standalone-btn"
                 title="Options"
                 style={{
@@ -758,9 +804,9 @@ const handleDownloadPDF = async () => {
                   justifyContent: 'center',
                   background: '#ffffff',
                   border: 'none',
-                  borderRadius: '50%', 
+                  borderRadius: '50%',
                   width: '40px',       
-                  height: '40px',      
+                  height: '40px',       
                   cursor: 'pointer',
                   boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)',
                   transition: 'all 0.2s ease',

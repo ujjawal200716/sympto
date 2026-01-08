@@ -5,7 +5,7 @@ import "./chatcss.css";
 
 // 1. SETUP GEMINI API
 // -------------------
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY4 ; 
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY110 || import.meta.env.VITE_GEMINI_API_KEY9; ; 
 // Note: If using Create React App, use process.env.REACT_APP_GEMINI_API_KEY
 
 const genAI = new GoogleGenerativeAI(API_KEY);

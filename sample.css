@@ -1232,3 +1232,516 @@
   background: rgba(16, 185, 129, 0.2);
   color: #34d399;
 }
+/* =========================================
+   9. NEW BODY MAP STYLES
+   ========================================= */
+
+.body-map-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 10px 0 40px 0;
+  width: 100%;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.body-map-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+/* Pulsing Red Dot in Header */
+.pulse-dot {
+  width: 10px;
+  height: 10px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.human-body-svg {
+  height: 400px; 
+  width: 100%;
+  max-width: 320px;
+  filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.1));
+  /* Prevent blue highlight on tap on mobile */
+  -webkit-tap-highlight-color: transparent; 
+  overflow: visible;
+}
+
+/* --- SVG INTERACTION --- */
+
+/* Default Body Part Style */
+.body-part {
+  fill: #f1f5f9;      /* Slate 100 */
+  stroke: #cbd5e1;    /* Slate 300 */
+  stroke-width: 2px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+/* Label text inside body parts */
+.part-label {
+  font-size: 11px;
+  fill: #64748b;
+  text-anchor: middle;
+  pointer-events: none; /* Clicks pass through to the shape */
+  font-weight: 700;
+  opacity: 0.6;
+  text-transform: uppercase;
+}
+
+/* Hover Effect */
+.body-part:hover {
+  fill: #e0f2fe; /* Sky 100 */
+  stroke: #38bdf8; /* Sky 400 */
+  transform: scale(1.02);
+}
+
+/* Selected Effect (Pain Location) */
+.body-part.selected {
+  fill: #ef4444; /* RED Fill */
+  stroke: #b91c1c; /* Dark Red Border */
+  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.5));
+}
+
+/* When selected, make label white and fully visible */
+.body-part.selected + .part-label {
+  fill: #ffffff;
+  opacity: 1;
+  font-weight: 800;
+}
+
+/* The label showing what you clicked below the map */
+.selected-label {
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
+  color: #94a3b8;
+  background: #ffffff;
+  padding: 0.8rem 1.5rem;
+  border-radius: 99px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.selected-label.active {
+  color: #b91c1c;
+  background: #fef2f2;
+  border-color: #fca5a5;
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.1);
+  animation: slideUpFade 0.3s ease-out;
+}
+
+/* --- DARK MODE FOR BODY MAP --- */
+
+.dark-theme .human-body-svg {
+  filter: drop-shadow(0px 10px 20px rgba(0,0,0,0.5));
+}
+
+.dark-theme .body-part {
+  fill: rgba(30, 41, 59, 0.5); /* Transparent dark slate */
+  stroke: rgba(255, 255, 255, 0.1);
+}
+
+.dark-theme .part-label {
+  fill: #94a3b8;
+}
+
+.dark-theme .body-part:hover {
+  fill: rgba(14, 165, 233, 0.2); /* Low opacity blue glow */
+  stroke: #38bdf8;
+}
+
+.dark-theme .body-part.selected {
+  fill: rgba(220, 38, 38, 0.8); /* Red transparency */
+  stroke: #ef4444;
+  filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.6));
+}
+
+.dark-theme .body-part.selected + .part-label {
+  fill: #ffffff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.dark-theme .selected-label {
+  background: rgba(30, 41, 59, 0.5);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+}
+
+.dark-theme .selected-label.active {
+  background: rgba(127, 29, 29, 0.3); /* Dark red bg */
+  border-color: #7f1d1d;
+  color: #fca5a5;
+}
+/* =========================================
+   10. CUSTOM ANIMATED CHECKBOX (Pain Toggle)
+   ========================================= */
+
+/* The Container */
+.pain-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 1.5rem !important;
+  padding: 10px;
+  border-radius: 12px;
+  transition: background 0.3s ease;
+  cursor: pointer;
+}
+
+.pain-toggle-wrapper:hover {
+  background-color: rgba(239, 68, 68, 0.05); /* Very light red hover */
+}
+
+/* The Checkbox Input - Hiding default and creating custom base */
+#pain-checkbox {
+  appearance: none;
+  -webkit-appearance: none; /* Safari support */
+  width: 26px;
+  height: 26px;
+  border: 2px solid #cbd5e1; /* Slate 300 */
+  border-radius: 8px;
+  background-color: #ffffff;
+  cursor: pointer;
+  position: relative;
+  display: grid;
+  place-content: center;
+  flex-shrink: 0;
+  
+  /* The "Anime" Bounce Transition */
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Checkbox Hover State */
+#pain-checkbox:hover {
+  border-color: #ef4444; /* Red border */
+  transform: scale(1.05);
+}
+
+/* CHECKED STATE - The Animation Trigger */
+#pain-checkbox:checked {
+  background-color: #ef4444; /* Red Fill */
+  border-color: #ef4444;
+  transform: scale(1.15); /* Pop effect */
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); /* Glow effect */
+}
+
+/* The White Checkmark (Hidden by default) */
+#pain-checkbox::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  box-shadow: inset 1em 1em white; /* Creates the white fill */
+  transform-origin: center;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  transform: scale(0); /* Start tiny */
+  transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Reveal Checkmark when checked */
+#pain-checkbox:checked::before {
+  transform: scale(1); /* Scale up with bounce */
+}
+
+/* The Label Text */
+.pain-toggle-wrapper label {
+  font-size: 1.1rem !important;
+  color: #64748b !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  user-select: none;
+}
+
+/* Change text color when checkbox is active */
+.pain-toggle-wrapper input:checked + label {
+  color: #1e293b !important; /* Darker text */
+}
+
+/* --- DARK MODE SUPPORT FOR CHECKBOX --- */
+
+.dark-theme .pain-toggle-wrapper:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+}
+
+.dark-theme #pain-checkbox {
+  background-color: rgba(30, 41, 59, 0.5);
+  border-color: #475569;
+}
+
+.dark-theme #pain-checkbox:checked {
+  background-color: #ef4444;
+  border-color: #ef4444;
+}
+
+.dark-theme .pain-toggle-wrapper label {
+  color: #94a3b8 !important;
+}
+
+.dark-theme .pain-toggle-wrapper input:checked + label {
+  color: #f1f5f9 !important;
+}
+/* =========================================
+   DARK MODE FOR NEW UI ELEMENTS
+   ========================================= */
+
+/* --- 1. Main Containers --- */
+.dark-theme .app-container {
+  background: radial-gradient(circle at top left, #0f172a, #1e293b); /* Deep Navy Gradient */
+}
+
+.dark-theme .main-card,
+.dark-theme .result-card {
+  background: rgba(30, 41, 59, 0.95); /* Slate-800 */
+  border: 1px solid #334155; /* Slate-700 border */
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.dark-theme .question-text {
+  color: #f1f5f9; /* Slate-100 */
+}
+
+.dark-theme .field-label {
+  color: #94a3b8; /* Slate-400 */
+}
+
+/* --- 2. Progress Stepper (Dark Mode Overrides) --- */
+/* Note: !important is used here to override the inline <style> tags in the React component */
+
+.dark-theme .step-bubble {
+  background-color: #0f172a !important; /* Dark bubble bg */
+  border-color: #334155 !important;     /* Dark border */
+  color: #94a3b8 !important;             /* Muted text */
+  box-shadow: none !important;
+}
+
+.dark-theme .step-bubble.active {
+  background-color: #3b82f6 !important; /* Blue bg for active */
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2) !important;
+}
+
+.dark-theme .step-bubble.completed {
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .stepper-line-bg {
+  background-color: #334155 !important; /* Darker track line */
+}
+
+/* --- 3. Realistic Body Map (Dark Mode Overrides) --- */
+
+/* The Body Silhouette */
+.dark-theme .body-part {
+  fill: #334155 !important;   /* Dark Slate fill */
+  stroke: #475569 !important; /* Lighter Slate outline */
+}
+
+/* Body Hover State */
+.dark-theme .body-part:hover {
+  fill: #1e3a8a !important;   /* Dark Blue fill */
+  stroke: #60a5fa !important; /* Bright Blue outline */
+  filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.6)) !important; /* Blue Glow */
+}
+
+/* Body Selected State */
+.dark-theme .body-part.selected {
+  fill: #7f1d1d !important;   /* Dark Red fill */
+  stroke: #ef4444 !important; /* Bright Red outline */
+  filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.6)) !important; /* Red Glow */
+}
+
+/* Zoom Reset Button */
+.dark-theme .zoom-reset-btn {
+  background: #0f172a !important;
+  border: 1px solid #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+/* Side Selector Popup */
+.dark-theme .side-selector-overlay {
+  background: #1e293b !important;
+  border: 1px solid #475569 !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6) !important;
+}
+
+.dark-theme .side-selector-overlay p {
+  color: #f1f5f9 !important;
+}
+
+.dark-theme .selected-text {
+  color: #cbd5e1 !important;
+}
+
+/* --- 4. Form Elements & Inputs --- */
+
+/* Option Buttons */
+.dark-theme .option-btn, 
+.dark-theme .symptom-btn {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+}
+
+.dark-theme .option-btn:hover,
+.dark-theme .symptom-btn:hover {
+  background: #334155; /* Slightly lighter on hover */
+  border-color: #60a5fa;
+}
+
+.dark-theme .option-btn.selected,
+.dark-theme .symptom-btn.selected {
+  background: #2563eb; /* Primary Blue */
+  border-color: #60a5fa;
+  color: white;
+}
+
+.dark-theme .symptom-name {
+  color: #cbd5e1;
+}
+
+/* Text Area & Inputs */
+.dark-theme .text-area-input,
+.dark-theme .input-group {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: white;
+}
+
+.dark-theme .text-area-input:focus,
+.dark-theme .input-group:focus-within {
+  border-color: #3b82f6;
+  background: #020617;
+}
+
+.dark-theme .medical-input {
+  color: white;
+}
+
+.dark-theme .unit {
+  color: #64748b;
+}
+
+/* Pain Checkbox Area */
+.dark-theme .pain-toggle-wrapper {
+  background: rgba(69, 10, 10, 0.5); /* Dark Red transparent */
+  border-color: #7f1d1d;
+}
+
+.dark-theme .pain-toggle-wrapper label {
+  color: #fca5a5 !important; /* Light Red text */
+}
+
+/* --- 5. Buttons --- */
+.dark-theme .btn-back {
+  color: #94a3b8;
+  border-color: #475569;
+}
+
+.dark-theme .btn-back:hover {
+  background: #334155;
+  color: white;
+}
+
+/* --- 6. Results Page Dark Mode --- */
+.dark-theme .result-badge {
+  background: #14532d; /* Dark Green */
+  color: #dcfce7;      /* Light Green text */
+}
+
+.dark-theme .diagnosis-icon {
+  background: #172554; /* Dark Blue circle */
+  color: #60a5fa;
+}
+
+.dark-theme .condition-name {
+  background: linear-gradient(90deg, #f8fafc, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dark-theme .condition-meta {
+  color: #94a3b8;
+}
+
+.dark-theme .warning-banner {
+  background: #431407; /* Dark Orange/Red */
+  border-color: #7c2d12;
+  color: #fdba74;
+}
+
+.dark-theme .section-title {
+  color: #f1f5f9;
+}
+
+.dark-theme .about-text {
+  color: #cbd5e1;
+}
+
+.dark-theme .stat-box {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.dark-theme .stat-label {
+  color: #64748b;
+}
+
+.dark-theme .stat-value {
+  color: #f1f5f9;
+}
+
+.dark-theme .actions-header {
+  color: #f1f5f9;
+}
+
+.dark-theme .rec-item {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.dark-theme .rec-icon-box {
+  background: #172554;
+  color: #60a5fa;
+}
+
+.dark-theme .icon-btn {
+  background: #0f172a;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+.dark-theme .icon-btn:hover {
+  background: #1e293b;
+  color: white;
+}
+
+.dark-theme .btn-restart {
+  background: #1e293b;
+  color: #cbd5e1;
+}
+
+.dark-theme .btn-restart:hover {
+  background: #334155;
+  color: white;
+}
