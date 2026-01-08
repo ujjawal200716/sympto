@@ -7,7 +7,7 @@ import "./sample.css";
 import Nev from "./test.jsx"; 
 
 // 🔒 SECURE: Key loaded from environment variables
-const API_KEY = VITE_GEMINI_API_KEY12 || VITE_GEMINI_API_KEY11;
+const API_KEY = VITE_GEMINI_API_KEY8 || VITE_GEMINI_API_KEY11;
 
 // --- COMPONENT: CLEAN PROGRESS STEPPER (No Titles) ---
 const ProgressStepper = ({ steps, currentStep }) => {

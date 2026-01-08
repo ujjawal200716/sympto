@@ -9,7 +9,7 @@ import logoLight from './logo.png';
 import logoDark from './logodark.png';
 
 // 🔒 SECURE: Key loaded from environment variables
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY1 || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY2|| import.meta.env.VITE_GEMINI_API_KEY3 || import.meta.env.VITE_GEMINI_API_KEY4 || import.meta.env.VITE_GEMINI_API_KEY5 || import.meta.env.VITE_GEMINI_API_KEY6 || import.meta.env.VITE_GEMINI_API_KEY7 || import.meta.env.VITE_GEMINI_API_KEY8 ;
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY1 || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY2|| import.meta.env.VITE_GEMINI_API_KEY3 || import.meta.env.VITE_GEMINI_API_KEY4 || import.meta.env.VITE_GEMINI_API_KEY5 || import.meta.env.VITE_GEMINI_API_KEY6 || import.meta.env.VITE_GEMINI_API_KEY7  ;
 
 export default function Advancedanalysis() {
   const [messages, setMessages] = useState([
