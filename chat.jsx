@@ -5,7 +5,27 @@ import "./chatcss.css";
 
 // 1. SETUP GEMINI API
 // -------------------
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY110 || import.meta.env.VITE_GEMINI_API_KEY9; ; 
+// 1. Define the pool of keys
+const ALL_KEYS = [
+ 
+  import.meta.env.VITE_GEMINI_API_KEY6,
+  import.meta.env.VITE_GEMINI_API_KEY7,
+];
+
+// 2. Filter out any keys that are missing/empty in the .env file
+const validKeys = ALL_KEYS.filter((key) => key && key.length > 0);
+
+// 3. Select a random key from the valid ones
+const API_KEY = validKeys.length > 0 
+  ? validKeys[Math.floor(Math.random() * validKeys.length)] 
+  : null;
+
+// 4. Safety check (optional but recommended)
+if (!API_KEY) {
+  console.error("❌ Critical Error: No valid Gemini API keys found.");
+} else {
+  console.log("✅ Using Key Index:", ALL_KEYS.indexOf(API_KEY)); // Uncomment for debugging
+} 
 // Note: If using Create React App, use process.env.REACT_APP_GEMINI_API_KEY
 
 const genAI = new GoogleGenerativeAI(API_KEY);

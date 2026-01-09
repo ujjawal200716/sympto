@@ -7,7 +7,26 @@ import "./sample.css";
 import Nev from "./test.jsx"; 
 
 // 🔒 SECURE: Key loaded from environment variables
-const API_KEY = VITE_GEMINI_API_KEY8 || VITE_GEMINI_API_KEY11;
+// 1. Define the pool of keys
+const ALL_KEYS = [
+  import.meta.env.VITE_GEMINI_API_KEY8,  // New addition
+  import.meta.env.VITE_GEMINI_API_KEY11, // New addition
+];
+
+// 2. Filter out any keys that are missing/empty in the .env file
+const validKeys = ALL_KEYS.filter((key) => key && key.length > 0);
+
+// 3. Select a random key from the valid ones
+const API_KEY = validKeys.length > 0 
+  ? validKeys[Math.floor(Math.random() * validKeys.length)] 
+  : null;
+
+// 4. Safety check (optional but recommended)
+if (!API_KEY) {
+  console.error("❌ Critical Error: No valid Gemini API keys found.");
+} else {
+  console.log("✅ Using Key Index:", ALL_KEYS.indexOf(API_KEY));
+}
 
 // --- COMPONENT: CLEAN PROGRESS STEPPER (No Titles) ---
 const ProgressStepper = ({ steps, currentStep }) => {
