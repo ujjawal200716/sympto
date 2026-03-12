@@ -2,21 +2,14 @@
    1. LIGHT MODE (DEFAULT)
    ========================================= */
 
-/* The outer container (for z-index context) */
 .find-modal-overlay {
     z-index: 9999999; 
 }
 
 .find-modal-content {
-    /* Positioning - CENTERED */
+    /* Position is controlled by JS inline styles for desktop dragging */
     position: fixed; 
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    
-    /* 🔴 ADD THIS LINE 🔴 */
     z-index: 10000000; 
-    /* ------------------ */
 
     /* Appearance */
     display: flex;
@@ -54,9 +47,7 @@
     color: #333333;
 }
 
-.find-input::placeholder {
-    color: #999999; 
-}
+.find-input::placeholder { color: #999999; }
 
 .find-input:focus {
     border-color: #3498db; 
@@ -84,9 +75,7 @@
     color: #333333; 
 }
 
-.find-modal-content button svg path {
-    fill: currentColor;
-}
+.find-modal-content button svg path { fill: currentColor; }
 
 .find-modal-content button:disabled {
     cursor: not-allowed;
@@ -109,23 +98,19 @@
 }
 
 .match-count.no-match {
-    color: #e74c3c; /* Red alert */
+    color: #e74c3c; 
     font-weight: 600;
 }
 
-
 /* --- Highlight Styles --- */
-
-/* Standard found instance */
 .highlight-find {
     background-color: #ffff99; 
-    color: #000; /* Force black text for contrast on yellow */
+    color: #000; 
     padding: 1px 0;
     line-height: inherit;
     display: inline;
 }
 
-/* Currently selected instance */
 .active-highlight {
     background-color: #3498db; 
     color: white; 
@@ -138,114 +123,88 @@
 /* =========================================
    2. DARK MODE OVERRIDES
    ========================================= */
-/* Applies when .dark-theme contains the modal */
 
 .dark-theme .find-modal-content {
-    background-color: #0f172a; /* Dark Slate Background */
-    border-color: #334155;     /* Dark Slate Border */
+    background-color: #0f172a; 
+    border-color: #334155;     
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); 
-    color: #f1f5f9;            /* Off-white text */
+    color: #f1f5f9;            
 }
 
-/* Dark Input Field */
 .dark-theme .find-input {
-    background-color: #1e293b; /* Darker Slate */
-    border-color: #475569;     /* Slate Gray Border */
-    color: #f1f5f9;            /* White Text */
+    background-color: #1e293b; 
+    border-color: #475569;     
+    color: #f1f5f9;            
 }
 
-.dark-theme .find-input::placeholder {
-    color: #94a3b8; /* Dimmed Gray Placeholder */
-}
+.dark-theme .find-input::placeholder { color: #94a3b8; }
 
 .dark-theme .find-input:focus {
-    border-color: #60a5fa; /* Lighter Blue Focus */
+    border-color: #60a5fa; 
     box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
 }
 
-/* Dark Buttons */
-.dark-theme .find-modal-content button {
-    color: #cbd5e1; /* Light Gray Icon */
-}
+.dark-theme .find-modal-content button { color: #cbd5e1; }
 
 .dark-theme .find-modal-content button:not(:disabled):hover {
-    background-color: #1e293b; /* Dark Hover BG */
-    color: #60a5fa;            /* Light Blue Icon */
+    background-color: #1e293b; 
+    color: #60a5fa;            
 }
 
-.dark-theme .find-modal-content button:disabled {
-    color: #475569; /* Disabled Gray */
-}
+.dark-theme .find-modal-content button:disabled { color: #475569; }
+.dark-theme .match-count { color: #e2e8f0; }
+.dark-theme .match-count.no-match { color: #f87171; }
 
-/* Dark Text Counters */
-.dark-theme .match-count {
-    color: #e2e8f0;
-}
-
-.dark-theme .match-count.no-match {
-    color: #f87171; /* Light Red for dark mode visibility */
-}
-
-/* Dark Mode Highlights */
 .dark-theme .highlight-find {
-    background-color: #fbbf24; /* Amber-400 */
-    color: #000000;            /* Always black text */
+    background-color: #fbbf24; 
+    color: #000000;            
 }
 
 .dark-theme .active-highlight {
-    background-color: #3b82f6; /* Blue-500 */
+    background-color: #3b82f6; 
     color: #ffffff;
     box-shadow: 0 0 4px rgba(59, 130, 246, 0.6);
 }
 
-/* =========================================
-   3. MOBILE OPTIMIZATIONS (CENTERED)
-   ========================================= */
 /* =========================================
    3. MOBILE OPTIMIZATIONS (COMPACT & CENTERED)
    ========================================= */
 @media (max-width: 768px) {
     
     .find-modal-content {
-        /* FIX: High Z-Index */
         z-index: 2147483647 !important; 
         
-        /* Position: Center of screen */
+        /* Forces true center on mobile and ignores JS drag coordinates */
         position: fixed !important;
         top: 50% !important;
         left: 50% !important;
         bottom: auto !important;
-        
-        /* Transform */
         transform: translate3d(-50%, -50%, 0) !important;
         will-change: transform, opacity;
         
-        /* Layout & Sizing - REDUCED SIZE */
-        width: auto;             /* Wraps content tightly */
-        min-width: 280px;        /* Prevents it from being too squashed */
-        max-width: 85%;          /* Limits width on small screens */
-        padding: 6px 8px;        /* Reduced padding (was 10px 14px) */
-        gap: 6px;                /* Reduced gap (was 8px) */
+        width: auto;             
+        min-width: 280px;        
+        max-width: 85%;          
+        padding: 6px 8px;        
+        gap: 6px;                
         
-        /* Appearance */
         background-color: rgba(255, 255, 255, 0.96);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Slightly smaller shadow */
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); 
         border: none;
-        border-radius: 16px;     /* Slightly smaller radius */
+        border-radius: 16px;     
         
         animation: centerPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    /* Input Field - COMPACT */
     .find-input {
         flex: 1; 
         width: auto;
-        height: 34px;          /* Reduced height (was 42px) */
-        font-size: 14px;       /* Smaller font (was 16px) */
-        border-radius: 17px;   /* Adjusted for new height */
-        padding-left: 12px;    /* Tighter padding */
+        height: 34px;          
+        font-size: 14px;       
+        border-radius: 17px;   
+        padding-left: 12px;    
         background-color: #f1f5f9;
         border: 1px solid transparent;
         appearance: none; 
@@ -257,19 +216,18 @@
         border-color: #3b82f6;
     }
 
-    /* Buttons - COMPACT */
     .find-modal-content button {
-        width: 32px;           /* Reduced size (was 42px) */
-        height: 32px;          /* Reduced size (was 42px) */
+        width: 32px;           
+        height: 32px;          
         background-color: transparent;
         border-radius: 50%;
         margin: 0;
-        padding: 4px;          /* Ensure icon fits inside */
+        padding: 4px;          
         flex-shrink: 0; 
     }
 
     .find-modal-content button svg {
-        width: 18px;           /* Force icon SVG scaling if needed */
+        width: 18px;           
         height: 18px;
     }
 
@@ -278,9 +236,8 @@
         transform: scale(0.95);
     }
 
-    /* Match Count */
     .match-count {
-        font-size: 11px;       /* Smaller text */
+        font-size: 11px;       
         min-width: auto;
         padding: 0 4px;
         color: #64748b;
@@ -288,7 +245,6 @@
         white-space: nowrap;
     }
 
-    /* Dark Mode Mobile Overrides */
     .dark-theme .find-modal-content {
         background-color: rgba(15, 23, 42, 0.96);
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
@@ -309,7 +265,6 @@
         background-color: #334155;
     }
 
-    /* Animation */
     @keyframes centerPop {
         0% { 
             transform: translate3d(-50%, -50%, 0) scale(0.85); 

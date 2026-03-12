@@ -1,15 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, ChevronRight, ChevronLeft, ChevronDown, Send, Bot } from 'lucide-react';
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 import "./chatcss.css";
 
-// 1. SETUP GEMINI API
+// 1. SETUP GROQ API
 // -------------------
-// 1. Define the pool of keys
+// 1. Define the pool of keys (update your .env to use Groq keys)
 const ALL_KEYS = [
- 
-  import.meta.env.VITE_GEMINI_API_KEY6,
-  import.meta.env.VITE_GEMINI_API_KEY7,
+  import.meta.env.VITE_GROQ_KEY_1
 ];
 
 // 2. Filter out any keys that are missing/empty in the .env file
@@ -20,34 +18,35 @@ const API_KEY = validKeys.length > 0
   ? validKeys[Math.floor(Math.random() * validKeys.length)] 
   : null;
 
-// 4. Safety check (optional but recommended)
 if (!API_KEY) {
-  console.error("❌ Critical Error: No valid Gemini API keys found.");
-} else {
-  console.log("✅ Using Key Index:", ALL_KEYS.indexOf(API_KEY)); // Uncomment for debugging
-} 
-// Note: If using Create React App, use process.env.REACT_APP_GEMINI_API_KEY
+  console.error("❌ Critical Error: No valid Groq API keys found.");
+}
 
-const genAI = new GoogleGenerativeAI(API_KEY);
+// 4. Initialize Groq (dangerouslyAllowBrowser is required if calling directly from React frontend)
+const groq = new Groq({ 
+    apiKey: API_KEY,
+    dangerouslyAllowBrowser: true 
+});
 
 // 2. THE "BRAIN" (System Context)
 // -------------------------------
 const SYMPTO_CONTEXT = `
-You are the official AI Support Assistant for "Sympto" (SymptoCheck).
-Your name is "SymptoBot".
+You are "SymptoBot", the official AI Support Assistant ONLY for "https://sympto.in/" (Sympto - AI Symptom Checker & Patient Health App).
 Your Tone: Professional, Empathetic, Reassuring, and Concise.
 
-DETAILS ABOUT THE WEBSITE:
-- **Core Function**: An AI-powered health companion for symptom analysis.
-- **Symptom Checker**: Users enter symptoms, AI provides differential diagnosis (NOT a formal medical diagnosis).
-- **Profile**: Has "Medical History" (saved reports), "News History", and "Appointment History".
-- **Doctors**: Users can find specialists and book appointments.
-- **Privacy**: User data is encrypted.
+DETAILS ABOUT SYMPTO.IN:
+- **Core Function**: An AI Health Companion for Adults and Women that analyzes symptoms, helps users understand their health, and prepares them for medical visits.
+- **How it Works**: Users enter symptoms in plain language (like chatting with a friend). Sympto combines medical knowledge with advanced AI to provide a smart assessment and clear advice on next steps.
+- **Features**: Offers "Simple Analysis" and "Advanced Check". The platform focuses on preventative, personalized, and proactive care, integrating Wearables & IoT, Telehealth, and Genetic Insights.
+- **Privacy**: End-to-end security with state-of-the-art encryption ensures all personal health data is private and compliant.
+- **Disclaimer**: Sympto is for informational purposes only and is NOT a substitute for professional medical advice, diagnosis, or treatment.
 
-RULES:
-1. If asked for a medical diagnosis *here*, refuse politely: "I am the support bot. Please use the 'Start Checkup' tool on the home page."
-2. Keep answers short (max 2-3 sentences) for the chat bubble.
-3. If you don't know, ask them to email support@sympto.in.
+STRICT RULES:
+1. YOU MUST ONLY ANSWER QUESTIONS RELATED TO https://sympto.in/ AND ITS FEATURES.
+2. If a user asks a general knowledge question, a coding question, or anything unrelated to Sympto.in, politely refuse and say: "I am SymptoBot, and I can only answer questions related to the sympto.in platform and its services."
+3. If asked for an actual medical diagnosis, refuse politely: "I am a support bot. Please use the 'Simple Analysis' or 'Advanced Check' tool on the sympto.in home page to analyze your symptoms."
+4. Keep answers short (max 2-3 sentences) for the chat bubble.
+5. If you don't know the answer regarding the platform, ask them to contact support via the website.
 `;
 
 // 3. FAQ DATA
@@ -58,28 +57,28 @@ const FAQ_DATA = [
     category: "Using the Symptom Checker",
     subtitle: "Basics & Privacy",
     items: [
-      { q: "Is this a formal medical diagnosis?", a: "No. This tool provides information based on common clinical patterns, but it is not a diagnosis." },
-      { q: "What if my symptoms aren't listed?", a: "The database covers common conditions. If symptoms are vague, please consult a doctor." },
-      { q: "Is my health data private?", a: "Yes. Your inputs are encrypted and handled according to healthcare privacy standards." }
+      { q: "Is this a formal medical diagnosis?", a: "No. Sympto is for informational purposes only and is not a substitute for professional medical advice, diagnosis, or treatment." },
+      { q: "How does Sympto work?", a: "You enter your symptoms in plain language. Sympto then combines medical knowledge with advanced AI to guide you through a smart assessment and provide clear advice." },
+      { q: "Is my health data private?", a: "Yes. Sympto uses end-to-end security and state-of-the-art encryption to ensure your personal health data remains private and compliant." }
     ]
   },
   {
     id: 2,
-    category: "Safety & Emergencies",
-    subtitle: "When to seek urgent care",
+    category: "Analysis Types",
+    subtitle: "Simple vs Advanced Check",
     items: [
-      { q: "When should I call 112?", a: "Seek immediate emergency care for severe chest pain, difficulty breathing, or uncontrolled bleeding." },
-      { q: "Can I use this for my child?", a: "Yes, provided you have accurate information about their current condition." }
+      { q: "What is the Simple Analysis?", a: "It provides a quick, foundational risk assessment based on the symptoms you clearly describe to the AI." },
+      { q: "What is the Advanced Check?", a: "It uses sophisticated AI and machine learning to analyze intricate patterns, offering a highly personalized assessment." },
+      { q: "What do I get at the end?", a: "You will receive a detailed risk assessment and clear advice on what to do next to prepare for your doctor's visit." }
     ]
   },
   {
     id: 3,
-    category: "Sample vs Advanced Analysis",
-    subtitle: "How our matching works",
+    category: "Safety & Emergencies",
+    subtitle: "When to seek urgent care",
     items: [
-      { q: "What is Sample Analysis?", a: "It uses basic 'If/Then' logic to match common symptoms to a static database." },
-      { q: "How does Advanced Analysis work?", a: "It uses AI to look at the relationship between symptoms, age, and risk factors." },
-      { q: "Why so many questions?", a: "To perform a 'Differential Diagnosis' and rule out dangerous conditions." }
+      { q: "When should I seek immediate help?", a: "Seek immediate emergency care for severe chest pain, difficulty breathing, uncontrolled bleeding, or any life-threatening symptoms." },
+      { q: "Does this replace my doctor?", a: "Absolutely not. Sympto is designed to help you prepare for your visit and plan your next steps, not to replace a trained physician." }
     ]
   }
 ];
@@ -93,7 +92,7 @@ const ChatWidget = () => {
   
   // Chat Logic State
   const [messages, setMessages] = useState([
-    { role: 'model', text: "Hello! I'm SymptoBot. How can I help you with the app today?" }
+    { role: 'model', text: "Hello! I'm SymptoBot. How can I help you with sympto.in today?" }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -125,7 +124,7 @@ const ChatWidget = () => {
     setExpandedQuestion(expandedQuestion === index ? null : index);
   };
 
-  // --- THE FRONTEND AI LOGIC (FIXED) ---
+  // --- THE FRONTEND AI LOGIC (UPDATED FOR GROQ) ---
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -138,38 +137,34 @@ const ChatWidget = () => {
     setIsLoading(true);
 
     try {
-      // 2. Prepare History for Gemini (THE FIX)
-      // Remove the first message (Welcome message) because Gemini API requires
-      // the first history item to be from the 'user', not the 'model'.
-      const historyForApi = messages
-        .slice(1) // Skips index 0 (The Welcome Message)
-        .map(msg => ({
-            role: msg.role === 'user' ? 'user' : 'model',
-            parts: [{ text: msg.text }]
-        }));
+      // 2. Prepare History for Groq
+      // Groq uses standard OpenAI message format: [{role: "system"|"user"|"assistant", content: "..."}]
+      const apiMessages = [
+        { role: "system", content: SYMPTO_CONTEXT },
+        ...messages.map(msg => ({
+            // Map our UI 'model' role to Groq's 'assistant' role
+            role: msg.role === 'model' ? 'assistant' : 'user',
+            content: msg.text
+        })),
+        { role: "user", content: userText } // Append the current message
+      ];
 
-      // 3. Initialize Model
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-2.5-flash", // Use 1.5-flash or 2.0-flash-exp
-        systemInstruction: SYMPTO_CONTEXT 
+      // 3. Send Message via Groq
+      const chatCompletion = await groq.chat.completions.create({
+        messages: apiMessages,
+        model: "llama-3.3-70b-versatile", // You can change this to "mixtral-8x7b-32768" or other Groq models
+        temperature: 0.2, // Kept low for factual, strict responses
       });
 
-      // 4. Start Chat Session with History
-      const chat = model.startChat({
-        history: historyForApi,
-      });
-
-      // 5. Send Message
-      const result = await chat.sendMessage(userText);
-      const response = await result.response;
-      const botText = response.text();
+      // 4. Extract Response
+      const botText = chatCompletion.choices[0]?.message?.content || "I'm sorry, I couldn't process that.";
       
-      // 6. Add Bot Response to UI
+      // 5. Add Bot Response to UI
       setMessages(prev => [...prev, { role: 'model', text: botText }]);
 
     } catch (error) {
-      console.error("Gemini Error:", error);
-      setMessages(prev => [...prev, { role: 'model', text: "I'm having trouble connecting. Please check your internet or API key." }]);
+      console.error("Groq Error:", error);
+      setMessages(prev => [...prev, { role: 'model', text: "I'm having trouble connecting to the server. Please check your internet or API key." }]);
     } finally {
       setIsLoading(false);
     }

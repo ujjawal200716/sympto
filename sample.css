@@ -1623,15 +1623,14 @@
 /* Text Area & Inputs */
 .dark-theme .text-area-input,
 .dark-theme .input-group {
-  background: #0f172a;
-  border: 1px solid #334155;
+ 
   color: white;
 }
 
 .dark-theme .text-area-input:focus,
 .dark-theme .input-group:focus-within {
   border-color: #3b82f6;
-  background: #020617;
+  
 }
 
 .dark-theme .medical-input {

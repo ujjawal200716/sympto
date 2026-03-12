@@ -13,8 +13,9 @@ const Icons = {
     logout: "M17 7l-1.41 1.41L18.17 12H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z",
     sun: "M12 7a5 5 0 100 10 5 5 0 000-10zM2 13h2a1 1 0 100-2H2a1 1 0 100 2zm18 0h2a1 1 0 100-2h-2a1 1 0 100 2zM11 2v2a1 1 0 102 0V2a1 1 0 102 0zm0 18v2a1 1 0 102 0v-2a1 1 0 102 0zM5.99 4.58a1 1 0 10-1.41 1.41l1.41 1.41a1 1 0 101.41-1.41L5.99 4.58zm12.02 12.02a1 1 0 10-1.41 1.41l1.41 1.41a1 1 0 101.41-1.41l-1.41-1.41zM4.58 18.01a1 1 0 101.41 1.41l1.41-1.41a1 1 0 10-1.41-1.41l-1.41 1.41zm12.02-12.02a1 1 0 101.41-1.41l-1.41-1.41a1 1 0 10-1.41 1.41l1.41 1.41z",
     moon: "M12.1 20.9c-.1 0-.2 0-.3 0-5.5-.4-9.8-5.2-9.4-10.7.3-3.8 2.9-7 6.4-8.2.5-.2 1 .1 1.2.5s0 1-.4 1.3c-2.4 1.6-3.5 4.6-2.7 7.4.8 2.8 3.4 4.7 6.3 4.5 1.1-.1 2.1-.4 3-1 .5-.3 1.1-.2 1.4.3s.2 1.1-.3 1.5c-1.6 1.1-3.5 1.7-5.2 1.7z",
-    find: "M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 5 1.49-1.49-5-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
+    find: "M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 5 1.49-1.49-5-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 14z",
     saved: "M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z",
+    star: "M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" // Added star icon
 };
 
 function Navbar() {
@@ -25,6 +26,12 @@ function Navbar() {
     const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
     const [scrolled, setScrolled] = useState(false);
     const [userData, setUserData] = useState({});
+
+    // Review Modal States
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const [rating, setRating] = useState(0);
+    const [hoverRating, setHoverRating] = useState(0);
+    const [reviewText, setReviewText] = useState('');
 
     const profileRef = useRef(null);
     const navigate = useNavigate();
@@ -97,7 +104,19 @@ function Navbar() {
         if (item.path === '#logout') handleLogout();
         else if (item.path === '##theme') setDarkMode(!darkMode);
         else if (item.path === '##find') setIsFindModalOpen(true);
+        else if (item.path === '##review') setIsReviewModalOpen(true); // Open review modal
         setDropdownOpen(false);
+    };
+
+    const handleReviewSubmit = async () => {
+        // Add your API submission logic here
+        console.log("Submitted Rating:", rating, "Review:", reviewText);
+        
+        // Reset and close
+        setRating(0);
+        setReviewText('');
+        setIsReviewModalOpen(false);
+        alert("Thank you for your feedback!");
     };
 
     const MENU_ITEMS = [
@@ -105,6 +124,7 @@ function Navbar() {
         { name: darkMode ? 'Light Mode' : 'Dark Mode', path: '##theme', icon: darkMode ? Icons.sun : Icons.moon },
         { name: 'Find in Page', path: '##find', icon: Icons.find },
         { name: 'Saved', path: '/saved', icon: Icons.saved },
+        { name: 'Leave Review', path: '##review', icon: Icons.star }, // New menu item
         { name: 'Logout', path: '#logout', icon: Icons.logout },
     ];
 
@@ -115,22 +135,20 @@ function Navbar() {
             <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
                 <div className="nav-container">
                     
-                    {/* 1. LEFT: Logo */}
                     <div className="nav-section-left">
                         <Link to="/home" className="nav-logo">
                             <img src={darkMode ? logoDark : logoLight} alt="Sympto" />
                         </Link>
                     </div>
 
-                    {/* 2. CENTER: Links (Moved out of the right container) */}
                     <ul className="nav-links">
                         <li><Link to="/home" className={isActive('/home')}>Home</Link></li>
+                        <li><Link to="/contactus" className={isActive('/contactus')}>MedicalDictionary</Link></li>
                         <li><Link to="/appointment" className={isActive('/appointment')}>Appointment</Link></li>
                         <li><Link to="/blog" className={isActive('/blog')}>News</Link></li>
                         <li><Link to="/about" className={isActive('/about')}>About</Link></li>
                     </ul>
 
-                    {/* 3. RIGHT: Actions (Profile/Login) */}
                     <div className="nav-actions">
                         {isLoggedIn ? (
                             <div ref={profileRef} className="profile-wrapper">
@@ -147,7 +165,10 @@ function Navbar() {
                                         <Link
                                             key={item.name}
                                             to={item.path}
-                                            onClick={() => handleMenuAction(item)}
+                                            onClick={(e) => {
+                                                if(item.path.startsWith('#')) e.preventDefault();
+                                                handleMenuAction(item);
+                                            }}
                                             className={`dropdown-item ${item.path === '#logout' ? 'danger' : ''}`}
                                         >
                                             <svg viewBox="0 0 24 24" fill="currentColor"><path d={item.icon} /></svg>
@@ -178,6 +199,7 @@ function Navbar() {
                 </div>
                 <ul className="sidebar-links">
                     <li><Link to="/home" onClick={hideSidebar}>Home</Link></li>
+                    <li><Link to="/contactus" onClick={hideSidebar}>MedicalDictionary</Link></li>
                     <li><Link to="/appointment" onClick={hideSidebar}>Appointment</Link></li>
                     <li><Link to="/blog" onClick={hideSidebar}>News</Link></li>
                     <li><Link to="/about" onClick={hideSidebar}>About</Link></li>
@@ -190,6 +212,50 @@ function Navbar() {
             </aside>
 
             <FindInPageModal isOpen={isFindModalOpen} onClose={() => setIsFindModalOpen(false)} targetRef={contentToSearchRef} />
+
+            {/* --- REVIEW MODAL START --- */}
+            {isReviewModalOpen && (
+                <div className="review-modal-overlay">
+                    <div className="review-modal-content">
+                        <h3>Rate Your Experience</h3>
+                        <p>How are we doing? Please let us know.</p>
+                        
+                        <div className="star-rating-container">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <svg
+                                    key={star}
+                                    className={`rating-star ${star <= (hoverRating || rating) ? 'filled' : ''}`}
+                                    onClick={() => setRating(star)}
+                                    onMouseEnter={() => setHoverRating(star)}
+                                    onMouseLeave={() => setHoverRating(0)}
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path d={Icons.star} />
+                                </svg>
+                            ))}
+                        </div>
+
+                        <textarea 
+                            className="review-textarea"
+                            placeholder="Tell us what you think (optional)..."
+                            value={reviewText}
+                            onChange={(e) => setReviewText(e.target.value)}
+                        />
+
+                        <div className="review-modal-actions">
+                            <button className="review-cancel-btn" onClick={() => setIsReviewModalOpen(false)}>Cancel</button>
+                            <button 
+                                className="review-submit-btn" 
+                                onClick={handleReviewSubmit} 
+                                disabled={rating === 0}
+                            >
+                                Submit Review
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* --- REVIEW MODAL END --- */}
         </>
     );
 }

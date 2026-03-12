@@ -1,16 +1,16 @@
 import React from 'react';
-import './sample.css'; // Ensure this points to your CSS file
+import './sample.css';
 
-const BodySelector = ({ onSelect, selectedPart }) => {
+const BodySelector = ({ onTogglePart, selectedParts = [] }) => {
   
-  // Helper to handle click and pass data up
+  // Helper to handle click and pass data up to toggle it
   const handleClick = (part) => {
-    onSelect(part);
+    onTogglePart(part);
   };
 
-  // Helper to determine color: Red if selected, Grey if not
+  // Helper to determine color: Red if it's inside our selected array, Grey if not
   const getClass = (part) => {
-    return selectedPart === part ? "body-part selected" : "body-part";
+    return selectedParts.includes(part) ? "body-part selected" : "body-part";
   };
 
   return (
@@ -19,7 +19,7 @@ const BodySelector = ({ onSelect, selectedPart }) => {
       {/* Visual Instruction */}
       <div className="body-map-header">
          <span className="pulse-dot"></span>
-         <p>Tap the affected area</p>
+         <p>Tap the affected area(s)</p>
       </div>
       
       <svg viewBox="0 0 200 450" className="human-body-svg">
@@ -39,7 +39,7 @@ const BodySelector = ({ onSelect, selectedPart }) => {
           className={getClass('Head')} 
           onClick={() => handleClick('Head')} 
         />
-        <text x="100" y="35" className="part-label">Head</text>
+        <text x="100" y="40" className="part-label">Head</text>
         
         {/* NECK */}
         <rect 
@@ -100,9 +100,10 @@ const BodySelector = ({ onSelect, selectedPart }) => {
         />
       </svg>
       
-      {selectedPart ? (
+      {/* Dynamic Label showing all selected parts */}
+      {selectedParts.length > 0 ? (
         <div className="selected-label active">
-          Pain Location: <strong>{selectedPart}</strong>
+          Pain Location(s): <strong>{selectedParts.join(', ')}</strong>
         </div>
       ) : (
         <div className="selected-label">

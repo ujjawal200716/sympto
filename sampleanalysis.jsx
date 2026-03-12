@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Suspense } from 'react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -7,261 +7,186 @@ import "./sample.css";
 import Nev from "./test.jsx"; 
 
 // 🔒 SECURE: Key loaded from environment variables
-// 1. Define the pool of keys
 const ALL_KEYS = [
-  import.meta.env.VITE_GEMINI_API_KEY8,  // New addition
-  import.meta.env.VITE_GEMINI_API_KEY11, // New addition
+  import.meta.env.VITE_GEMINI_API_KEY8,
+  import.meta.env.VITE_GEMINI_API_KEY11,
 ];
 
-// 2. Filter out any keys that are missing/empty in the .env file
 const validKeys = ALL_KEYS.filter((key) => key && key.length > 0);
-
-// 3. Select a random key from the valid ones
 const API_KEY = validKeys.length > 0 
   ? validKeys[Math.floor(Math.random() * validKeys.length)] 
   : null;
 
-// 4. Safety check (optional but recommended)
 if (!API_KEY) {
   console.error("❌ Critical Error: No valid Gemini API keys found.");
 } else {
   console.log("✅ Using Key Index:", ALL_KEYS.indexOf(API_KEY));
 }
 
-// --- COMPONENT: CLEAN PROGRESS STEPPER (No Titles) ---
+// --- COMPONENT: CLEAN PROGRESS STEPPER ---
 const ProgressStepper = ({ steps, currentStep }) => {
   const progressPercentage = (currentStep / (steps.length - 1)) * 100;
 
   return (
     <div className="stepper-wrapper">
       <div className="stepper-line-bg">
-        <div 
-          className="stepper-line-fill" 
-          style={{ width: `${progressPercentage}%` }}
-        ></div>
+        <div className="stepper-line-fill" style={{ width: `${progressPercentage}%` }}></div>
       </div>
-
       {steps.map((step, index) => {
         const isCompleted = index < currentStep;
         const isActive = index === currentStep;
         const letter = step.label ? step.label.charAt(0).toUpperCase() : (index + 1);
-
         return (
-          <div 
-            key={index} 
-            className={`step-bubble ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
-            title={step.label} 
-          >
+          <div key={index} className={`step-bubble ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`} title={step.label}>
             {isCompleted ? <FaCheck size={12} /> : letter}
           </div>
         );
       })}
-
       <style>{`
-        .stepper-wrapper {
-          position: relative;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 2rem;
-          padding: 0 10px;
-          margin-top: 10px;
-        }
-        .stepper-line-bg {
-          position: absolute;
-          top: 50%;
-          left: 0;
-          width: 100%;
-          height: 4px;
-          background: #e2e8f0;
-          z-index: 0;
-          transform: translateY(-50%);
-          border-radius: 2px;
-        }
-        .stepper-line-fill {
-          height: 100%;
-          background: linear-gradient(90deg, #3b82f6, #2563eb);
-          transition: width 0.4s ease;
-          border-radius: 2px;
-        }
-        .step-bubble {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          background: #ffffff;
-          border: 3px solid #e2e8f0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1;
-          font-weight: 800;
-          color: #94a3b8;
-          font-size: 16px;
-          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          position: relative;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .step-bubble.active {
-          border-color: #3b82f6;
-          background: #3b82f6;
-          color: white;
-          transform: scale(1.15);
-          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
-        }
-        .step-bubble.completed {
-          border-color: #3b82f6;
-          background: #3b82f6;
-          color: white;
-        }
+        .stepper-wrapper { position: relative; display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding: 0 10px; margin-top: 10px; }
+        .stepper-line-bg { position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background: #e2e8f0; z-index: 0; transform: translateY(-50%); border-radius: 2px; }
+        .stepper-line-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #2563eb); transition: width 0.4s ease; border-radius: 2px; }
+        .step-bubble { width: 40px; height: 40px; border-radius: 50%; background: #ffffff; border: 3px solid #e2e8f0; display: flex; align-items: center; justify-content: center; z-index: 1; font-weight: 800; color: #94a3b8; font-size: 16px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .step-bubble.active { border-color: #3b82f6; background: #3b82f6; color: white; transform: scale(1.15); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); }
+        .step-bubble.completed { border-color: #3b82f6; background: #3b82f6; color: white; }
       `}</style>
     </div>
   );
 };
 
-// --- COMPONENT: REALISTIC HUMAN BODY MAP ---
-const InteractiveBodyMap = ({ onSelect, selectedPart }) => {
-  const [zoomLevel, setZoomLevel] = useState('default'); 
+// --- COMPONENT: 2D INTERACTIVE SVG BODY MAP ---
+const SvgBodyMap = ({ selectedParts, handlePartClick, hoveredPart, setHoveredPart }) => {
+  const getStyle = (partName) => {
+    const safePart = (partName || "").toLowerCase();
+    
+    // Check if the current shape matches ANY of the selected parts in the array
+    const isSelected = selectedParts.some(p => 
+      p.toLowerCase().includes(safePart) || safePart.includes(p.toLowerCase())
+    );
+    const isHovered = hoveredPart === partName;
+    
+    return {
+      fill: isSelected ? '#ef4444' : isHovered ? '#60a5fa' : '#cbd5e1',
+      stroke: '#ffffff',
+      strokeWidth: '3',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease'
+    };
+  };
+
+  const getInteractionProps = (partName) => ({
+    onClick: (e) => { 
+      e.stopPropagation(); 
+      handlePartClick(partName); 
+    },
+    onPointerOver: (e) => { 
+      e.stopPropagation(); 
+      setHoveredPart(partName); 
+    },
+    onPointerOut: (e) => { 
+      e.stopPropagation(); 
+      setHoveredPart(null); 
+    }
+  });
+
+  return (
+    <svg viewBox="0 0 200 350" style={{ width: '100%', height: '100%', maxHeight: '420px', padding: '20px' }}>
+      {/* Head */}
+      <circle cx="100" cy="40" r="25" style={getStyle('Head')} {...getInteractionProps('Head')} />
+      
+      {/* Torso */}
+      <rect x="65" y="70" width="70" height="90" rx="15" style={getStyle('Torso')} {...getInteractionProps('Torso')} />
+      
+      {/* Arms (Grouped as 'Arm' so Left/Right logic still works) */}
+      <g style={getStyle('Arm')} {...getInteractionProps('Arm')}>
+        {/* Left Arm (User's Right) */}
+        <rect x="30" y="75" width="25" height="100" rx="12" /> 
+        {/* Right Arm (User's Left) */}
+        <rect x="145" y="75" width="25" height="100" rx="12" /> 
+      </g>
+      
+      {/* Legs (Grouped as 'Leg' so Left/Right logic still works) */}
+      <g style={getStyle('Leg')} {...getInteractionProps('Leg')}>
+        {/* Left Leg (User's Right) */}
+        <rect x="65" y="170" width="30" height="120" rx="15" /> 
+        {/* Right Leg (User's Left) */}
+        <rect x="105" y="170" width="30" height="120" rx="15" /> 
+      </g>
+    </svg>
+  );
+};
+
+const InteractiveBodyMap = ({ onTogglePart, selectedParts }) => {
   const [showSideSelection, setShowSideSelection] = useState(false);
   const [pendingPart, setPendingPart] = useState(null);
+  const [hoveredPart, setHoveredPart] = useState(null);
 
-  const handlePartClick = (part, zoomArea) => {
-    if (['Arms', 'Legs'].includes(part)) {
-      setZoomLevel(zoomArea);
+  const handlePartClick = (part) => {
+    // 1. Check if the part is already selected (to trigger deselect)
+    const isAlreadySelected = selectedParts.some(p => 
+      p.toLowerCase().includes(part.toLowerCase()) || part.toLowerCase().includes(p.toLowerCase())
+    );
+
+    if (isAlreadySelected) {
+      onTogglePart(part); // Calling it when it exists will remove it
+      setShowSideSelection(false);
+      return;
+    }
+
+    // 2. If it's a new selection, check if it needs Left/Right
+    const needsSideSelection = part.toLowerCase().includes('arm') || part.toLowerCase().includes('leg');
+    
+    if (needsSideSelection) {
       setPendingPart(part);
       setShowSideSelection(true);
     } else {
-      onSelect(part);
-      setZoomLevel('default');
+      onTogglePart(part);
       setShowSideSelection(false);
     }
   };
 
   const handleSideSelect = (side) => {
-    const finalLocation = `${side} ${pendingPart}`; 
-    onSelect(finalLocation);
-    setShowSideSelection(false);
-    setTimeout(() => setZoomLevel('default'), 300);
-  };
-
-  const resetView = (e) => {
-    e.stopPropagation();
-    setZoomLevel('default');
+    const finalLocation = side === 'Both' ? pendingPart : `${side} ${pendingPart}`; 
+    onTogglePart(finalLocation);
     setShowSideSelection(false);
   };
 
   return (
-    <div className={`body-map-wrapper zoom-${zoomLevel}`}>
-      {zoomLevel !== 'default' && (
-        <button onClick={resetView} className="zoom-reset-btn"><FaUndo /> Reset View</button>
+    <div className="body-map-wrapper">
+      <SvgBodyMap 
+        selectedParts={selectedParts} 
+        handlePartClick={handlePartClick} 
+        hoveredPart={hoveredPart} 
+        setHoveredPart={setHoveredPart} 
+      />
+
+      {showSideSelection && (
+        <div className="side-selector-overlay">
+          <p>Which side?</p>
+          <div className="side-buttons">
+            <button onClick={() => handleSideSelect('Left')}>Left</button>
+            <button onClick={() => handleSideSelect('Right')}>Right</button>
+            <button onClick={() => handleSideSelect('Both')}>Both</button>
+          </div>
+        </div>
       )}
       
-      <div className="svg-container">
-        {/* Human Body SVG - Realistic Silhouette with Breathing Animation */}
-        <svg viewBox="0 0 260 500" className="human-body-svg">
-          <defs>
-            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-              <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-
-          {/* Head & Neck */}
-          <path 
-            className={`body-part ${selectedPart === 'Head' ? 'selected' : ''}`}
-            onClick={() => handlePartClick('Head', 'upper')}
-            d="M130,20 C110,20 100,40 100,65 C100,85 110,95 120,98 L120,110 L140,110 L140,98 C150,95 160,85 160,65 C160,40 150,20 130,20 Z" 
-          />
-
-          {/* Torso */}
-          <path 
-            className={`body-part ${selectedPart === 'Torso' ? 'selected' : ''}`}
-            onClick={() => handlePartClick('Torso', 'default')}
-            d="M95,115 C80,125 70,130 70,150 L75,240 C75,260 80,280 85,290 L175,290 C180,280 185,260 185,240 L190,150 C190,130 180,125 165,115 L95,115 Z" 
-          />
-
-          {/* Arms */}
-          <path 
-            className={`body-part ${selectedPart && selectedPart.includes('Arm') ? 'selected' : ''}`}
-            onClick={() => handlePartClick('Arms', 'arms')}
-            d="M70,150 C60,150 40,160 35,180 L30,250 C30,260 35,270 45,270 L55,270 C65,270 70,260 70,250 L75,180 C78,160 85,150 95,145 L70,150 Z 
-               M190,150 C200,150 220,160 225,180 L230,250 C230,260 225,270 215,270 L205,270 C195,270 190,260 190,250 L185,180 C182,160 175,150 165,145 L190,150 Z" 
-          />
-
-          {/* Legs */}
-          <path 
-            className={`body-part ${selectedPart && selectedPart.includes('Leg') ? 'selected' : ''}`}
-            onClick={() => handlePartClick('Legs', 'lower')}
-            d="M85,290 L90,400 C90,420 80,450 70,460 L110,460 C105,450 115,420 115,400 L120,290 L85,290 Z 
-               M175,290 L170,400 C170,420 180,450 190,460 L150,460 C155,450 145,420 145,400 L140,290 L175,290 Z" 
-          />
-        </svg>
-
-        {showSideSelection && (
-          <div className="side-selector-overlay">
-            <p>Which side?</p>
-            <div className="side-buttons">
-              <button onClick={() => handleSideSelect('Left')}>Left</button>
-              <button onClick={() => handleSideSelect('Right')}>Right</button>
-              <button onClick={() => handleSideSelect('Both')}>Both</button>
-            </div>
-          </div>
-        )}
+      <div className="selection-info">
+        <p className="selected-text">
+          {selectedParts.length > 0 
+            ? `Selected: ${selectedParts.join(', ')}` 
+            : 'Click the affected area(s) on the model (Click again to deselect)'}
+        </p>
       </div>
-      
-      <p className="selected-text">
-        {selectedPart ? `Selected: ${selectedPart}` : 'Tap the affected area'}
-      </p>
 
       <style>{`
-        /* Breathing Animation Keyframes */
-        @keyframes breathe {
-          0% { transform: scale(1); filter: drop-shadow(0 5px 15px rgba(14, 165, 233, 0.2)); }
-          50% { transform: scale(1.005); filter: drop-shadow(0 5px 20px rgba(14, 165, 233, 0.35)); }
-          100% { transform: scale(1); filter: drop-shadow(0 5px 15px rgba(14, 165, 233, 0.2)); }
-        }
-
-        .body-map-wrapper { 
-          position: relative; width: 100%; height: 480px; display: flex; flex-direction: column; align-items: center; overflow: hidden; transition: all 0.5s ease;
-        }
-        .svg-container {
-          width: 100%; height: 100%; display: flex; justify-content: center; transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-        /* ZOOM STATES */
-        .zoom-upper .svg-container { transform: scale(1.8) translateY(120px); }
-        .zoom-lower .svg-container { transform: scale(1.6) translateY(-120px); }
-        .zoom-arms .svg-container { transform: scale(1.3) translateY(20px); }
-
-        .human-body-svg { 
-          height: 100%; 
-          animation: breathe 4s ease-in-out infinite; 
-          overflow: visible;
-        }
-        
-        .body-part { 
-          fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.5; transition: all 0.3s ease; cursor: pointer; stroke-linejoin: round; stroke-linecap: round;
-        }
-        .body-part:hover { fill: #dbeafe; stroke: #3b82f6; filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6)); }
-        .body-part.selected { fill: #ef4444; stroke: #b91c1c; filter: url(#glow); }
-        
-        .side-selector-overlay {
-          position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-          background: rgba(255, 255, 255, 0.95); padding: 24px; border-radius: 16px;
-          box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center;
-          animation: popIn 0.3s ease; z-index: 20; backdrop-filter: blur(8px); border: 1px solid #e2e8f0;
-        }
+        .body-map-wrapper { position: relative; width: 100%; height: 500px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .selection-info { position: absolute; bottom: 0; width: 100%; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); padding: 15px; text-align: center; border-top: 1px solid #e2e8f0; pointer-events: none; }
+        .side-selector-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255, 255, 255, 0.95); padding: 24px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center; animation: popIn 0.3s ease; z-index: 20; backdrop-filter: blur(8px); border: 1px solid #e2e8f0; }
         .side-buttons { display: flex; gap: 10px; margin-top: 10px; }
-        .side-buttons button {
-          padding: 10px 20px; border: none; background: #3b82f6; color: white;
-          border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s;
-        }
+        .side-buttons button { padding: 10px 20px; border: none; background: #3b82f6; color: white; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
         .side-buttons button:hover { background: #2563eb; transform: translateY(-2px); }
-        .selected-text { margin-top: 10px; color: #64748b; font-weight: 600; }
-        .zoom-reset-btn {
-          position: absolute; top: 10px; right: 10px; z-index: 10;
-          background: white; border: 1px solid #cbd5e1; padding: 6px 12px;
-          border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 6px;
-          font-size: 0.85rem; color: #64748b; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
+        .selected-text { color: #334155; font-weight: 600; margin: 0; font-size: 0.95rem; }
         @keyframes popIn { from { opacity: 0; transform: translate(-50%, -40%); } to { opacity: 1; transform: translate(-50%, -50%); } }
       `}</style>
     </div>
@@ -284,7 +209,7 @@ export default function SymptomChecker() {
 
   const [formData, setFormData] = useState({
     age: '', gender: '', symptoms: [], otherSymptoms: '', 
-    hasPain: false, painLocation: '', 
+    hasPain: false, painLocation: [], // 🚀 UPDATED: Now an array to support multiple selections
     dynamicAnswers: {}, 
     duration: '', severity: '', temperature: '', medicalHistory: '', medications: '', allergies: ''
   });
@@ -310,7 +235,6 @@ export default function SymptomChecker() {
     if (mainCardRef.current) mainCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [currentStep]);
 
-  // --- ADDED: Handle Share Function ---
   const handleShare = async () => {
     if (navigator.share && result) {
       try {
@@ -338,10 +262,7 @@ export default function SymptomChecker() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/save-page`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({
                 title: `Symptom Check: ${result.condition} - ${new Date().toLocaleDateString()}`,
                 informationType: 'sample analysis', 
@@ -361,28 +282,35 @@ export default function SymptomChecker() {
     }
   };
 
-  const options = {
-    gender: ['Male', 'Female', 'Other', 'Prefer not to say'],
-  };
+  const options = { gender: ['Male', 'Female', 'Other', 'Prefer not to say'] };
 
   const handleContainerClick = () => { if (inputRef.current) inputRef.current.focus(); };
 
-  // --- HANDLE MULTI-SELECT FOR DYNAMIC QUESTIONS ---
+  // --- HANDLE MULTI-SELECT FOR BODY MAP ---
+  const handleBodyPartToggle = (part) => {
+    setFormData(prev => {
+      const currentLocations = prev.painLocation || [];
+      // Look for a match to see if we need to remove it
+      const existingMatch = currentLocations.find(p => 
+        p.toLowerCase().includes(part.toLowerCase()) || part.toLowerCase().includes(p.toLowerCase())
+      );
+      
+      if (existingMatch) {
+        // If it exists, filter it out (Deselect)
+        return { ...prev, painLocation: currentLocations.filter(p => p !== existingMatch) };
+      } else {
+        // If it doesn't exist, add it (Select)
+        return { ...prev, painLocation: [...currentLocations, part] };
+      }
+    });
+  };
+
   const toggleDynamicOption = (field, option) => {
     setFormData(prev => {
         const currentAnswers = prev.dynamicAnswers[field] || [];
         const answerArray = Array.isArray(currentAnswers) ? currentAnswers : [currentAnswers].filter(Boolean);
-        
-        let newAnswers;
-        if (answerArray.includes(option)) {
-            newAnswers = answerArray.filter(a => a !== option);
-        } else {
-            newAnswers = [...answerArray, option];
-        }
-        return {
-            ...prev,
-            dynamicAnswers: { ...prev.dynamicAnswers, [field]: newAnswers }
-        };
+        let newAnswers = answerArray.includes(option) ? answerArray.filter(a => a !== option) : [...answerArray, option];
+        return { ...prev, dynamicAnswers: { ...prev.dynamicAnswers, [field]: newAnswers } };
     });
   };
 
@@ -397,32 +325,26 @@ export default function SymptomChecker() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // --- NEW: AUTO-NAVIGATE ON PAIN CHECKBOX ---
   const handlePainCheckboxChange = (e) => {
     const isChecked = e.target.checked;
     setFormData(prev => ({ ...prev, hasPain: isChecked }));
 
     if (isChecked) {
-        // Automatically inject body map and move next
         const bodyMapStep = { 
             label: 'Pain', 
             field: 'painLocation', 
             type: 'bodyMap', 
-            question: 'Tap the specific area where it hurts:' 
+            question: 'Tap the specific area(s) where it hurts:' 
         };
 
         setSteps(prevSteps => {
-            // Prevent duplication
             if (prevSteps.some(s => s.field === 'painLocation')) return prevSteps;
             const newSteps = [...prevSteps];
             newSteps.splice(currentStep + 1, 0, bodyMapStep);
             return newSteps;
         });
 
-        // Smooth delay to show the checkmark briefly
-        setTimeout(() => {
-            setCurrentStep(prev => prev + 1);
-        }, 300);
+        setTimeout(() => setCurrentStep(prev => prev + 1), 300);
     }
   };
 
@@ -438,11 +360,10 @@ export default function SymptomChecker() {
     }
     if (currentField === 'symptoms') return true; 
     if (currentField === 'otherSymptoms') return formData.otherSymptoms.trim() !== '';
-    if (currentField === 'painLocation') return formData.painLocation !== ''; 
+    if (currentField === 'painLocation') return formData.painLocation.length > 0; // Check array length
     return formData[currentField] !== '';
   };
 
-  // --- AI QUESTION GENERATOR ---
   const generateFollowUpQuestions = async () => {
     setLoadingQuestions(true);
     try {
@@ -452,7 +373,7 @@ export default function SymptomChecker() {
       const prompt = `
         The patient is a ${formData.age} year old ${formData.gender}.
         Primary Symptom: "${formData.otherSymptoms}".
-        ${formData.hasPain ? `Pain Location: ${formData.painLocation}.` : 'Patient reported NO specific body pain.'}
+        ${formData.hasPain && formData.painLocation.length > 0 ? `Pain Location(s): ${formData.painLocation.join(', ')}.` : 'Patient reported NO specific body pain.'}
         
         Generate 4-5 relevant follow-up questions.
         IMPORTANT:
@@ -500,10 +421,8 @@ export default function SymptomChecker() {
   const handleNext = () => {
     const currentField = steps[currentStep].field;
 
-    // 1. Description Step - Fallback manual navigation
     if (currentField === 'otherSymptoms') {
         if (formData.hasPain) {
-            // Logic handled by checkbox usually, but safe fallback
             const bodyMapStep = { label: 'Pain', field: 'painLocation', type: 'bodyMap', question: 'Point to where it hurts:' };
             setSteps(prev => {
                 if (prev.some(s => s.field === 'painLocation')) return prev;
@@ -552,7 +471,7 @@ export default function SymptomChecker() {
         Act as a compassionate doctor.
         PATIENT: ${formData.age}yo ${formData.gender}
         COMPLAINT: ${formData.otherSymptoms}
-        PAIN LOC: ${formData.hasPain ? formData.painLocation : 'None'}
+        PAIN LOC(S): ${formData.hasPain && formData.painLocation.length > 0 ? formData.painLocation.join(', ') : 'None'}
         
         ANSWERS:
         ${dynamicQA}
@@ -584,7 +503,7 @@ export default function SymptomChecker() {
 
   const resetQuiz = () => {
     setCurrentStep(0); setSteps(initialSteps);
-    setFormData({ age: '', gender: '', symptoms: [], otherSymptoms: '', hasPain: false, painLocation: '', dynamicAnswers: {} });
+    setFormData({ age: '', gender: '', symptoms: [], otherSymptoms: '', hasPain: false, painLocation: [], dynamicAnswers: {} });
     setResult(null); setError(null); setIsSaved(false);
   };
 
@@ -637,7 +556,10 @@ export default function SymptomChecker() {
                 <h2 className="question-text">{step?.question}</h2>
 
                 {step?.type === 'bodyMap' && (
-                   <InteractiveBodyMap selectedPart={formData.painLocation} onSelect={(part) => updateFormData('painLocation', part)} />
+                   <InteractiveBodyMap 
+                     selectedParts={formData.painLocation} 
+                     onTogglePart={handleBodyPartToggle} 
+                   />
                 )}
 
                 {step?.type === 'input' && (
@@ -647,7 +569,6 @@ export default function SymptomChecker() {
                   </div>
                 )}
 
-                {/* SINGLE SELECT */}
                 {step?.type === 'select' && (
                   <div className="options-grid">
                     {(step.options || options[step.field])?.map((option) => (
@@ -672,7 +593,6 @@ export default function SymptomChecker() {
                   </div>
                 )}
 
-                {/* MULTI SELECT (Dynamic Questions) */}
                 {step?.type === 'multiselect' && !step.field.startsWith('symptoms') && (
                   <div className="options-grid">
                     {step.options?.map((option) => {
@@ -706,7 +626,7 @@ export default function SymptomChecker() {
                                 type="checkbox" 
                                 id="pain-checkbox" 
                                 checked={formData.hasPain} 
-                                onChange={handlePainCheckboxChange} // NEW: AUTO-NAVIGATE HANDLER
+                                onChange={handlePainCheckboxChange}
                                 style={{ width: '22px', height: '22px', cursor: 'pointer', accentColor: '#ef4444' }} 
                               />
                               <label htmlFor="pain-checkbox" style={{ fontSize: '1.05rem', color: '#334155', cursor: 'pointer', fontWeight: '500' }}>
@@ -717,7 +637,6 @@ export default function SymptomChecker() {
                   </div>
                 )}
 
-                {/* Common Symptoms Grid */}
                 {step?.type === 'multiselect' && step.field === 'symptoms' && (
                   <div className="symptoms-grid">
                     {symptomsList.map((symptom) => (

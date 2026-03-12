@@ -21,6 +21,22 @@
   100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
 }
 
+/* New Animations Added */
+@keyframes cw-slide-in-right {
+  0% { opacity: 0; transform: translateX(20px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes cw-fade-in-up {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cw-icon-pop {
+  0% { opacity: 0; transform: scale(0.5) rotate(-45deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
 /* =========================================
    2. VARIABLES (THEME CONFIG)
    ========================================= */
@@ -163,7 +179,7 @@
   color: var(--cw-text-sub);
   cursor: pointer;
   border-radius: 10px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Smoother bounce transition */
 }
 
 .cw-tab-btn:hover { color: var(--cw-text-main); }
@@ -193,6 +209,7 @@
   background-color: var(--cw-bg-body);
   display: flex;
   flex-direction: column;
+  animation: cw-fade-in-up 0.4s ease-out forwards; /* Tab content entrance */
 }
 
 .cw-list {
@@ -208,11 +225,22 @@
   cursor: pointer;
   display: flex; align-items: center; justify-content: space-between;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  
+  /* Staggered entrance animation for list items */
+  opacity: 0;
+  animation: cw-slide-in-right 0.4s ease-out forwards;
 }
+
+/* Delays for staggered loading effect */
+.cw-list-item:nth-child(1) { animation-delay: 0.05s; }
+.cw-list-item:nth-child(2) { animation-delay: 0.1s; }
+.cw-list-item:nth-child(3) { animation-delay: 0.15s; }
+.cw-list-item:nth-child(4) { animation-delay: 0.2s; }
+.cw-list-item:nth-child(5) { animation-delay: 0.25s; }
 
 .cw-list-item:hover {
   border-color: var(--cw-primary);
-  transform: translateY(-4px);
+  transform: translateY(-4px) scale(1.01); /* Added slight scale */
   box-shadow: var(--cw-shadow-sm);
 }
 
@@ -220,7 +248,14 @@
 .cw-list-item p { margin: 4px 0 0 0; font-size: 0.85rem; color: var(--cw-text-sub); }
 
 /* Icons in list */
-.cw-icon-arrow { color: var(--cw-text-sub); }
+.cw-icon-arrow { 
+  color: var(--cw-text-sub); 
+  transition: transform 0.2s ease;
+}
+.cw-list-item:hover .cw-icon-arrow {
+  transform: translateX(4px); /* Arrow nudges right on hover */
+  color: var(--cw-primary);
+}
 
 /* --- Drill Down Header --- */
 .cw-qa-header {
@@ -229,26 +264,54 @@
   display: flex; align-items: center; gap: 12px;
   background: var(--cw-bg-glass);
   position: sticky; top: 0; z-index: 10;
+  animation: cw-fade-in-up 0.3s ease-out forwards;
 }
 .cw-back-btn {
   background: none; border: none; cursor: pointer; color: var(--cw-primary);
   font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 5px;
+  transition: transform 0.2s ease;
+}
+.cw-back-btn:hover {
+  transform: translateX(-3px);
 }
 
 /* --- Questions Accordion --- */
+.cw-qa-item {
+  opacity: 0;
+  animation: cw-fade-in-up 0.4s ease-out forwards;
+}
+.cw-qa-item:nth-child(1) { animation-delay: 0.05s; }
+.cw-qa-item:nth-child(2) { animation-delay: 0.1s; }
+.cw-qa-item:nth-child(3) { animation-delay: 0.15s; }
+
 .cw-question-btn {
   width: 100%; text-align: left; background: var(--cw-bg-subtle);
   padding: 16px; border: none; border-radius: 12px;
   display: flex; justify-content: space-between; align-items: center;
   font-weight: 600; color: var(--cw-text-main); cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.1s;
 }
 .cw-question-btn:hover { background: var(--cw-border); }
+.cw-question-btn:active { transform: scale(0.98); }
+
+/* Chevron rotation logic */
+.cw-chevron {
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.cw-rotate {
+  transform: rotate(180deg);
+}
 
 .cw-answer {
-  max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 16px;
+  max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s ease; padding: 0 16px;
+  opacity: 0;
 }
-.cw-answer-open { max-height: 300px; padding-bottom: 16px; }
+.cw-answer-open { 
+  max-height: 300px; 
+  padding-bottom: 16px; 
+  opacity: 1;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s ease, opacity 0.4s ease 0.1s;
+}
 .cw-answer p { margin-top: 10px; font-size: 0.9rem; line-height: 1.5; color: var(--cw-text-sub); }
 
 /* =========================================
@@ -270,7 +333,8 @@
   border-radius: 18px;
   font-size: 0.95rem;
   line-height: 1.5;
-  animation: cw-message-pop 0.3s ease-out forwards;
+  animation: cw-message-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  transform-origin: bottom center;
 }
 
 /* Bot Message */
@@ -280,6 +344,7 @@
   color: var(--cw-text-main);
   border: 1px solid var(--cw-border);
   border-bottom-left-radius: 4px;
+  transform-origin: bottom left;
 }
 
 /* User Message */
@@ -289,6 +354,13 @@
   color: white;
   border-bottom-right-radius: 4px;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  transform-origin: bottom right;
+}
+
+.cw-msg-icon {
+  margin-right: 6px;
+  vertical-align: middle;
+  animation: cw-icon-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 /* --- Input Area --- */
@@ -297,6 +369,7 @@
   background: var(--cw-bg-body);
   border-top: 1px solid var(--cw-border);
   display: flex; gap: 12px; align-items: center;
+  animation: cw-fade-in-up 0.4s ease-out forwards;
 }
 
 .cw-chat-input-area input {
@@ -308,13 +381,14 @@
   background: var(--cw-bg-subtle);
   color: var(--cw-text-main);
   font-size: 0.95rem;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cw-chat-input-area input:focus {
   background: var(--cw-bg-body);
   border-color: var(--cw-primary);
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  transform: translateY(-1px);
 }
 
 .cw-chat-input-area button {
@@ -322,11 +396,28 @@
   background: var(--cw-gradient);
   color: white; border: none;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: transform 0.2s;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
 }
-.cw-chat-input-area button:hover { transform: scale(1.1); }
-.cw-chat-input-area button svg { width: 20px; height: 20px; }
+.cw-chat-input-area button:hover:not(:disabled) { 
+  transform: scale(1.1) rotate(-10deg); 
+}
+.cw-chat-input-area button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+.cw-chat-input-area button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: scale(1);
+  box-shadow: none;
+}
+.cw-chat-input-area button svg { 
+  width: 20px; height: 20px; 
+  transition: transform 0.2s;
+}
+.cw-chat-input-area button:hover:not(:disabled) svg {
+  transform: scale(1.1) translateX(2px) translateY(-2px);
+}
 
 /* Dark Mode Inputs */
 .dark-theme .cw-chat-input-area input {
@@ -352,13 +443,22 @@
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   pointer-events: auto;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Smoother bounce */
   z-index: 10002;
   animation: cw-pulse-glow 3s infinite;
 }
 
-.cw-fab:hover { transform: scale(1.1) rotate(90deg); }
-.cw-icon-fab { width: 28px; height: 28px; }
+.cw-fab:hover { 
+  transform: scale(1.1) translateY(-4px); 
+}
+.cw-fab-open:hover {
+  transform: scale(1.1) rotate(90deg); /* Special rotation for the 'X' icon */
+}
+.cw-icon-fab { 
+  width: 28px; 
+  height: 28px; 
+  animation: cw-icon-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
 
 /* =========================================
    9. MOBILE OPTIMIZATION (Full Screen)
@@ -381,7 +481,7 @@
     border: none;
     
     /* Slide Up Animation for Mobile */
-    animation: cw-spring-up 0.4s ease-out;
+    animation: cw-spring-up 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   
   .cw-header-area {
