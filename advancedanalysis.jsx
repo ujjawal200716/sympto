@@ -902,35 +902,38 @@ Always encourage the user to consult with a healthcare professional for medical 
                   </div>
                 )}
                 
-                {/* --- RENDER GENERATED IMAGE --- */}
+              {/* --- RENDER GENERATED IMAGE --- */}
                 {msg.generatedImage && (
-                    <img 
-                      src={msg.generatedImage} 
-                      alt="Generated Content" 
-                      style={{width: '100%', maxWidth: '300px', borderRadius: '8px', marginTop: '10px', border: '1px solid #e5e7eb'}} 
-                      onError={(e) => {
-                          e.target.onerror = null; // Prevent infinite loop
-                          e.target.src = `https://via.placeholder.com/400x400.png?text=Image+Blocked+or+Failed`;
-                      }}
-                    />
+                    <div style={{ position: 'relative', width: '100%', maxWidth: '300px', marginTop: '10px' }}>
+                        <img 
+                          src={msg.generatedImage} 
+                          alt="Generated Content" 
+                          style={{
+                              width: '100%', 
+                              minHeight: '300px', /* Keeps the box open while loading */
+                              backgroundColor: '#f3f4f6', /* Grey placeholder color */
+                              borderRadius: '8px', 
+                              border: '1px solid #e5e7eb',
+                              objectFit: 'cover',
+                              display: 'block'
+                          }} 
+                          onError={(e) => {
+                              e.target.onerror = null; // Prevent infinite loop
+                              // Updated to a more reliable placeholder service
+                              e.target.src = `https://placehold.co/400x400/f3f4f6/6b7280.png?text=Image+Failed`;
+                          }}
+                        />
+                        {/* Little text to let the user know it's working */}
+                        <div style={{
+                            position: 'absolute', 
+                            top: '50%', left: '50%', 
+                            transform: 'translate(-50%, -50%)', 
+                            color: '#9ca3af', fontSize: '12px', zIndex: -1
+                        }}>
+                            Generating...
+                        </div>
+                    </div>
                 )}
-
-                {/* TEXT CONTENT WITH HIGHLIGHTING AND MARKDOWN */}
-                {renderMessageContent(msg, idx)}
-              </div>
-            </div>
-            );
-          })}
-          {loading && !isVoiceMode && (
-            <div className="new-message-row new-assistant-row">
-              <div className="new-avatar new-assistant-avatar">🤖</div>
-              <div className="new-message-bubble new-assistant-bubble new-loading-bubble"><span className="new-spinner">⌛</span><span>Analyzing...</span></div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
-
       {/* --- FOOTER --- */}
       <div className="new-sympto-footer">
         <div className="new-footer-content">
