@@ -793,6 +793,7 @@ Always encourage the user to consult with a healthcare professional for medical 
   
   // Quick Create Image Helper
   const handleCreateImageCommand = () => {
+      setShowMenu(false); // Closes the drop-up menu when clicked
       setInput('/image ');
       textareaRef.current?.focus();
   };
@@ -1005,6 +1006,7 @@ Always encourage the user to consult with a healthcare professional for medical 
                </svg>
               </button>
 
+              {/* --- UPDATED DROP-UP MENU --- */}
               {showMenu && (
                 <div className="new-dropup-menu">
                   <div className="new-dropdown-item" onClick={handleClearChat} style={{ color: '#ef4444' }}>
@@ -1019,6 +1021,10 @@ Always encourage the user to consult with a healthcare professional for medical 
                   <div className="new-dropdown-item" onClick={handleSave}>
                     <span>💾</span> Save Chat
                   </div>
+                  {/* --- NEW GENERATE IMAGE OPTION --- */}
+                  <div className="new-dropdown-item" onClick={handleCreateImageCommand}>
+                    <span>✨</span> Generate Image
+                  </div>
                 </div>
               )}
             </div>
@@ -1026,24 +1032,20 @@ Always encourage the user to consult with a healthcare professional for medical 
             <div className="new-input-bar">
               
               <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept="image/*" style={{ display: 'none' }} />
-              {/* NEW: Input for Document Files (PDF, etc) */}
               <input type="file" ref={documentInputRef} onChange={handleFileSelect} accept="application/pdf,text/plain,.doc,.docx" style={{ display: 'none' }} />
               
-              {/* IMAGE UPLOAD ICON */}
               <button onClick={() => fileInputRef.current?.click()} disabled={loading} className="new-icon-btn new-camera-btn" title="Upload Image">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 960 960" fill="currentColor">
                   <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
                 </svg>
               </button>
 
-              {/* NEW: FILE UPLOAD ICON (Paperclip) */}
               <button onClick={() => documentInputRef.current?.click()} disabled={loading} className="new-icon-btn" title="Upload Document (PDF/Text)" style={{ color: '#6b7280' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
                   <path d="M720-330q0 104-73 177T470-80q-104 0-177-73t-73-177v-370q0-75 52.5-127.5T400-880q75 0 127.5 52.5T580-700v350q0 46-32 78t-78 32q-46 0-78-32t-32-78v-370h80v370q0 13 8.5 21.5T470-320q13 0 21.5-8.5T500-350v-350q-1-42-29.5-71T400-800q-42 0-71 29t-29 71v370q-1 71 49 120.5T470-160q70 0 119-49.5T640-330v-390h80v390Z"/>
                 </svg>
               </button>
 
-              {/* NEW: CREATE IMAGE ICON (Magic Wand) */}
               <button onClick={handleCreateImageCommand} disabled={loading} className="new-icon-btn" title="Generate AI Image" style={{ color: '#8b5cf6' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
                   <path d="M480-80 346-214l-84-84-84-84q-23-23-23-56.5t23-56.5l346-346q23-23 56.5-23t56.5 23l169 169q23 23 23 56.5T806-360L480-80Zm-28-254 254-254-169-169-254 254 169 169Zm194-43q8-8 8-20t-8-20l-15-15q-8-8-20-8t-20 8l-15 15q-8 8-8 20t8 20l15 15q8 8 20 8t20-8ZM240-800q-33 0-56.5-23.5T160-880q0 33-23.5 56.5T80-800q33 0 56.5 23.5T160-720q0-33 23.5-56.5T240-800Z"/>
@@ -1080,7 +1082,7 @@ Always encourage the user to consult with a healthcare professional for medical 
               {(!input.trim() && selectedImages.length === 0) ? (
                   <button onClick={handleFooterMicClick} className="new-icon-btn new-mic-btn" style={{ color: isListening ? '#ef4444' : 'inherit' }}>
                       <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-                        <path d="M480-400q-60 0-102-42t-42-102v-240q0-60 42-102t102-42q60 0 102 42t42 102v240q0 60-42 102t-102 42Zm0-80q26 0 43-17t17-43v-240q0-26-17-43t-43-17q-26 0-43-17t-17 43v240q0 26 17 43t43 17Zm0 320q-133 0-234.5-81.5T128-480h86q16 87 86.5 143.5T480-280q87 0 157.5-56.5T724-480h86q-16 124-117.5 205.5T480-160Zm0-480Z"/>
+                        <path d="M480-400q-60 0-102-42t-42-102v-240q0-60 42-102t102-42q60 0 102 42t42 102v240q0 60-42 102t-102 42Zm0-80q26 0 43-17t17-43v-240q0-26-17-43t-43-17q-26 0-43 17t-17 43v240q0 26 17 43t43 17Zm0 320q-133 0-234.5-81.5T128-480h86q16 87 86.5 143.5T480-280q87 0 157.5-56.5T724-480h86q-16 124-117.5 205.5T480-160Zm0-480Z"/>
                       </svg>
                   </button>
               ) : (
