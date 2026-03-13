@@ -902,7 +902,7 @@ Always encourage the user to consult with a healthcare professional for medical 
                   </div>
                 )}
                 
-            {/* --- RENDER GENERATED IMAGE --- */}
+              {/* --- RENDER GENERATED IMAGE --- */}
                 {msg.generatedImage && (
                     <div style={{ position: 'relative', width: '100%', maxWidth: '300px', marginTop: '10px' }}>
                         <img 
@@ -924,17 +924,6 @@ Always encourage the user to consult with a healthcare professional for medical 
                           }}
                         />
                         {/* Generating Text Placeholder */}
-                        <div style={{
-                            position: 'absolute', 
-                            top: '50%', left: '50%', 
-                            transform: 'translate(-50%, -50%)', 
-                            color: '#9ca3af', fontSize: '12px', zIndex: -1
-                        }}>
-                            Generating...
-                        </div>
-                    </div>
-                )}
-                        {/* Little text to let the user know it's working */}
                         <div style={{
                             position: 'absolute', 
                             top: '50%', left: '50%', 
@@ -1088,7 +1077,7 @@ Always encourage the user to consult with a healthcare professional for medical 
               {(!input.trim() && selectedImages.length === 0) ? (
                   <button onClick={handleFooterMicClick} className="new-icon-btn new-mic-btn" style={{ color: isListening ? '#ef4444' : 'inherit' }}>
                       <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-                        <path d="M480-400q-60 0-102-42t-42-102v-240q0-60 42-102t102-42q60 0 102 42t42 102v240q0 60-42 102t102-42q60 0 102 42t42 102v240q0 60-42 102t-102 42Zm0-80q26 0 43-17t17-43v-240q0-26-17-43t-43-17q-26 0-43 17t-17 43v240q0 26 17 43t43 17Zm0 320q-133 0-234.5-81.5T128-480h86q16 87 86.5 143.5T480-280q87 0 157.5-56.5T724-480h86q-16 124-117.5 205.5T480-160Zm0-480Z"/>
+                        <path d="M480-400q-60 0-102-42t-42-102v-240q0-60 42-102t102-42q60 0 102 42t42 102v240q0 60-42 102t-102 42Zm0-80q26 0 43-17t17-43v-240q0-26-17-43t-43-17q-26 0-43 17t-17 43v240q0 26 17 43t43 17Zm0 320q-133 0-234.5-81.5T128-480h86q16 87 86.5 143.5T480-280q87 0 157.5-56.5T724-480h86q-16 124-117.5 205.5T480-160Zm0-480Z"/>
                       </svg>
                   </button>
               ) : (
