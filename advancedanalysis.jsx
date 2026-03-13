@@ -47,7 +47,7 @@ export default function Advancedanalysis() {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
 
-  // --- STATE FOR MULTIPLE IMAGES ---
+  // --- STATE FOR MULTIPLE IMAGES & FILES ---
   const [selectedImages, setSelectedImages] = useState([]);
 
   // --- STATE FOR VOICE MODE ---
@@ -66,6 +66,7 @@ export default function Advancedanalysis() {
  
   const isVoiceModeRef = useRef(false);
   const fileInputRef = useRef(null);
+  const documentInputRef = useRef(null); // Ref for documents
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
   const chatContentRef = useRef(null);
@@ -188,7 +189,7 @@ CRITICAL RULES:
 - Use clear, simple language
 - Ask one or two questions at a time, not overwhelming lists
 ADDITIONAL FOR VOICE MODE: reply in 2-3 sentences max to keep the conversation flowing.
-If the user uploads images, acknowledge them and incorporate them into your analysis.
+If the user uploads images or documents, acknowledge them and incorporate them into your analysis.
 If the user is silent for a while, prompt them gently to provide more information or ask if they have any questions.
 Always encourage the user to consult with a healthcare professional for medical advice.`;
 
@@ -686,25 +687,52 @@ Always encourage the user to consult with a healthcare professional for medical 
 
   const sendMessage = async () => {
     if ((!input.trim() && selectedImages.length === 0) || loading) return;
+
+    // --- NEW: CREATE IMAGE COMMAND ---
+    if (input.trim().startsWith('/image ')) {
+        const prompt = input.trim().replace('/image ', '');
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=400&height=400&nologo=true`;
+        
+        setMessages(prev => [
+            ...prev, 
+            { role: 'user', content: input }, 
+            { role: 'assistant', content: `Here is the generated image for: "${prompt}"`, generatedImage: imageUrl }
+        ]);
+        
+        setInput('');
+        if (textareaRef.current) textareaRef.current.style.height = 'auto';
+        return; // Skip Gemini AI call
+    }
+
     if (!API_KEY) { alert("API Key is missing!"); return; }
 
-    const userMessageText = input.trim() || `I have uploaded ${selectedImages.length} image(s). Please analyze them.`;
-    const imagePreviews = selectedImages.map(img => img.preview);
+    const userMessageText = input.trim() || `I have uploaded ${selectedImages.length} file(s). Please analyze them.`;
+    
+    // Pass object array instead of just strings so we know if it's a doc or image
+    const imagePreviews = selectedImages.map(img => ({ src: img.preview, isDoc: img.isDoc }));
+    
     setMessages(prev => [...prev, { role: 'user', content: userMessageText, images: imagePreviews }]);
     setInput('');
     if (textareaRef.current) textareaRef.current.style.height = 'auto'; // Reset text area height
     setLoading(true);
+    
     const currentImages = [...selectedImages];
     setSelectedImages([]);
     if (fileInputRef.current) fileInputRef.current.value = '';
+    if (documentInputRef.current) documentInputRef.current.value = '';
 
     try {
       const genAI = new GoogleGenerativeAI(API_KEY);
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", systemInstruction: SYSTEM_INSTRUCTION });
       const history = messages.slice(1).map(msg => ({ role: msg.role === 'assistant' ? 'model' : 'user', parts: [{ text: msg.content }] }));
       const chat = model.startChat({ history: history });
+      
       let messageParts = [{ text: userMessageText }];
-      currentImages.forEach(img => { messageParts.push({ inlineData: { data: img.data, mimeType: img.type } }); });
+      currentImages.forEach(img => { 
+          // Gemini 1.5 Flash supports both image and application/pdf via inlineData
+          messageParts.push({ inlineData: { data: img.data, mimeType: img.type } }); 
+      });
+      
       const result = await chat.sendMessage(messageParts);
       const text = result.response.text();
       setMessages(prev => [...prev, { role: 'assistant', content: text }]);
@@ -730,14 +758,25 @@ Always encourage the user to consult with a healthcare professional for medical 
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
-  const handleImageSelect = (e) => {
+  // --- UPDATED: HANDLE FILES & IMAGES ---
+  const handleFileSelect = (e) => {
     const file = e.target.files?.[0];
-    if (file && file.type.startsWith('image/')) {
+    if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
         const base64Data = event.target.result.split(',')[1];
-        setSelectedImages(prev => [...prev, { id: Date.now(), type: file.type, data: base64Data, preview: event.target.result }]);
+        const isImage = file.type.startsWith('image/');
+        
+        setSelectedImages(prev => [...prev, { 
+            id: Date.now(), 
+            type: file.type, 
+            data: base64Data, 
+            preview: isImage ? event.target.result : file.name, // Show name for documents
+            isDoc: !isImage
+        }]);
+        
         if (fileInputRef.current) fileInputRef.current.value = '';
+        if (documentInputRef.current) documentInputRef.current.value = '';
       };
       reader.readAsDataURL(file);
     }
@@ -745,6 +784,13 @@ Always encourage the user to consult with a healthcare professional for medical 
 
   const removeImage = (index) => setSelectedImages(prev => prev.filter((_, i) => i !== index));
   const handleQuickAction = (action) => setInput(action);
+  
+  // Quick Create Image Helper
+  const handleCreateImageCommand = () => {
+      setInput('/image ');
+      textareaRef.current?.focus();
+  };
+
   const quickActions = ['I have a headache', 'I have a fever', 'I feel nauseous', 'I have chest pain', 'I\'m feeling dizzy'];
 
   return (
@@ -773,14 +819,12 @@ Always encourage the user to consult with a healthcare professional for medical 
       <div className="new-sympto-chat-area">
         <div className="new-chat-content" ref={chatContentRef}>
           {messages.map((msg, idx) => {
-            // Check if this specific message needs the special animation
             const isUrgent = msg.role === 'assistant' && isUrgentMessage(msg.content);
             
             return (
             <div key={idx} className={`new-message-row ${msg.role === 'user' ? 'new-user-row' : 'new-assistant-row'} animate-message`}>
              <div className={`new-avatar ${msg.role === 'assistant' ? 'new-assistant-avatar' : 'new-user-avatar'}`}>
               {msg.role === 'assistant' ? (
-                /* --- Chat Interface Logo Fix --- */
                 <img
                   src={logo1}
                   alt="Sympto"
@@ -808,12 +852,58 @@ Always encourage the user to consult with a healthcare professional for medical 
                 </div>
               )}
             </div>
-              <div className={`new-message-bubble ${msg.role === 'user' ? 'new-user-bubble' : 'new-assistant-bubble'} ${isUrgent ? 'urgent-message' : ''}`}>
+              {/* URGENT BUBBLE DESIGN */}
+              <div 
+                className={`new-message-bubble ${msg.role === 'user' ? 'new-user-bubble' : 'new-assistant-bubble'} ${isUrgent ? 'urgent-message' : ''}`}
+                style={isUrgent ? { 
+                    backgroundColor: '#fff0f0', 
+                    border: '2px solid #ffcccc', 
+                    borderLeft: '6px solid #ef4444', 
+                    boxShadow: '0 4px 12px rgba(239, 68, 68, 0.15)' 
+                } : {}}
+              >
+                {/* URGENT BANNER */}
+                {isUrgent && (
+                    <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        color: '#b91c1c', 
+                        fontWeight: 'bold', 
+                        fontSize: '13px',
+                        marginBottom: '10px', 
+                        paddingBottom: '8px',
+                        borderBottom: '1px solid #fecaca',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                    }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor" style={{ marginRight: '6px' }}>
+                            <path d="M480-120q-33 0-56.5-23.5T400-200q0-33 23.5-56.5T480-280q33 0 56.5 23.5T560-200q0 33-23.5 56.5T480-120Zm-40-240v-440h80v440h-80Z"/>
+                        </svg>
+                        Action Required
+                    </div>
+                )}
+                
+                {/* --- RENDER ATTACHED IMAGES OR DOCS --- */}
                 {msg.images?.length > 0 && (
                   <div className="new-chat-images-grid">
-                    {msg.images.map((imgSrc, i) => <img key={i} src={imgSrc} alt="Symptom" className="new-chat-image-item" />)}
+                    {msg.images.map((fileObj, i) => (
+                      // Handle both new Object structure and old String structure
+                      (fileObj.isDoc) ? (
+                         <div key={i} style={{ padding: '8px 12px', background: '#f3f4f6', color: '#374151', borderRadius: '6px', fontSize: '13px', marginBottom: '8px', border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center' }}>
+                             📄 {fileObj.src}
+                         </div>
+                      ) : (
+                         <img key={i} src={fileObj.src || fileObj} alt="Symptom" className="new-chat-image-item" />
+                      )
+                    ))}
                   </div>
                 )}
+                
+                {/* --- RENDER GENERATED IMAGE --- */}
+                {msg.generatedImage && (
+                    <img src={msg.generatedImage} alt="Generated UI" style={{width: '100%', maxWidth: '300px', borderRadius: '8px', marginTop: '10px', border: '1px solid #e5e7eb'}} />
+                )}
+
                 {/* TEXT CONTENT WITH HIGHLIGHTING AND MARKDOWN */}
                 {renderMessageContent(msg, idx)}
               </div>
@@ -842,41 +932,37 @@ Always encourage the user to consult with a healthcare professional for medical 
             </div>
           )}
 
+          {/* --- NEW: RENDER UPLOAD PREVIEWS (Image or Doc) --- */}
           {selectedImages.length > 0 && (
             <div className="new-multi-image-preview">
-              {selectedImages.map((img, idx) => (
-                <div key={img.id} className="new-thumbnail-wrapper">
-                  <img src={img.preview} alt="Preview" />
+              {selectedImages.map((file, idx) => (
+                <div key={file.id} className="new-thumbnail-wrapper">
+                  {file.isDoc ? (
+                      <div style={{ background: '#e5e7eb', width: '50px', height: '50px', padding: '5px', borderRadius: '8px', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', color: '#4b5563' }}>
+                          📄<br/>Doc
+                      </div>
+                  ) : (
+                      <img src={file.preview} alt="Preview" />
+                  )}
                   <button onClick={() => removeImage(idx)} className="new-thumbnail-remove-btn">×</button>
                 </div>
               ))}
-              <button onClick={() => fileInputRef.current?.click()} className="new-add-more-btn" title="Add another image">+</button>
+              <button onClick={() => fileInputRef.current?.click()} className="new-add-more-btn" title="Add another attachment">+</button>
             </div>
           )}
 
           {/* --- NEW FOOTER ROW (Layout for Robot + Input) --- */}
           <div className="new-footer-row">
 
-            {/* 1. ROBOT MENU (Far Left, Independent) */}
             <div className="new-menu-wrapper" ref={menuRef}>
               <button
                 onClick={() => setShowMenu(!showMenu)}
                 className="new-robot-standalone-btn"
                 title="Options"
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: '#ffffff',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '40px',       
-                  height: '40px',       
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)',
-                  transition: 'all 0.2s ease',
-                  color: 'gray',
-                  padding: 0
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ffffff',
+                  border: 'none', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(124, 58, 237, 0.3)', transition: 'all 0.2s ease', color: 'gray', padding: 0
                 }}
               >
                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -886,7 +972,6 @@ Always encourage the user to consult with a healthcare professional for medical 
                </svg>
               </button>
 
-              {/* DROP-UP MENU */}
               {showMenu && (
                 <div className="new-dropup-menu">
                   <div className="new-dropdown-item" onClick={handleClearChat} style={{ color: '#ef4444' }}>
@@ -905,14 +990,30 @@ Always encourage the user to consult with a healthcare professional for medical 
               )}
             </div>
 
-            {/* 2. INPUT BAR (Right Side) */}
             <div className="new-input-bar">
               
-              <input type="file" ref={fileInputRef} onChange={handleImageSelect} accept="image/*" style={{ display: 'none' }} />
+              <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept="image/*" style={{ display: 'none' }} />
+              {/* NEW: Input for Document Files (PDF, etc) */}
+              <input type="file" ref={documentInputRef} onChange={handleFileSelect} accept="application/pdf,text/plain,.doc,.docx" style={{ display: 'none' }} />
               
+              {/* IMAGE UPLOAD ICON */}
               <button onClick={() => fileInputRef.current?.click()} disabled={loading} className="new-icon-btn new-camera-btn" title="Upload Image">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 960 960" fill="currentColor">
                   <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
+                </svg>
+              </button>
+
+              {/* NEW: FILE UPLOAD ICON (Paperclip) */}
+              <button onClick={() => documentInputRef.current?.click()} disabled={loading} className="new-icon-btn" title="Upload Document (PDF/Text)" style={{ color: '#6b7280' }}>
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                  <path d="M720-330q0 104-73 177T470-80q-104 0-177-73t-73-177v-370q0-75 52.5-127.5T400-880q75 0 127.5 52.5T580-700v350q0 46-32 78t-78 32q-46 0-78-32t-32-78v-370h80v370q0 13 8.5 21.5T470-320q13 0 21.5-8.5T500-350v-350q-1-42-29.5-71T400-800q-42 0-71 29t-29 71v370q-1 71 49 120.5T470-160q70 0 119-49.5T640-330v-390h80v390Z"/>
+                </svg>
+              </button>
+
+              {/* NEW: CREATE IMAGE ICON (Magic Wand) */}
+              <button onClick={handleCreateImageCommand} disabled={loading} className="new-icon-btn" title="Generate AI Image" style={{ color: '#8b5cf6' }}>
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                  <path d="M480-80 346-214l-84-84-84-84q-23-23-23-56.5t23-56.5l346-346q23-23 56.5-23t56.5 23l169 169q23 23 23 56.5T806-360L480-80Zm-28-254 254-254-169-169-254 254 169 169Zm194-43q8-8 8-20t-8-20l-15-15q-8-8-20-8t-20 8l-15 15q-8 8-8 20t8 20l15 15q8 8 20 8t20-8ZM240-800q-33 0-56.5-23.5T160-880q0 33-23.5 56.5T80-800q33 0 56.5 23.5T160-720q0-33 23.5-56.5T240-800Z"/>
                 </svg>
               </button>
               
