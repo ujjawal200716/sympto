@@ -692,14 +692,17 @@ Always encourage the user to consult with a healthcare professional for medical 
     if (input.trim().startsWith('/image ')) {
         const prompt = input.trim().replace('/image ', '');
         
-        // Back to the REAL AI Image generator!
+        // FORMAT PROMPT: Convert spaces to commas for the keyword search (e.g., "human heart" -> "human,heart")
+        const keywords = encodeURIComponent(prompt.trim().replace(/\s+/g, ','));
+        
+        // UPDATED: Using LoremFlickr Keyword API (Super fast, reliable, real photos)
         const randomSeed = Math.floor(Math.random() * 1000000);
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=400&height=400&nologo=true&seed=${randomSeed}`;
+        const imageUrl = `https://loremflickr.com/400/400/${keywords}?lock=${randomSeed}`;
         
         setMessages(prev => [
             ...prev, 
             { role: 'user', content: input }, 
-            { role: 'assistant', content: `Here is the generated image for: "${prompt}"`, generatedImage: imageUrl }
+            { role: 'assistant', content: `Here is a photo matching: "${prompt}"`, generatedImage: imageUrl }
         ]);
         
         setInput('');
@@ -920,7 +923,7 @@ Always encourage the user to consult with a healthcare professional for medical 
                           onError={(e) => {
                               e.target.onerror = null; // Prevent infinite loop
                               // Bulletproof inline SVG fallback that cannot fail a network request
-                              e.target.src = "data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22400%22%20height%3D%22400%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22sans-serif%22%20font-size%3D%2214%22%20fill%3D%22%23ef4444%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3E%E2%9A%A0%EF%B8%8F%20AI%20Image%20Server%20Overloaded%3C%2Ftext%3E%3C%2Fsvg%3E";
+                              e.target.src = "data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22400%22%20height%3D%22400%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22sans-serif%22%20font-size%3D%2214%22%20fill%3D%22%23ef4444%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3E%E2%9A%A0%EF%B8%8F%20Image%20Failed%20to%20Load%3C%2Ftext%3E%3C%2Fsvg%3E";
                           }}
                         />
                         {/* Generating Text Placeholder */}
@@ -930,7 +933,7 @@ Always encourage the user to consult with a healthcare professional for medical 
                             transform: 'translate(-50%, -50%)', 
                             color: '#9ca3af', fontSize: '12px', zIndex: -1
                         }}>
-                            Generating...
+                            Loading Image...
                         </div>
                     </div>
                 )}
@@ -1077,7 +1080,7 @@ Always encourage the user to consult with a healthcare professional for medical 
               {(!input.trim() && selectedImages.length === 0) ? (
                   <button onClick={handleFooterMicClick} className="new-icon-btn new-mic-btn" style={{ color: isListening ? '#ef4444' : 'inherit' }}>
                       <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-                        <path d="M480-400q-60 0-102-42t-42-102v-240q0-60 42-102t102-42q60 0 102 42t42 102v240q0 60-42 102t-102 42Zm0-80q26 0 43-17t17-43v-240q0-26-17-43t-43-17q-26 0-43 17t-17 43v240q0 26 17 43t43 17Zm0 320q-133 0-234.5-81.5T128-480h86q16 87 86.5 143.5T480-280q87 0 157.5-56.5T724-480h86q-16 124-117.5 205.5T480-160Zm0-480Z"/>
+                        <path d="M480-400q-60 0-102-42t-42-102v-240q0-60 42-102t102-42q60 0 102 42t42 102v240q0 60-42 102t-102 42Zm0-80q26 0 43-17t17-43v-240q0-26-17-43t-43-17q-26 0-43-17t-17 43v240q0 26 17 43t43 17Zm0 320q-133 0-234.5-81.5T128-480h86q16 87 86.5 143.5T480-280q87 0 157.5-56.5T724-480h86q-16 124-117.5 205.5T480-160Zm0-480Z"/>
                       </svg>
                   </button>
               ) : (
