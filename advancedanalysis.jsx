@@ -1046,7 +1046,7 @@ Always encourage the user to consult with a healthcare professional for medical 
                 </svg>
               </button>
 
-              <button onClick={handleCreateImageCommand} disabled={loading} className="new-icon-btn" title="Generate AI Image" style={{ color: '#8b5cf6' }}>
+            
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
                   <path d="M480-80 346-214l-84-84-84-84q-23-23-23-56.5t23-56.5l346-346q23-23 56.5-23t56.5 23l169 169q23 23 23 56.5T806-360L480-80Zm-28-254 254-254-169-169-254 254 169 169Zm194-43q8-8 8-20t-8-20l-15-15q-8-8-20-8t-20 8l-15 15q-8 8-8 20t8 20l15 15q8 8 20 8t20-8ZM240-800q-33 0-56.5-23.5T160-880q0 33-23.5 56.5T80-800q33 0 56.5 23.5T160-720q0-33 23.5-56.5T240-800Z"/>
                 </svg>
