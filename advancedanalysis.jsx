@@ -35,7 +35,7 @@ const API_KEY = validKeys[Math.floor(Math.random() * validKeys.length)];
 
 const INITIAL_MESSAGE = {
   role: 'assistant',
-  content: 'Hello! I\'m Sympto, your medical symptom checker assistant. I\'m here to help you understand your symptoms better.\n\n⚠️ Important: I am not a doctor and cannot provide medical diagnoses. Always consult with a healthcare professional for medical advice.\n\nTo get started, please tell me:\n1. What symptoms are you experiencing?\n2. When did they start?\n3. How severe are they (mild, moderate, severe)?\n\nYou can also upload multiple images of visible symptoms using the camera button.'
+  content: 'Hello! I\'m Sympto, your medical symptom checker assistant. I\'m here to help you understand your symptoms better.\n\n⚠️ Important: I am not a doctor and cannot provide medical diagnoses. Always consult with a healthcare professional for medical advice.\n\nTo get started, please tell me:\n1. What symptoms are you experiencing?\n2. When did they start?\n3. How severe are they (mild, moderate, severe)?\n\nYou can also upload multiple images or documents using the paperclip attachment button.'
 };
 
 export default function Advancedanalysis() {
@@ -66,7 +66,6 @@ export default function Advancedanalysis() {
  
   const isVoiceModeRef = useRef(false);
   const fileInputRef = useRef(null);
-  const documentInputRef = useRef(null); // Ref for documents
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
   const chatContentRef = useRef(null);
@@ -725,7 +724,6 @@ Always encourage the user to consult with a healthcare professional for medical 
     const currentImages = [...selectedImages];
     setSelectedImages([]);
     if (fileInputRef.current) fileInputRef.current.value = '';
-    if (documentInputRef.current) documentInputRef.current.value = '';
 
     try {
       const genAI = new GoogleGenerativeAI(API_KEY);
@@ -764,7 +762,7 @@ Always encourage the user to consult with a healthcare professional for medical 
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
-  // --- UPDATED: HANDLE FILES & IMAGES ---
+  // --- UPDATED: COMBINED HANDLE FILES & IMAGES ---
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -782,7 +780,6 @@ Always encourage the user to consult with a healthcare professional for medical 
         }]);
         
         if (fileInputRef.current) fileInputRef.current.value = '';
-        if (documentInputRef.current) documentInputRef.current.value = '';
       };
       reader.readAsDataURL(file);
     }
@@ -1031,24 +1028,19 @@ Always encourage the user to consult with a healthcare professional for medical 
 
             <div className="new-input-bar">
               
-              <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept="image/*" style={{ display: 'none' }} />
-              <input type="file" ref={documentInputRef} onChange={handleFileSelect} accept="application/pdf,text/plain,.doc,.docx" style={{ display: 'none' }} />
+              {/* SINGLE CONSOLIDATED FILE INPUT FOR IMAGES AND DOCS */}
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileSelect} 
+                accept="image/*,application/pdf,text/plain,.doc,.docx" 
+                style={{ display: 'none' }} 
+              />
               
-              <button onClick={() => fileInputRef.current?.click()} disabled={loading} className="new-icon-btn new-camera-btn" title="Upload Image">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 960 960" fill="currentColor">
-                  <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
-                </svg>
-              </button>
-
-              <button onClick={() => documentInputRef.current?.click()} disabled={loading} className="new-icon-btn" title="Upload Document (PDF/Text)" style={{ color: '#6b7280' }}>
+              {/* COMBINED ATTACHMENT ICON (Paperclip) */}
+              <button onClick={() => fileInputRef.current?.click()} disabled={loading} className="new-icon-btn" title="Attach File or Image" style={{ color: '#6b7280' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
                   <path d="M720-330q0 104-73 177T470-80q-104 0-177-73t-73-177v-370q0-75 52.5-127.5T400-880q75 0 127.5 52.5T580-700v350q0 46-32 78t-78 32q-46 0-78-32t-32-78v-370h80v370q0 13 8.5 21.5T470-320q13 0 21.5-8.5T500-350v-350q-1-42-29.5-71T400-800q-42 0-71 29t-29 71v370q-1 71 49 120.5T470-160q70 0 119-49.5T640-330v-390h80v390Z"/>
-                </svg>
-              </button>
-
-            
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-                  <path d="M480-80 346-214l-84-84-84-84q-23-23-23-56.5t23-56.5l346-346q23-23 56.5-23t56.5 23l169 169q23 23 23 56.5T806-360L480-80Zm-28-254 254-254-169-169-254 254 169 169Zm194-43q8-8 8-20t-8-20l-15-15q-8-8-20-8t-20 8l-15 15q-8 8-8 20t8 20l15 15q8 8 20 8t20-8ZM240-800q-33 0-56.5-23.5T160-880q0 33-23.5 56.5T80-800q33 0 56.5 23.5T160-720q0-33 23.5-56.5T240-800Z"/>
                 </svg>
               </button>
               
