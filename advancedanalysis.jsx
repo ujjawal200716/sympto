@@ -691,7 +691,10 @@ Always encourage the user to consult with a healthcare professional for medical 
     // --- NEW: CREATE IMAGE COMMAND ---
     if (input.trim().startsWith('/image ')) {
         const prompt = input.trim().replace('/image ', '');
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=400&height=400&nologo=true`;
+        
+        // Random seed to prevent browser caching issues
+        const randomSeed = Math.floor(Math.random() * 1000000);
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=400&height=400&nologo=true&seed=${randomSeed}`;
         
         setMessages(prev => [
             ...prev, 
@@ -901,7 +904,15 @@ Always encourage the user to consult with a healthcare professional for medical 
                 
                 {/* --- RENDER GENERATED IMAGE --- */}
                 {msg.generatedImage && (
-                    <img src={msg.generatedImage} alt="Generated UI" style={{width: '100%', maxWidth: '300px', borderRadius: '8px', marginTop: '10px', border: '1px solid #e5e7eb'}} />
+                    <img 
+                      src={msg.generatedImage} 
+                      alt="Generated Content" 
+                      style={{width: '100%', maxWidth: '300px', borderRadius: '8px', marginTop: '10px', border: '1px solid #e5e7eb'}} 
+                      onError={(e) => {
+                          e.target.onerror = null; // Prevent infinite loop
+                          e.target.src = `https://via.placeholder.com/400x400.png?text=Image+Blocked+or+Failed`;
+                      }}
+                    />
                 )}
 
                 {/* TEXT CONTENT WITH HIGHLIGHTING AND MARKDOWN */}
