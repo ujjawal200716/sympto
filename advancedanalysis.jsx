@@ -20,15 +20,26 @@ const ALL_KEYS = [
 // Filter out undefined/empty keys first
 const validKeys = ALL_KEYS.filter((key) => key && key.length > 0);
 
+// --- ADD THIS ABOVE return () ---
+  const isUrgentMessage = (text) => {
+    if (!text) return false;
+    const lowerText = text.toLowerCase();
+    return lowerText.includes('emergency') || 
+           lowerText.includes('immediate medical attention') || 
+           lowerText.includes('call 112') ||
+           lowerText.includes('seek urgent care');
+  };
+
 // Select a random key from the valid list
 const API_KEY = validKeys[Math.floor(Math.random() * validKeys.length)];
+
+const INITIAL_MESSAGE = {
+  role: 'assistant',
+  content: 'Hello! I\'m Sympto, your medical symptom checker assistant. I\'m here to help you understand your symptoms better.\n\n⚠️ Important: I am not a doctor and cannot provide medical diagnoses. Always consult with a healthcare professional for medical advice.\n\nTo get started, please tell me:\n1. What symptoms are you experiencing?\n2. When did they start?\n3. How severe are they (mild, moderate, severe)?\n\nYou can also upload multiple images of visible symptoms using the camera button.'
+};
+
 export default function Advancedanalysis() {
-  const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: 'Hello! I\'m Sympto, your medical symptom checker assistant. I\'m here to help you understand your symptoms better.\n\n⚠️ Important: I am not a doctor and cannot provide medical diagnoses. Always consult with a healthcare professional for medical advice.\n\nTo get started, please tell me:\n1. What symptoms are you experiencing?\n2. When did they start?\n3. How severe are they (mild, moderate, severe)?\n\nYou can also upload multiple images of visible symptoms using the camera button.'
-    }
-  ]);
+  const [messages, setMessages] = useState([INITIAL_MESSAGE]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
  
@@ -58,6 +69,7 @@ export default function Advancedanalysis() {
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
   const chatContentRef = useRef(null);
+  const textareaRef = useRef(null); // Ref for auto-expanding textarea
 
   // --- SPEECH QUEUE REFS ---
   const speechQueueRef = useRef([]); 
@@ -180,7 +192,17 @@ If the user uploads images, acknowledge them and incorporate them into your anal
 If the user is silent for a while, prompt them gently to provide more information or ask if they have any questions.
 Always encourage the user to consult with a healthcare professional for medical advice.`;
 
-const handleDownloadPDF = async () => {
+  const handleClearChat = () => {
+    setMessages([INITIAL_MESSAGE]);
+    setShowMenu(false);
+    window.speechSynthesis.cancel();
+    setSpeakingMessageIndex(null);
+    setInput('');
+    setSelectedImages([]);
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
+  };
+
+  const handleDownloadPDF = async () => {
     setShowMenu(false);
     const element = chatContentRef.current;
     if (!element) return;
@@ -512,11 +534,17 @@ const handleDownloadPDF = async () => {
     speakChunk();
   };
 
-  // --- HIGHLIGHTER COMPONENT ---
+  // --- HIGHLIGHTER & MARKDOWN COMPONENT ---
   const renderMessageContent = (msg, index) => {
-    // If not speaking this message, just return text
+    // If not speaking this message, parse markdown (bold) and return text
     if (speakingMessageIndex !== index) {
-        return <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div>;
+        const formattedText = msg.content.split(/(\*\*.*?\*\*)/g).map((part, i) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+                return <strong key={i} style={{fontWeight: 'bold', color: '#1f2937'}}>{part.slice(2, -2)}</strong>;
+            }
+            return <span key={i}>{part}</span>;
+        });
+        return <div style={{ whiteSpace: 'pre-wrap' }}>{formattedText}</div>;
     }
 
     // Prepare text for highlighting (Must match speech cleaning roughly)
@@ -664,6 +692,7 @@ const handleDownloadPDF = async () => {
     const imagePreviews = selectedImages.map(img => img.preview);
     setMessages(prev => [...prev, { role: 'user', content: userMessageText, images: imagePreviews }]);
     setInput('');
+    if (textareaRef.current) textareaRef.current.style.height = 'auto'; // Reset text area height
     setLoading(true);
     const currentImages = [...selectedImages];
     setSelectedImages([]);
@@ -687,6 +716,14 @@ const handleDownloadPDF = async () => {
     } catch (error) {
       setMessages(prev => [...prev, { role: 'assistant', content: '⚠️ Error connecting to AI.' }]);
     } finally { setLoading(false); }
+  };
+
+  const handleInputChange = (e) => {
+    setInput(e.target.value);
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -735,8 +772,12 @@ const handleDownloadPDF = async () => {
       {/* --- CHAT AREA --- */}
       <div className="new-sympto-chat-area">
         <div className="new-chat-content" ref={chatContentRef}>
-          {messages.map((msg, idx) => (
-            <div key={idx} className={`new-message-row ${msg.role === 'user' ? 'new-user-row' : 'new-assistant-row'}`}>
+          {messages.map((msg, idx) => {
+            // Check if this specific message needs the special animation
+            const isUrgent = msg.role === 'assistant' && isUrgentMessage(msg.content);
+            
+            return (
+            <div key={idx} className={`new-message-row ${msg.role === 'user' ? 'new-user-row' : 'new-assistant-row'} animate-message`}>
              <div className={`new-avatar ${msg.role === 'assistant' ? 'new-assistant-avatar' : 'new-user-avatar'}`}>
               {msg.role === 'assistant' ? (
                 /* --- Chat Interface Logo Fix --- */
@@ -767,17 +808,18 @@ const handleDownloadPDF = async () => {
                 </div>
               )}
             </div>
-              <div className={`new-message-bubble ${msg.role === 'user' ? 'new-user-bubble' : 'new-assistant-bubble'}`}>
+              <div className={`new-message-bubble ${msg.role === 'user' ? 'new-user-bubble' : 'new-assistant-bubble'} ${isUrgent ? 'urgent-message' : ''}`}>
                 {msg.images?.length > 0 && (
                   <div className="new-chat-images-grid">
                     {msg.images.map((imgSrc, i) => <img key={i} src={imgSrc} alt="Symptom" className="new-chat-image-item" />)}
                   </div>
                 )}
-                {/* TEXT CONTENT WITH HIGHLIGHTING */}
+                {/* TEXT CONTENT WITH HIGHLIGHTING AND MARKDOWN */}
                 {renderMessageContent(msg, idx)}
               </div>
             </div>
-          ))}
+            );
+          })}
           {loading && !isVoiceMode && (
             <div className="new-message-row new-assistant-row">
               <div className="new-avatar new-assistant-avatar">🤖</div>
@@ -847,6 +889,9 @@ const handleDownloadPDF = async () => {
               {/* DROP-UP MENU */}
               {showMenu && (
                 <div className="new-dropup-menu">
+                  <div className="new-dropdown-item" onClick={handleClearChat} style={{ color: '#ef4444' }}>
+                    <span>🗑️</span> Clear Chat
+                  </div>
                   <div className="new-dropdown-item" onClick={handleShare}>
                     <span>🔗</span> Share
                   </div>
@@ -879,14 +924,22 @@ const handleDownloadPDF = async () => {
               </button>
 
               <div className="new-text-input-wrapper">
-                <input
-                  type="text"
+                <textarea
+                  ref={textareaRef}
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={handleInputChange}
                   onKeyDown={handleKeyPress}
                   placeholder={isListening ? "Listening..." : (selectedImages.length > 0 ? "Add a caption..." : "Describe symptoms...")}
                   disabled={loading}
                   className="new-chat-input"
+                  rows={1}
+                  style={{ 
+                      resize: 'none', 
+                      overflowY: 'auto', 
+                      maxHeight: '120px',
+                      paddingTop: '10px',
+                      fontFamily: 'inherit'
+                  }}
                 />
               </div>
 
