@@ -902,7 +902,7 @@ Always encourage the user to consult with a healthcare professional for medical 
                   </div>
                 )}
                 
-              {/* --- RENDER GENERATED IMAGE --- */}
+            {/* --- RENDER GENERATED IMAGE --- */}
                 {msg.generatedImage && (
                     <div style={{ position: 'relative', width: '100%', maxWidth: '300px', marginTop: '10px' }}>
                         <img 
@@ -910,8 +910,8 @@ Always encourage the user to consult with a healthcare professional for medical 
                           alt="Generated Content" 
                           style={{
                               width: '100%', 
-                              minHeight: '300px', /* Keeps the box open while loading */
-                              backgroundColor: '#f3f4f6', /* Grey placeholder color */
+                              minHeight: '300px', 
+                              backgroundColor: '#f3f4f6', 
                               borderRadius: '8px', 
                               border: '1px solid #e5e7eb',
                               objectFit: 'cover',
@@ -919,10 +919,21 @@ Always encourage the user to consult with a healthcare professional for medical 
                           }} 
                           onError={(e) => {
                               e.target.onerror = null; // Prevent infinite loop
-                              // Updated to a more reliable placeholder service
-                              e.target.src = `https://placehold.co/400x400/f3f4f6/6b7280.png?text=Image+Failed`;
+                              // Bulletproof inline SVG fallback that cannot fail a network request
+                              e.target.src = "data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22400%22%20height%3D%22400%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23f3f4f6%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22sans-serif%22%20font-size%3D%2214%22%20fill%3D%22%23ef4444%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3E%E2%9A%A0%EF%B8%8F%20AI%20Image%20Server%20Overloaded%3C%2Ftext%3E%3C%2Fsvg%3E";
                           }}
                         />
+                        {/* Generating Text Placeholder */}
+                        <div style={{
+                            position: 'absolute', 
+                            top: '50%', left: '50%', 
+                            transform: 'translate(-50%, -50%)', 
+                            color: '#9ca3af', fontSize: '12px', zIndex: -1
+                        }}>
+                            Generating...
+                        </div>
+                    </div>
+                )}
                         {/* Little text to let the user know it's working */}
                         <div style={{
                             position: 'absolute', 
