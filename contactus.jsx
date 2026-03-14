@@ -29,8 +29,45 @@ export default function MedicalDictionary() {
   const [isSaved, setIsSaved] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  // ✨ NEW: States for Autocomplete
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
   // React ref for better DOM containment during PDF export
   const pdfExportRef = useRef(null);
+
+  // ✨ NEW: Autocomplete Logic
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+
+    if (value.trim() === '') {
+      setShowSuggestions(false);
+      return;
+    }
+
+    // Mock dictionaries
+    const mockData = {
+      medicine: ['Paracetamol', 'Ibuprofen', 'Amoxicillin', 'Aspirin', 'Azithromycin', 'Cetirizine', 'Cough Syrup', 'Omeprazole', 'Dolo 650', 'Pantoprazole'],
+      disease: ['Diabetes', 'Dengue', 'Depression', 'Hypertension', 'COVID-19', 'Cholera', 'Malaria', 'Migraine', 'Tuberculosis', 'Asthma'],
+      rumour: ['Does papaya leaf cure dengue?', 'Is microwaving food bad?', 'Do vaccines cause autism?', 'Does vitamin C cure a cold?', 'Can garlic prevent viruses?']
+    };
+
+    const currentList = mockData[activeTab] || [];
+    
+    // Filter the list to find matching items
+    const filtered = currentList.filter(item => 
+      item.toLowerCase().includes(value.toLowerCase())
+    );
+    
+    setSuggestions(filtered);
+    setShowSuggestions(true);
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setSearchQuery(suggestion);
+    setShowSuggestions(false);
+  };
 
   // --- GROQ API CALL ---
   const handleSearch = async (e) => {
@@ -40,6 +77,7 @@ export default function MedicalDictionary() {
     setError(null);
     setResult(null);
     setIsSaved(false); // Reset save state on new search
+    setShowSuggestions(false); // Hide suggestions on search submit
 
     if (!API_KEY) {
       setError("Groq API Key is missing. Please check your environment variables.");
@@ -136,7 +174,7 @@ export default function MedicalDictionary() {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // Added Token Header!
+          'Authorization': `Bearer ${token}` 
         },
         body: JSON.stringify({
           type: activeTab,
@@ -264,19 +302,19 @@ export default function MedicalDictionary() {
           <div className="dict-tab-container">
             <button 
               className={`dict-tab ${activeTab === 'medicine' ? 'active' : ''}`} 
-              onClick={() => { setActiveTab('medicine'); setResult(null); setError(null); }}
+              onClick={() => { setActiveTab('medicine'); setResult(null); setError(null); setShowSuggestions(false); setSearchQuery(''); }}
             >
               <FaPills className="tab-icon" /> Medicine
             </button>
             <button 
               className={`dict-tab ${activeTab === 'disease' ? 'active' : ''}`} 
-              onClick={() => { setActiveTab('disease'); setResult(null); setError(null); }}
+              onClick={() => { setActiveTab('disease'); setResult(null); setError(null); setShowSuggestions(false); setSearchQuery(''); }}
             >
               <FaVirus className="tab-icon" /> Disease
             </button>
             <button 
               className={`dict-tab ${activeTab === 'rumour' ? 'active' : ''}`} 
-              onClick={() => { setActiveTab('rumour'); setResult(null); setError(null); }}
+              onClick={() => { setActiveTab('rumour'); setResult(null); setError(null); setShowSuggestions(false); setSearchQuery(''); }}
             >
               <FaCommentSlash className="tab-icon" /> Fact-Check
             </button>
@@ -284,7 +322,9 @@ export default function MedicalDictionary() {
         </div>
 
         <form className="dict-search-form" onSubmit={handleSearch}>
-          <div className="dict-search-bar">
+          <div className="dict-search-bar" style={{ position: 'relative', overflow: 'visible' }}>
+            
+            {/* ✨ UPDATED INPUT FOR AUTOCOMPLETE */}
             <input 
               type="text" 
               placeholder={
@@ -293,12 +333,31 @@ export default function MedicalDictionary() {
                 "Enter a claim to verify (e.g., 'Does papaya leaf cure dengue?')"
               }
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleInputChange}
+              onFocus={() => { if(suggestions.length > 0) setShowSuggestions(true) }}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)} // Delay allows click to register
               disabled={loading}
+              style={{ width: '100%' }}
             />
+            
             <button type="submit" disabled={loading || !searchQuery.trim()} className="dict-search-btn">
               {loading ? <span className="loader-spinner">...</span> : 'Search'}
             </button>
+
+            {/* ✨ NEW: AUTOCOMPLETE DROPDOWN UI */}
+            {showSuggestions && suggestions.length > 0 && (
+              <ul className="autocomplete-dropdown">
+                {suggestions.map((suggestion, index) => (
+                  <li 
+                    key={index} 
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  >
+                    <FaSearch style={{ marginRight: '10px', fontSize: '0.8rem', opacity: 0.5 }} />
+                    {suggestion}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </form>
 
@@ -319,7 +378,6 @@ export default function MedicalDictionary() {
                 <p><strong>Disclaimer:</strong> This information is generated by AI for educational purposes only and should NOT be used for self-diagnosis or treatment. Always consult a qualified healthcare provider.</p>
               </div>
 
-              {/* ✨ UPDATED HEADER WITH ACTION BUTTONS */}
               <div className="result-header" style={{ flexWrap: 'wrap', justifyContent: 'space-between', borderBottom: '1px solid var(--border-light)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.8rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                   <div className="result-icon-box" style={{ margin: 0 }}>
@@ -338,7 +396,6 @@ export default function MedicalDictionary() {
                   </div>
                 </div>
 
-                {/* --- NEW ACTION ROW --- */}
                 <div className="action-row" data-html2canvas-ignore="true">
                   <button onClick={handleShare} className="icon-btn-custom" title="Share">
                     <FaShareAlt size={18} />
@@ -476,7 +533,7 @@ export default function MedicalDictionary() {
 
             </div>
 
-            {/* ✨ STYLES FOR THE NEW BUTTONS */}
+            {/* ✨ STYLES FOR THE NEW BUTTONS & AUTOCOMPLETE */}
             <style>{`
               .action-row { 
                 display: flex; gap: 12px; align-items: center; margin-left: auto; flex-wrap: wrap; justify-content: center; 
@@ -487,7 +544,6 @@ export default function MedicalDictionary() {
                 background: var(--bg-tab-container); border: 1px solid var(--border-light); 
                 color: var(--text-muted); font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease; 
               }
-              /* FIX: Force SVGs to render at the correct size */
               .icon-btn-custom svg {
                 min-width: 18px;
                 min-height: 18px;
@@ -516,9 +572,45 @@ export default function MedicalDictionary() {
               }
               .btn-primary-custom:disabled { opacity: 0.7; cursor: not-allowed; }
               
+              /* ✨ NEW: Autocomplete Styles */
+              .autocomplete-dropdown {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: calc(100% - 120px);
+                background: var(--bg-card, #ffffff);
+                border: 1px solid var(--border-light, #e2e8f0);
+                border-radius: 12px;
+                margin-top: 8px;
+                list-style: none;
+                padding: 0;
+                z-index: 1000;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                max-height: 250px;
+                overflow-y: auto;
+                text-align: left;
+              }
+              .autocomplete-dropdown li {
+                padding: 12px 20px;
+                cursor: pointer;
+                color: var(--text-primary, #1e293b);
+                border-bottom: 1px solid var(--border-light, #f1f5f9);
+                display: flex;
+                align-items: center;
+                transition: background 0.2s ease;
+              }
+              .autocomplete-dropdown li:last-child {
+                border-bottom: none;
+              }
+              .autocomplete-dropdown li:hover {
+                background: var(--bg-hover, #f8fafc);
+                color: var(--primary);
+              }
+
               @media (max-width: 768px) {
                  .action-row { margin-left: 0; margin-top: 15px; width: 100%; justify-content: center; }
                  .btn-primary-custom { flex: 1; justify-content: center; }
+                 .autocomplete-dropdown { width: 100%; }
               }
             `}</style>
           </div>
