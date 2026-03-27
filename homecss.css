@@ -2,6 +2,106 @@
    GLOBAL RESET & SCROLLBAR HIDING
    ========================================= */
 /* Hide Scrollbar for Chrome, Safari and Opera */
+/* --- Hero Section Dark Mode Fixes --- */
+/* =========================================
+   8. CUSTOM UI UPDATES (Buttons & Input)
+   ========================================= */
+
+/* --- Modern Button UI (.your-custom-class) --- */
+.your-custom-class {
+  background: linear-gradient(135deg, var(--primary) 0%, #60a5fa 100%);
+  color: #ffffff;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 99px; /* Smooth pill shape */
+  font-weight: 600;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.your-custom-class:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+  color: #ffffff;
+}
+
+/* Disabled state for the age Continue button */
+.your-custom-class:disabled {
+  background: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* --- Input Box Color UI --- */
+.modal-body input[type="number"] {
+  background-color: #f8fafc; /* Soft gray/blue background */
+  color: var(--primary-dark) !important; /* Bold blue text */
+  border: 2px solid #cbd5e1 !important;
+  font-weight: 700;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.modal-body input[type="number"]:focus {
+  background-color: #ffffff;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 4px var(--primary-light), inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+/* --- Dark Mode Support for the new UI --- */
+.dark-theme .your-custom-class {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark-theme .your-custom-class:hover {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+.dark-theme .your-custom-class:disabled {
+  background: #334155;
+  color: #64748b;
+}
+
+.dark-theme .modal-body input[type="number"] {
+  background-color: #0f172a;
+  color: #60a5fa !important;
+  border-color: #334155 !important;
+}
+
+.dark-theme .modal-body input[type="number"]:focus {
+  background-color: #1e293b;
+  border-color: #3b82f6 !important;
+}
+.dark-theme .hero-main-title {
+  color: #ffffff; /* Forces the huge text to be bright white */
+}
+
+.dark-theme .hero-pre-title {
+  background: transparent;
+  color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+/* Adds the subtle dark glass boxes to your checklist items */
+.dark-theme .check-item {
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 16px 8px 12px;
+  border-radius: 8px;
+}
+
+.dark-theme .check-item::before {
+  background: #3b82f6; /* Bright blue checkmark for dark mode */
+}
 ::-webkit-scrollbar {
   display: none;
 }
@@ -78,7 +178,7 @@ html, body {
   display: flex;
   align-items: center; 
   justify-content: center; 
- padding: 60px 0 40px 0;
+  padding: 60px 0 40px 0;
   overflow: hidden;
   width: 100%;
   z-index: 2;
@@ -139,29 +239,30 @@ html, body {
   margin-right: 40px; 
 }
 
-.home-container h1 {
-  font-size: clamp(2.2rem, 5vw, 4.2rem); 
-  font-weight: 800;
-  line-height: 1.15;
-  color: var(--text-main);
-  margin-bottom: 20px; 
-  text-align: left;
-  letter-spacing: -0.03em;
-}
-
+/* --- Matches your exact "Hi I'm Sympto" Pill --- */
 .hero-pre-title {
   display: inline-block;
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--primary);
-  margin-bottom: 12px; 
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #2563eb; 
+  margin-bottom: 16px; 
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  background: var(--primary-light);
-  padding: 6px 12px;
-  border-radius: 99px;
-  border: 1px solid rgba(37, 99, 235, 0.1);
-  transition: transform 0.3s ease;
+  letter-spacing: 1.5px;
+  background: transparent;
+  padding: 6px 16px;
+  border-radius: 50px;
+  border: 1px solid #bfdbfe;
+}
+
+/* --- Matches your thicker heading font --- */
+.hero-main-title {
+  font-size: clamp(3rem, 6vw, 4.8rem); 
+  font-weight: 900; 
+  color: #0b1120; 
+  line-height: 1.1;
+  margin: 0 0 24px 0;
+  text-align: left;
+  letter-spacing: -0.04em;
 }
 
 .scrolling-words-container {
@@ -170,10 +271,9 @@ html, body {
   display: inline-block;
   vertical-align: bottom;
   position: relative;
-  
-  /* CHANGED: Adjusted from 5px to 0px or -2px to align better */
   top: -15px; 
 }
+
 .scrolling-words-wrapper {
   transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -185,7 +285,7 @@ html, body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: 800;
-  padding-right: 5px; /* Prevent clipping */
+  padding-right: 5px;
 }
 
 .hero-checklist {
@@ -196,18 +296,15 @@ html, body {
   text-align: left;
 }
 
-
+/* --- Solid Blue Checkmarks --- */
 .check-item {
-  font-size: 1rem;
-  color: var(--text-body);
+  font-size: 1.05rem;
+  color: #475569;
   display: flex;
   align-items: center;
-  font-weight: 500;
-  background: rgba(255,255,255,0.5); 
-  padding: 4px 12px 4px 4px;
-  border-radius: 20px;
-  border: 1px solid transparent;
-  transition: all 0.3s ease;
+  font-weight: 600;
+  background: transparent;
+  padding: 4px 12px 4px 0;
 }
 
 .check-item::before {
@@ -215,18 +312,18 @@ html, body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px; 
-  height: 18px;
-  background: var(--primary);
+  width: 22px; 
+  height: 22px;
+  background: #0ea5e9; 
   color: white;
   border-radius: 50%;
-  font-size: 10px;
-  margin-right: 8px;
+  font-size: 13px;
+  margin-right: 10px;
   font-weight: bold;
 }
 
 /* =========================================
-   BUTTON ANIMATIONS
+   PILL BUTTONS
    ========================================= */
 .hero-actions {
   display: flex;
@@ -236,123 +333,46 @@ html, body {
   flex-wrap: wrap;
 }
 
-/* --- Base Setup --- */
 .btn {
-  padding: 14px 32px;
-  font-size: 1rem;
-  font-weight: 700; /* Increased weight for visibility */
-  border-radius: 12px;
+  padding: 16px 36px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border-radius: 9999px; /* Perfect pill */
   text-decoration: none;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid transparent;
-  position: relative;
-  overflow: hidden; /* Essential for the light sweep */
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all 0.3s ease;
   white-space: nowrap;
-  user-select: none;
-  z-index: 1;
 }
 
-/* --- Shine Animation Effect --- */
-/* This creates the sweeping light beam */
-.btn::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.6),
-    transparent
-  );
-  transition: none;
-  z-index: -1;
-}
-
-.btn:hover::after {
-  animation: sweep 0.6s ease-in-out;
-}
-
-@keyframes sweep {
-  0% { left: -100%; }
-  100% { left: 200%; }
-}
-
-/* --- Primary Button (The "Light Source") --- */
 .btn-primary {
-  background: var(--primary);
+  background: #0ea5e9; 
   color: white;
-  /* Multi-layered shadow for a deep neon glow */
-  box-shadow: 
-    0 4px 6px -1px rgba(37, 99, 235, 0.3),
-    0 0 15px rgba(37, 99, 235, 0.4), 
-    inset 0 0 10px rgba(255, 255, 255, 0.2); 
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  
-  /* Constant subtle pulse to stay visible */
-  animation: glow-pulse 3s infinite;
+  border: none;
+  box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
 }
 
 .btn-primary:hover {
-  background: var(--primary); /* Keep base color, let light do the work */
-  transform: translateY(-4px) scale(1.02);
-   color: white;
-  /* Intense Light Explosion on Hover */
-  box-shadow: 
-    0 15px 25px -5px rgba(37, 99, 235, 0.6),
-    0 0 30px rgba(37, 99, 235, 0.5),
-    0 0 60px rgba(37, 99, 235, 0.3),
-    inset 0 0 20px rgba(255, 255, 255, 0.4);
-  
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.8); /* Make text glow too */
+  background: #0284c7;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
 }
 
-.btn-primary:active {
-  transform: translateY(1px) scale(0.96);
-  box-shadow: 0 5px 10px rgba(37, 99, 235, 0.4);
-}
-
-/* --- Secondary Button (Illuminated Glass) --- */
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--text-main);
-  border: 1px solid var(--border-light);
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-  backdrop-filter: blur(5px);
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.04);
 }
 
 .btn-secondary:hover {
-  background: white;
-  border-color: var(--primary);
-  color: var(--primary);
-  transform: translateY(-3px);
-  
-  /* Colored glow reflection */
-  box-shadow: 
-    0 10px 20px -3px rgba(37, 99, 235, 0.15),
-    0 0 15px rgba(37, 99, 235, 0.2);
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
 }
 
-.btn-secondary:active {
-  transform: translateY(1px) scale(0.96);
-}
-
-/* --- Pulse Animation Definition --- */
-@keyframes glow-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
-}
-
-/* =========================================
-   Hero Visual & Glass Cards
-   ========================================= */
 .hero-visual {
   position: relative;
   width: 450px;
@@ -629,7 +649,7 @@ html, body {
   width: max-content;
   animation: scroll 50s linear infinite;
   padding: 20px 0; 
-  will-change: transform; /* Fixes lag */
+  will-change: transform;
 }
 
 .carousel-track:hover { animation-play-state: paused; }
@@ -688,6 +708,308 @@ html, body {
 @keyframes scroll {
   0% { transform: translateX(0); }
   100% { transform: translateX(calc(-50% - 10px)); }
+}
+
+/* =========================================
+   UPGRADED: BROWSE CONDITIONS SECTION
+   ========================================= */
+.checkup-section {
+  padding: 5rem 0;
+  background-color: transparent; 
+  width: 100%;
+}
+
+.checkup-section .section-intro {
+  margin-bottom: 3.5rem;
+  padding: 0 4%;
+}
+
+.checkup-section .section-intro h2 {
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  color: var(--text-main, #0f172a); 
+  margin-bottom: 0.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.checkup-section .section-intro p {
+  color: var(--text-body, #64748b);
+  font-size: 1.15rem;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.disease-category-wrapper {
+  margin-bottom: 4rem;
+}
+
+.disease-category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 0 4%;
+}
+
+.disease-category-header h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main, #0f172a); 
+  margin: 0;
+}
+
+.search-more-btn {
+  background: none;
+  border: none;
+  color: var(--primary, #3b82f6);
+  font-size: 1rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 99px;
+}
+
+.search-more-btn:hover,
+.search-more-btn:focus-visible {
+  background: var(--primary-light, #eff6ff);
+  transform: translateX(4px);
+  outline: none;
+}
+
+/* Horizontal Scrolling Row with Scroll Snapping */
+.disease-row {
+  display: flex;
+  gap: 1.25rem; 
+  overflow-x: auto;
+  padding: 0.5rem 4% 2.5rem 4%; 
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  
+  /* Native App-like Scrolling */
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 4%;
+}
+
+.disease-row.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.disease-row.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Disease Cards */
+.disease-card {
+  flex: 0 0 auto;
+  width: 340px; 
+  min-height: 220px; 
+  background: var(--secondary, #ffffff); 
+  border: 1px solid var(--border-light, #e2e8f0);
+  border-radius: 20px; /* Smoother, modern radius */
+  padding: 2rem;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  
+  /* Snaps cleanly to the left edge when user stops scrolling */
+  scroll-snap-align: start; 
+}
+
+.disease-card:hover,
+.disease-card:focus-within {
+  transform: translateY(-8px);
+  border-color: var(--primary, #3b82f6);
+  box-shadow: 0 20px 40px -10px rgba(37, 99, 235, 0.12), 
+              0 8px 16px -4px rgba(0, 0, 0, 0.05);
+}
+
+.disease-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 100%;
+  background: linear-gradient(180deg, var(--primary-light, rgba(59, 130, 246, 0.08)) 0%, transparent 80%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.disease-card:hover::before {
+  opacity: 1;
+}
+
+.disease-card-icon {
+  width: 52px; 
+  height: 52px;
+  border-radius: 14px;
+  background: var(--primary-light, rgba(59, 130, 246, 0.1));
+  color: var(--primary, #3b82f6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.disease-card:hover .disease-card-icon {
+  background: var(--primary, #3b82f6);
+  color: #ffffff;
+  transform: scale(1.15) rotate(8deg);
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+}
+
+.disease-card-content {
+  margin-top: 3.5rem; 
+  position: relative;
+  z-index: 2;
+}
+
+.disease-card-content h4 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main, #0f172a); 
+  margin: 0 0 0.75rem 0;
+  transition: color 0.3s ease;
+}
+
+.disease-card:hover .disease-card-content h4 {
+  color: var(--primary, #3b82f6); 
+}
+
+.disease-card-content p {
+  font-size: 0.95rem;
+  color: var(--text-body, #475569); 
+  line-height: 1.6;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* --- Integrated Dark Mode --- */
+.dark-theme .disease-card { 
+  background: var(--bg-card, #1e293b); 
+  border-color: var(--border-light, #334155); 
+}
+.dark-theme .disease-card:hover {
+  background: #25334b; /* Subtle lift in dark mode */
+}
+.dark-theme .disease-card-content h4 { color: var(--text-main, #f8fafc); }
+.dark-theme .disease-card-content p { color: var(--text-body, #cbd5e1); }
+
+/* --- Integrated Mobile Queries --- */
+@media (max-width: 768px) {
+  .checkup-section { padding: 3rem 0; }
+  .checkup-section .section-intro { margin-bottom: 2rem; text-align: center; }
+  .disease-category-header { 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 12px; 
+  }
+  .search-more-btn { padding: 0; } /* Remove padding on mobile for flush alignment */
+  
+  .disease-row { padding-bottom: 1.5rem; }
+  .disease-card {
+    width: 280px; /* Tighter fit for phones */
+    min-height: 200px;
+    padding: 1.5rem;
+  }
+  .disease-card:hover { transform: none; box-shadow: none; } /* Better touch UX */
+}
+/* --- DISEASE CARDS (USER'S NEW DESIGN) --- */
+.disease-card {
+  flex: 0 0 auto;
+  width: 360px; 
+  min-height: 200px; 
+  background: #ffffff; 
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.75rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.disease-card:hover {
+  transform: translateY(-8px);
+  border-color: #3b82f6;
+  box-shadow: 0 12px 24px -10px rgba(59, 130, 246, 0.25), 
+              0 4px 12px -5px rgba(0, 0, 0, 0.1);
+}
+
+.disease-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.08) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.disease-card:hover::before {
+  opacity: 1;
+}
+
+.disease-card-icon {
+  width: 48px; 
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+}
+
+.disease-card:hover .disease-card-icon {
+  background: #3b82f6;
+  color: #ffffff;
+  transform: scale(1.1) rotate(5deg);
+}
+
+.disease-card-content {
+  margin-top: 3rem; 
+}
+
+.disease-card-content h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a; 
+  margin: 0 0 0.5rem 0;
+  transition: color 0.3s ease;
+}
+
+.disease-card:hover .disease-card-content h4 {
+  color: #3b82f6; 
+}
+
+.disease-card-content p {
+  font-size: 0.95rem;
+  color: #475569; 
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* =========================================
@@ -877,20 +1199,18 @@ html, body {
 .footer-primary-content {
   display: flex;
   flex-wrap: wrap;
-  /* KEY CHANGE: Pushes Logo to left and Links to right */
   justify-content: space-between; 
-  align-items: flex-start; /* Ensures top alignment */
+  align-items: flex-start; 
   gap: 40px; 
   margin-bottom: 30px;
-  text-align: left; /* Reset text alignment to left */
+  text-align: left; 
 }
 
-/* --- Left Side: Logo & Tagline --- */
 .footer-identity {
   flex: 0 1 350px; 
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Aligns content to the left */
+  align-items: flex-start; 
 }
 
 .footer-brand-logo {
@@ -899,7 +1219,6 @@ html, body {
   object-fit: contain;
   margin-bottom: 12px;
   display: block;
-  /* No auto margins here, keeps it left */
 }
 
 .footer-brand-logo:not([src]), 
@@ -913,15 +1232,12 @@ html, body {
   text-align: left;
 }
 
-/* --- Right Side: Navigation Links --- */
-/* Optional wrapper to group columns if needed, but flex works without it */
-
 .footer-nav-column {
   flex: 0 0 auto;
   min-width: 120px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Aligns links to the left */
+  align-items: flex-start; 
 }
 
 .footer-nav-column h4 {
@@ -962,28 +1278,19 @@ html, body {
 
 .footer-nav-column a:hover,
 .footer-nav-column button:hover {
-  color: #2563eb;
+ 
   padding-left: 5px; 
 }
 
-/* =========================================
-   Updated Notice Box Styling
-   ========================================= */
-
 .footer-notice-box {
-  /* Box Styling */
   background-color: #fffbeb;
   border: 1px solid #fcd34d;
   border-radius: 8px;
   padding: 16px 20px;
-  
-  /* Layout: Make it full width */
   width: 100%; 
-  max-width: 100%; /* Removes previous width restriction */
-  box-sizing: border-box; /* Ensures padding doesn't break width */
-  margin: 0 0 30px 0; /* Add bottom margin to separate from copyright */
-  
-  /* Flex settings for the icon and text */
+  max-width: 100%; 
+  box-sizing: border-box; 
+  margin: 0 0 30px 0; 
   display: flex;
   gap: 12px;
   align-items: flex-start;
@@ -995,10 +1302,9 @@ html, body {
   font-size: 0.85rem;
   line-height: 1.5;
   text-align: left;
-  flex: 1; /* Ensures text takes up remaining space */
+  flex: 1; 
 }
 
-/* Icon Styling */
 .notice-icon {
   flex-shrink: 0;
   width: 20px;
@@ -1011,11 +1317,11 @@ html, body {
   justify-content: center;
   font-weight: 800;
   font-size: 12px;
-  margin-top: 2px; /* Slight visual alignment with text */
+  margin-top: 2px; 
 }
 
 .footer-copyright {
-  text-align: center; /* Copyright usually stays centered, or change to left if preferred */
+  text-align: center; 
   border-top: 1px solid #f1f5f9;
   padding-top: 20px;
 }
@@ -1025,20 +1331,8 @@ html, body {
   font-size: 0.8rem;
 }
 
-/* Mobile Responsiveness: Stacks them vertically on small screens */
-@media (max-width: 768px) {
-  .footer-primary-content {
-    flex-direction: column;
-    gap: 30px;
-  }
-  
-  /* On mobile, you might want to stack the columns */
-  .footer-nav-column {
-    width: 100%;
-  }
-}
 /* =========================================
-   6. Popup / Modal Styles (NEW)
+   6. Popup / Modal Styles
    ========================================= */
 .modal-overlay {
   position: fixed;
@@ -1046,12 +1340,12 @@ html, body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(15, 23, 42, 0.6); /* Slate overlay */
+  background-color: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999; /* High z-index to sit on top of everything */
+  z-index: 9999; 
   animation: fadeIn 0.2s ease-out;
 }
 
@@ -1118,80 +1412,7 @@ html, body {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-/* =========================================
-   Dark Mode Overrides for Modals
-   ========================================= */
 
-/* 1. Darken the main modal box */
-.dark-theme .modal-content {
-  background: #1e293b; /* Slate-800 */
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
-}
-
-/* 2. Darken the header background and borders */
-.dark-theme .modal-header {
-  background-color: #0f172a; /* Slate-900 (Darker than body) */
-  border-bottom: 1px solid #334155; /* Slate-700 */
-}
-
-/* 3. Lighten the Title Text */
-.dark-theme .modal-header h2 {
-  color: #f1f5f9; /* Slate-100 (Almost White) */
-}
-
-/* 4. Adjust Close Button for dark background */
-.dark-theme .close-btn {
-  color: #94a3b8; /* Slate-400 */
-}
-
-.dark-theme .close-btn:hover {
-  color: #f87171; /* Light Red for visibility */
-}
-
-/* 5. Lighten Body Text */
-.dark-theme .modal-body {
-  color: #cbd5e1; /* Slate-300 */
-}
-
-/* 6. Adjust Headings inside body (Make blue lighter) */
-.dark-theme .modal-body h3 {
-  color: #60a5fa; /* Blue-400 (Lighter blue for contrast) */
-}
-/* --- Footer Logo Switching --- */
-
-.footer-brand-logo {
-  height: 40px !important; /* Adjust size as needed */
-  width: auto;
-  object-fit: contain;
-  margin-bottom: 12px;
-}
-
-/* 1. Default State (Light Mode) */
-.logo-light {
-  display: block;
-}
-
-.logo-dark {
-  display: none; /* Hide dark logo by default */
-}
-
-/* 2. Dark Mode State */
-/* When .dark-theme is present on body/wrapper, switch them */
-.dark-theme .logo-light {
-  display: none;
-}
-
-.dark-theme .logo-dark {
-  display: block;
-}
-/* Optional: Make the scrollbar look good in dark mode */
-.dark-theme .modal-body::-webkit-scrollbar-track {
-  background: #0f172a; 
-}
-.dark-theme .modal-body::-webkit-scrollbar-thumb {
-  background-color: #475569; 
-  border-radius: 20px;
-}
 /* =========================================
    DARK MODE THEME
    ========================================= */
@@ -1229,14 +1450,8 @@ html, body {
 }
 
 .dark-theme .hero-bg-gradient { background: var(--bg-main); }
-
-.dark-theme .hero-bg-gradient::before {
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
-}
-
-.dark-theme .hero-bg-gradient::after {
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
-}
+.dark-theme .hero-bg-gradient::before { background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%); }
+.dark-theme .hero-bg-gradient::after { background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%); }
 
 .dark-theme .step-card,
 .dark-theme .feature-card,
@@ -1296,163 +1511,103 @@ html, body {
   background-color: var(--bg-footer);
   border-top-color: var(--border-light);
 }
-
 .dark-theme .footer-nav-column h4 { color: #f1f5f9; }
-
 .dark-theme .footer-nav-column a { color: #94a3b8; }
-
 .dark-theme .footer-nav-column a:hover { color: #60a5fa; }
-
-.dark-theme .footer-notice-box {
-  background-color: rgba(245, 158, 11, 0.1); 
-  border-color: rgba(245, 158, 11, 0.3);
-}
-
+.dark-theme .footer-notice-box { background-color: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); }
 .dark-theme .footer-notice-box p { color: #fbbf24; }
-
 .dark-theme .footer-copyright { border-top-color: var(--border-light); }
 
+/* User's New Dark Mode Overrides mapped to .dark-theme */
+.dark-theme .checkup-section .section-intro h2,
+.dark-theme .disease-category-header h3 { color: #f8fafc; }
+.dark-theme .checkup-section .section-intro p { color: #94a3b8; }
+.dark-theme .disease-card { background: #1e293b !important; border-color: #334155 !important; }
+.dark-theme .disease-card-content h4 { color: #f1f5f9 !important; }
+.dark-theme .disease-card-content p { color: #94a3b8 !important; }
+
+/* Modals Dark Mode */
+.dark-theme .modal-content { background: #1e293b; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3); }
+.dark-theme .modal-header { background-color: #0f172a; border-bottom: 1px solid #334155; }
+.dark-theme .modal-header h2 { color: #f1f5f9; }
+.dark-theme .close-btn { color: #94a3b8; }
+.dark-theme .close-btn:hover { color: #f87171; }
+.dark-theme .modal-body { color: #cbd5e1; }
+.dark-theme .modal-body h3 { color: #60a5fa; }
+.dark-theme .logo-light { display: none; }
+.dark-theme .logo-dark { display: block; }
+.dark-theme .modal-body::-webkit-scrollbar-track { background: #0f172a; }
+.dark-theme .modal-body::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 20px; }
+
 /* =========================================
-   6. MEDIA QUERIES (ENHANCED MOBILE UI)
-   ========================================= */
-
-/* --- Tablet (Between 769px and 992px) --- */
-/* =========================================
-   6. RESPONSIVE DESIGN (FIXED LAYOUT)
-   ========================================= */
-
-/* --- TABLET ADJUSTMENTS (Max-Width: 992px) --- */
-@media (max-width: 992px) {
-  
-  /* 1. HERO SECTION: Clean Stack */
-  .hero-content {
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center; /* Center text alignment */
-  }
-
-  .hero-text-wrapper {
-    margin: 0 auto 40px auto; /* Auto margins to center the box */
-    max-width: 580px; /* Constrain width for readability */
-    padding: 0 20px;
-  }
-
-  /* Fix: Ensure buttons stay side-by-side on tablet if there is space */
-  .hero-actions {
-    justify-content: center;
-    gap: 16px;
-  }
-
-  /* 2. FOOTER ("POOTER") FIX 
-     This fixes the large gap between Logo and Text */
-  .footer-primary-content {
-    flex-direction: column;
-    gap: 40px; /* Space between the Logo section and the Links section */
-    text-align: center; /* Center align for tablet aesthetics */
-  }
-
-  .footer-identity {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Aligns items down the center line */
-    gap: 16px; /* CONTROLLED GAP: Only 16px between logo and text */
-    max-width: 500px;
-    margin: 0 auto; /* Centers the whole block */
-  }
-
-  .footer-logo {
-    margin-bottom: 0;
-    display: none; /* Remove old margins if any */
-  }
-
-  .footer-identity p {
-    margin-top: 0; /* Remove top margin from text to close the gap */
-    opacity: 0.8;
-    line-height: 1.6;
-  }
-
-  /* 3. INFO GRID: 2x2 Layout instead of 1 long column */
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Keep 2 items per row */
-    gap: 20px;
-  }
-}
-
-/* --- MOBILE ADJUSTMENTS (Max-Width: 768px) --- */
-/* =========================================
-   MOBILE FIXES: Remove 'How it Works' & Fix Gaps
-   Paste this at the VERY BOTTOM of your CSS
+   7. MEDIA QUERIES (ENHANCED MOBILE UI)
    ========================================= */
 
 @media (max-width: 768px) {
-
-  /* 1. REMOVE "How It Works" Section */
-  /* This hides the section with the 1-2-3 steps */
-  .info-section {
-    display: none !important;
-  }
-
-  /* 2. REMOVE EXTRA FOOTER GAP */
-  .site-footer {
-    /* Reduce the space inside the footer */
-    padding-top: 0px !important; 
-    padding-bottom: 30px !important; 
-    margin-top: 0 !important;
-    border-top: 1px solid #e2e8f0; /* Ensure border is visible */
-  }
-
-  /* 3. TIGHTEN THE SECTION ABOVE FOOTER */
-  /* This pulls the footer closer to the content above it */
-  .future-section {
-    padding-bottom: 20px !important;
-  }
-  
-  .cta-banner {
-    margin-bottom: 20px !important; /* Reduce margin below the blue banner */
-  }
-
-  /* 4. TIGHTEN GAP INSIDE FOOTER */
-  .footer-primary-content {
-    gap: 15px !important; /* Bring links closer to the text */
-  }
-}
-/* =========================================
-   MOBILE: REMOVE IMAGE & TIGHTEN GAPS
-   Paste this at the VERY BOTTOM
-   ========================================= */
-
-@media (max-width: 768px) {
-
-  /* 1. REMOVE IMAGE (Hero Visual) */
-  .hero-visual,
-  .hero-bg-gradient::before,
-  .hero-bg-gradient::after {
-    display: none !important;
-  }
-
-  /* 2. TIGHTEN GAP: HEADER LOGO -> HERO TEXT
-     This pulls "Hi, I'm Sympto" up closer to the top navigation bar. */
+  /* 1. HERO SECTION */
   .hero-section {
-    padding-top: 100px !important; /* Reduced from 100px to 20px */
-    padding-bottom: 20px !important;
+    padding: 100px 16px 40px !important;
+    min-height: auto;
   }
+  .hero-bg-gradient::before,
+  .hero-bg-gradient::after,
+  .hero-visual { display: none !important; }
+  .hero-content { flex-direction: column; text-align: center; padding: 0; }
+  .hero-text-wrapper { margin: 0; max-width: 100%; }
+  .hero-main-title { font-size: 2.2rem; text-align: center; margin-bottom: 16px; }
+  .hero-pre-title { font-size: 0.8rem; margin-bottom: 16px; }
+  .hero-checklist { grid-template-columns: 1fr; gap: 12px; max-width: 300px; margin: 24px auto; }
+  .hero-actions { flex-direction: column; width: 100%; gap: 16px; }
+  .hero-actions .btn { width: 100%; padding: 16px; }
 
-  /* 3. TIGHTEN GAP: FOOTER AREA
-     Removes the space where the footer logo used to be. */
-  .footer-brand-logo {
-    display: none !important; /* Ensure it's hidden */
-  }
+  /* 2. HOW IT WORKS */
+  .info-section { padding: 50px 0 !important; display: block !important; }
+  .info-visual { display: none !important; }
+  .info-grid { grid-template-columns: 1fr; gap: 30px; }
+  .section-header { font-size: 1.8rem; text-align: center; }
+  .lead-text { text-align: center; font-size: 1rem; margin-bottom: 24px; }
+  .step-card { padding: 16px; flex-direction: column; text-align: center; align-items: center; }
 
-  .footer-identity {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    gap: 0 !important; /* Remove flex gap */
-  }
+  /* 3. CAROUSEL */
+  .carousel-section { padding: 50px 0 !important; }
+  .carousel-wrapper { mask-image: none; -webkit-mask-image: none; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 20px; scrollbar-width: none; }
+  .carousel-wrapper::-webkit-scrollbar { display: none; }
+  .carousel-track { animation: none !important; padding: 10px 16px; gap: 16px; }
+  .carousel-card { scroll-snap-align: center; width: 280px; height: auto; min-height: 260px; margin: 0; }
+  .carousel-card:hover { transform: none; }
 
-  .footer-identity p {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
+  /* 4. USER'S NEW DISEASE CARDS (MOBILE RESIZE) */
+  .disease-card {
+    width: 280px; /* Scaled down slightly for mobile screens */
+    min-height: 180px;
   }
+  .disease-card:hover {
+    transform: none; /* Disable lift on touch devices */
+  }
+  .disease-category-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+
+  /* 5. FUTURE SECTION & CTA */
+  .future-section { padding: 50px 0 30px !important; }
+  .features-grid { grid-template-columns: 1fr; gap: 16px; margin-bottom: 40px; }
+  .feature-card { padding: 24px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .feature-card:hover { transform: none; }
+  .cta-banner { padding: 40px 20px; border-radius: 16px; }
+  .cta-banner h3 { font-size: 1.5rem; }
+  .bottom-links { flex-direction: column; width: 100%; }
+  .bottom-links .link-text { width: 100%; text-align: center; }
+
+  /* 6. FOOTER */
+  .site-footer { padding: 40px 0 20px !important; }
+  .footer-primary-content { flex-direction: column; align-items: center; text-align: center; gap: 30px !important; }
+  .footer-identity { align-items: center; flex: none; width: 100%; }
+  .footer-brand-logo { display: block !important; margin: 0 auto 16px auto; }
+  .footer-identity p { text-align: center; }
+  .footer-nav-column { width: 100%; align-items: center; }
+  .footer-nav-column h4 { text-align: center; }
+  .footer-nav-column a, .footer-nav-column button { text-align: center; padding: 8px 0; }
+  .footer-notice-box { flex-direction: column; align-items: center; text-align: center; padding: 16px; }
+  .footer-notice-box p { text-align: center; }
+
+  /* 7. MODALS */
+  .modal-content { width: 95%; max-height: 90vh; }
 }
