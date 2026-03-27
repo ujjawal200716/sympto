@@ -1,9 +1,8 @@
 /* MedicalDictionary.css - Ultra-Premium Animated UI (Light & Dark Themes) */
 
 /* --- 1. THEME VARIABLES (Light Mode Default) --- */
-
 :root {
-  /* Soft Light Backgrounds - Matched to Image */
+  /* Soft Light Backgrounds */
   --bg-page: #f8fafc;
   --bg-card: rgba(255, 255, 255, 0.85); 
   --bg-tab-container: #f1f5f9; 
@@ -48,6 +47,7 @@
   /* Cinematic Easing Curves */
   --spring-easing: cubic-bezier(0.175, 0.885, 0.32, 1.2); 
   --smooth-easing: cubic-bezier(0.16, 1, 0.3, 1);
+  --bounce-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
   
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
@@ -65,19 +65,17 @@
   --primary-dark: #0284c7;
   --primary-glow: rgba(56, 189, 248, 0.25);
   
-  /* FIX: Changed gradient so 'Knowledge Base' title is white instead of blue */
   --accent-gradient: linear-gradient(135deg, #ffffff, #e2e8f0);
   
   --search-bg: rgba(15, 23, 42, 0.75); 
   --search-border: #334155; 
   --search-icon: #64748b;   
   
-  /* FIX: Restored pure white and light gray text colors */
   --text-title-dark: #ffffff; 
-  --text-main: #ffffff;       
+  --text-main: #ffffff;        
   --text-muted: #cbd5e1;
   --text-light: #94a3b8;
-  --text-inverse: #020617;    
+  --text-inverse: #020617;   
   
   --border-light: #1e293b;
   --border-subtle: #334155;
@@ -87,7 +85,7 @@
   --warning-bg: rgba(217, 119, 6, 0.15); --warning-text: #fbbf24;
   --danger-bg: rgba(220, 38, 38, 0.15);  --danger-text: #f87171;
 
-  animation: darkModePulse 3s ease-in-out infinite alternate;
+  animation: darkModePulse 4s ease-in-out infinite alternate;
 }
 
 /* --- 2. FULL SIZE CONTAINER & BREATHING GLOW --- */
@@ -117,7 +115,7 @@
     radial-gradient(circle at 85% 90%, var(--ambient-glow-2) 0%, transparent 40%);
   z-index: 0;
   pointer-events: none;
-  animation: breatheGlow 15s ease-in-out infinite alternate;
+  animation: breatheGlow 12s ease-in-out infinite alternate;
 }
 
 .dictionary-wrapper {
@@ -135,7 +133,7 @@
   text-align: center;
   width: 100%;
   margin-bottom: 3rem;
-  animation: fadeDown 1s var(--smooth-easing);
+  animation: fadeDown 1s var(--bounce-easing);
 }
 
 .dict-title {
@@ -177,6 +175,7 @@
   gap: 4px; 
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
   transition: background-color 0.4s ease;
+  position: relative;
 }
 
 .dict-tab {
@@ -193,18 +192,34 @@
   gap: 8px;
   justify-content: center;
   transition: all 0.3s var(--spring-easing);
+  position: relative;
+  overflow: hidden;
 }
 
-.dict-tab:hover:not(.active) { 
-  color: var(--text-main); 
+.dict-tab::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 50%;
+  width: 0; height: 3px;
+  background: var(--primary);
+  transition: all 0.3s var(--spring-easing);
+  transform: translateX(-50%);
+  border-radius: 3px 3px 0 0;
+  opacity: 0;
 }
+
+.dict-tab:hover:not(.active) { color: var(--text-main); }
 
 .dict-tab.active { 
   background: var(--bg-card); 
   color: var(--primary); 
   font-weight: 700; 
-  border-color: var(--search-border) !important; 
   box-shadow: 0 4px 12px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.05); 
+}
+
+.dict-tab.active::after {
+  width: 40%;
+  opacity: 1;
 }
 
 .tab-icon { font-size: 1.1rem; }
@@ -214,7 +229,8 @@
   width: 100%;
   max-width: 680px;
   margin-bottom: 4rem;
-  animation: fadeUp 0.8s var(--smooth-easing) 0.1s both;
+  animation: fadeUp 0.8s var(--bounce-easing) 0.1s both;
+  position: relative;
 }
 
 .dict-search-bar {
@@ -273,9 +289,20 @@
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s var(--spring-easing);
+  transition: all 0.3s var(--bounce-easing);
   min-width: 120px;
   margin-left: 10px; 
+  position: relative;
+  overflow: hidden;
+}
+
+.dict-search-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
 }
 
 .dict-search-btn:hover:not(:disabled) {
@@ -285,9 +312,8 @@
   box-shadow: 0 8px 20px var(--primary-glow);
 }
 
-.dict-search-btn:active:not(:disabled) {
-  transform: scale(0.96); 
-}
+.dict-search-btn:hover:not(:disabled)::before { left: 100%; }
+.dict-search-btn:active:not(:disabled) { transform: scale(0.94); }
 
 .dict-search-btn:disabled {
   background: var(--border-light);
@@ -303,20 +329,75 @@
   animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite; 
 }
 
+/* --- 5.1 PREMIUM AUTOCOMPLETE DROPDOWN --- */
+.autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  width: calc(100% - 130px);
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  margin: 0;
+  padding: 8px 0;
+  list-style: none;
+  z-index: 1000;
+  box-shadow: var(--shadow-float);
+  max-height: 300px;
+  overflow-y: auto;
+  text-align: left;
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: fadeDown 0.3s var(--bounce-easing) forwards;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar { width: 6px; }
+.autocomplete-dropdown::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 10px; }
+
+.autocomplete-dropdown li {
+  padding: 14px 24px;
+  cursor: pointer;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  font-size: 1.05rem;
+  font-weight: 500;
+  transition: all 0.2s var(--smooth-easing);
+  border-left: 3px solid transparent;
+}
+
+.autocomplete-dropdown li:hover {
+  background: var(--bg-tab-container);
+  color: var(--primary);
+  border-left-color: var(--primary);
+  padding-left: 30px; 
+}
+
+.autocomplete-dropdown li svg {
+  margin-right: 14px;
+  color: var(--text-light);
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.autocomplete-dropdown li:hover svg { color: var(--primary); }
+
 /* --- 6. RESULTS CARD & WATERFALL INFO BLOCKS --- */
 .dict-error-box { 
   width: 100%; max-width: 680px; background: var(--danger-bg); 
   border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 16px; 
   padding: 1.2rem; color: var(--danger-text); display: flex; 
   align-items: center; gap: 12px; font-size: 1.05rem; font-weight: 600; 
-  margin-bottom: 2rem; animation: shakeError 0.5s var(--spring-easing); 
+  margin-bottom: 2rem; animation: shakeError 0.5s var(--bounce-easing); 
 }
 
 .dict-result-card { 
   width: 100%; background: var(--bg-card); border-radius: 28px; 
   padding: 3.5rem; box-shadow: var(--shadow-float); 
   border: 1px solid var(--border-light); position: relative; 
-  overflow: hidden; animation: cardReveal 0.7s var(--spring-easing); 
+  overflow: hidden; animation: cardReveal 0.7s var(--bounce-easing); 
   transition: background-color 0.5s ease, border-color 0.5s ease;
 }
 
@@ -335,7 +416,7 @@
   width: 75px; height: 75px; background: var(--primary-glow); 
   color: var(--primary); border-radius: 22px; display: flex; 
   align-items: center; justify-content: center; font-size: 2.6rem; 
-  box-shadow: var(--shadow-sm); animation: popIn 0.6s var(--spring-easing) 0.2s both;
+  box-shadow: var(--shadow-sm); animation: popIn 0.6s var(--bounce-easing) 0.2s both;
 }
 
 .result-title-area h2 { 
@@ -369,12 +450,11 @@
   animation: staggerFadeUp 0.6s var(--smooth-easing) forwards;
 }
 
+/* Staggered loading for content blocks */
 .info-block:nth-child(1) { animation-delay: 0.1s; }
 .info-block:nth-child(2) { animation-delay: 0.2s; }
 .info-block:nth-child(3) { animation-delay: 0.3s; }
 .info-block:nth-child(4) { animation-delay: 0.4s; }
-.info-block:nth-child(5) { animation-delay: 0.5s; }
-.info-block:nth-child(6) { animation-delay: 0.6s; }
 
 .info-block:hover { 
   background: var(--bg-card); 
@@ -388,24 +468,40 @@
 .info-block:hover h3 svg { transform: scale(1.15) rotate(-8deg); }
 .info-block p { color: var(--text-muted); line-height: 1.75; margin: 0; font-size: 1.05rem; }
 
-/* FIX: Removed blue border and linear-gradient background from highlight blocks */
-.highlight-block { background: var(--bg-page); border-left: none; }
-.highlight-block h3 svg { background: transparent; padding: 0; font-size: 1.5rem; }
-.red-highlight { background: var(--bg-page); border-left: none; }
+/* --- 6.1 SKELETON LOADING ANIMATION --- */
+.skeleton-glow {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--border-light) !important;
+  color: transparent !important;
+  border-color: transparent !important;
+  pointer-events: none;
+}
+.skeleton-glow::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: translateX(-100%);
+  animation: shimmerLftToRgt 1.5s infinite var(--smooth-easing);
+}
+.dark-theme .skeleton-glow::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+}
 
 /* --- 7. REFINED LISTS --- */
 .modern-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; }
 .modern-list li { position: relative; padding-left: 40px; color: var(--text-muted); line-height: 1.6; font-size: 1.05rem; transition: transform 0.3s ease, color 0.3s ease; }
 .modern-list li:hover { transform: translateX(8px); color: var(--text-main); }
-.modern-list li::before { content: '•'; position: absolute; left: 0; color: var(--primary); font-weight: 900; font-size: 1.5rem; top: -5px; }
+.modern-list li::before { content: '•'; position: absolute; left: 0; color: var(--primary); font-weight: 900; font-size: 1.5rem; top: -5px; transition: transform 0.3s ease; }
+.modern-list li:hover::before { transform: scale(1.5); }
 
 .check-list li::before { content: '✓'; color: var(--success-text); background: var(--success-bg); font-size: 0.85rem; top: 3px; padding: 3px 5px; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.3); }
 .warning-list li::before { content: '!'; color: var(--warning-text); background: var(--warning-bg); font-size: 0.95rem; font-weight: 900; top: 3px; padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.3); }
-.alert-list li::before { content: '✕'; color: var(--danger-text); background: var(--danger-bg); font-size: 0.85rem; font-weight: 900; top: 3px; padding: 3px 6px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.3); }
 
 /* --- 8. ACTION BAR --- */
 .result-action-bar { display: flex; gap: 18px; margin-top: 3rem; padding-top: 3rem; border-top: 1px solid var(--border-light); justify-content: center; flex-wrap: wrap; animation: fadeUp 0.8s ease 0.8s both; }
-.action-btn { display: flex; align-items: center; gap: 12px; padding: 16px 32px; border-radius: 14px; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: all 0.3s var(--spring-easing); border: 1px solid var(--border-light); background: var(--bg-card); color: var(--text-main); }
+.action-btn { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 16px 32px; border-radius: 14px; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: all 0.3s var(--spring-easing); border: 1px solid var(--border-light); background: var(--bg-card); color: var(--text-main); }
 .action-btn:hover { box-shadow: var(--shadow-md); transform: translateY(-5px); border-color: var(--primary); color: var(--primary); }
 .action-btn:active { transform: translateY(1px) scale(0.96); } 
 
@@ -413,11 +509,9 @@
 .save-btn:hover { background: rgba(16, 185, 129, 0.2); color: var(--success-text); border-color: var(--success-text); box-shadow: 0 10px 25px var(--success-glow); }
 .download-btn { background: var(--primary-glow); color: var(--primary); border-color: rgba(14, 165, 233, 0.3); }
 .download-btn:hover { background: rgba(14, 165, 233, 0.2); color: var(--primary); border-color: var(--primary); box-shadow: 0 10px 25px var(--primary-glow); }
-.share-btn { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; border-color: rgba(139, 92, 246, 0.3); }
-.share-btn:hover { background: rgba(139, 92, 246, 0.2); color: #a78bfa; border-color: #8b5cf6; box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3); }
 
 .medical-disclaimer { background: var(--warning-bg); border: 1px solid rgba(245, 158, 11, 0.4); padding: 18px 24px; border-radius: 16px; display: flex; align-items: flex-start; gap: 18px; margin-bottom: 3rem; }
-.medical-disclaimer svg { color: var(--warning-text); font-size: 2rem; flex-shrink: 0; }
+.medical-disclaimer svg { color: var(--warning-text); font-size: 2rem; flex-shrink: 0; animation: pulse-warning 3s infinite; border-radius: 50%;}
 .medical-disclaimer p { color: var(--text-main); font-size: 1rem; line-height: 1.6; margin: 0; }
 
 /* --- 9. KEYFRAME ANIMATIONS --- */
@@ -430,6 +524,7 @@
 @keyframes cardReveal { from { opacity: 0; transform: translateY(60px) scale(0.97); filter: blur(12px); } to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
 @keyframes shakeError { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 50% { transform: translateX(10px); } 75% { transform: translateX(-5px); } }
 @keyframes staggerFadeUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes shimmerLftToRgt { 100% { transform: translateX(100%); } }
 
 @keyframes pulse-success { 0% { box-shadow: 0 0 0 0 var(--success-glow); } 70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
 @keyframes pulse-danger { 0% { box-shadow: 0 0 0 0 var(--danger-glow); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
@@ -441,7 +536,6 @@
 }
 
 /* --- 10. ULTRA-PREMIUM REFINEMENTS & ACCESSIBILITY --- */
-
 .dict-result-card, 
 .dict-search-bar, 
 .info-block {
@@ -457,16 +551,6 @@
   transition: outline-offset 0.2s ease;
 }
 
-.dict-search-bar input:focus,
-.dict-search-bar input:focus-visible,
-.dict-search-bar input:active {
-  outline: none !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-/* FIX: Removed custom ::selection logic to prevent text highlighting bugs */
-
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: var(--bg-page); }
 ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 20px; border: 3px solid var(--bg-page); }
@@ -474,13 +558,11 @@
 
 /* --- 11. RESPONSIVE & MOBILE OPTIMIZATIONS (COMPLETELY REBUILT) --- */
 @media (max-width: 768px) {
-  /* Tighter top padding for smaller screens */
-  .dictionary-wrapper { padding: 40px 15px 20px 15px; }
-  .dict-title { font-size: 2.4rem; line-height: 1.15; }
-  .dict-title span { padding-bottom: 6px; }
-  .dict-subtitle { font-size: 1rem; padding: 0 5px; margin-bottom: 2rem; }
+  .dictionary-wrapper { padding: 30px 15px 20px 15px; }
+  .dict-title { font-size: 2.2rem; line-height: 1.15; }
+  .dict-subtitle { font-size: 0.95rem; margin-bottom: 2rem; padding: 0 10px; }
   
-  /* Swipeable Horizontal Tabs - Ultra Premium Native Feel */
+  /* Swipeable Tabs with Visual Fade Indicator */
   .dict-tab-container {
     display: flex;
     width: 100%;
@@ -491,40 +573,187 @@
     border-radius: 20px;
     scrollbar-width: none; 
     scroll-snap-type: x mandatory;
+    /* Premium fade mask to indicate scrolling */
+    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    mask-image: linear-gradient(to right, black 85%, transparent 100%);
   }
   .dict-tab-container::-webkit-scrollbar { display: none; } 
   .dict-tab { 
     padding: 12px 20px; 
     font-size: 0.95rem; 
     white-space: nowrap; 
-    flex-shrink: 0; /* CRITICAL: prevents text from squishing */
-    scroll-snap-align: center;
+    flex-shrink: 0; 
+    scroll-snap-align: start;
   }
 
-  /* Smart Wrapping Search Bar */
+  /* Fixed Search Bar - True Pill Shape without Wrapping */
   .dict-search-form { padding: 0 5px; margin-bottom: 2.5rem; }
   .dict-search-bar { 
-    flex-wrap: wrap; 
-    border-radius: 20px; 
-    padding: 8px; 
+    flex-wrap: nowrap; /* Forces one line */
+    border-radius: 99px; 
+    padding: 6px 6px 6px 20px; 
   }
-  .search-icon { margin-left: 12px; font-size: 1.1rem; }
+  .search-icon { margin-right: 8px; font-size: 1.1rem; }
   .dict-search-bar input { 
-    flex: 1 1 calc(100% - 50px); 
-    text-align: left; 
-    padding: 12px 0; 
-    font-size: 1.05rem; 
+    padding: 10px 0; 
+    font-size: 1rem; 
+  }
+  /* --- 11. RESPONSIVE & MOBILE OPTIMIZATIONS (COMPLETELY REBUILT) --- */
+@media (max-width: 768px) {
+  /* 1. Fix the 100vw scrollbar bug */
+  .dictionary-container { min-width: 100%; }
+  
+  /* 2. Clear the navbar and prevent horizontal scroll */
+  .dictionary-wrapper { 
+    padding: 100px 15px 20px 15px; 
+    box-sizing: border-box;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* 3. Fluid Typography & Wrap Fix */
+  .dict-title { 
+    /* clamp(min, preferred, max) scales perfectly to the screen width */
+    font-size: clamp(2rem, 8vw, 2.5rem); 
+    line-height: 1.2; 
+    padding: 0; 
+    width: 100%;
   }
   
-  /* Button stretches beautifully on the bottom row */
-  .dict-search-btn { 
-    width: 100%; 
-    border-radius: 14px; 
-    padding: 14px; 
-    margin-left: 0; 
-    margin-top: 8px; 
-    font-size: 1.05rem;
+  .dict-title span {
+    display: inline; /* CRITICAL FIX: Allows gradient text to wrap naturally */
   }
+  
+  .dict-subtitle { 
+    font-size: 0.95rem; 
+    margin-bottom: 2rem; 
+    padding: 0 5px; 
+  }
+  
+  /* Swipeable Tabs */
+  .dict-tab-container {
+    display: flex;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+    padding: 6px;
+    border-radius: 20px;
+    scrollbar-width: none; 
+    scroll-snap-type: x mandatory;
+    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  }
+  .dict-tab-container::-webkit-scrollbar { display: none; } 
+  .dict-tab { 
+    padding: 12px 20px; 
+    font-size: 0.95rem; 
+    white-space: nowrap; 
+    flex-shrink: 0; 
+    scroll-snap-align: start;
+  }
+
+  /* Fixed Search Bar */
+  .dict-search-form { 
+    width: 100%; 
+    padding: 0; 
+    margin-bottom: 2.5rem; 
+    box-sizing: border-box;
+  }
+  .dict-search-bar { 
+    width: 100%;
+    flex-wrap: nowrap; 
+    border-radius: 99px; 
+    padding: 6px 6px 6px 20px; 
+    box-sizing: border-box;
+  }
+  .search-icon { margin-right: 8px; font-size: 1.1rem; }
+  .dict-search-bar input { 
+    width: 100%;
+    min-width: 0; 
+    padding: 10px 0; 
+    font-size: 1rem; 
+  }
+  .dict-search-btn { 
+    flex-shrink: 0; 
+    width: auto;
+    min-width: unset;
+    padding: 12px 20px; 
+    margin-left: 5px; 
+    margin-top: 0; 
+    font-size: 0.95rem;
+  }
+
+  /* Mobile Dropdown Adjustments */
+  .autocomplete-dropdown { width: 100%; top: calc(100% + 8px); border-radius: 16px; }
+  .autocomplete-dropdown li { font-size: 0.95rem; padding: 12px 18px; }
+
+  /* Compact Results Card & Disclaimer */
+  .dict-result-card { 
+    padding: 1.8rem 1.2rem; 
+    border-radius: 24px; 
+    box-sizing: border-box; /* CRITICAL FIX: Keeps card inside screen bounds */
+    width: 100%;
+  }
+  .result-header { flex-direction: column; text-align: center; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; }
+  .result-icon-box { width: 64px; height: 64px; font-size: 2rem; border-radius: 18px; margin: 0 auto; }
+  .result-title-area h2 { font-size: 1.8rem; }
+  
+  .result-content-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .info-block { padding: 1.25rem; border-radius: 18px; }
+  .info-block h3 { font-size: 1.05rem; }
+  .modern-list li { font-size: 0.95rem; padding-left: 30px; }
+  .modern-list li::before { font-size: 1.2rem; top: -3px; }
+  
+  /* Action Buttons */
+  .result-action-bar { padding-top: 1.5rem; margin-top: 1.5rem; gap: 10px; display: grid; grid-template-columns: 1fr 1fr; }
+  .save-btn { grid-column: span 2; }
+  .action-btn { width: 100%; padding: 14px; font-size: 0.95rem; border-radius: 14px; }
+  
+  /* Touch target active states */
+  .info-block:active, .dict-tab:active, .action-btn:active {
+      transform: scale(0.97) !important;
+      transition: transform 0.1s;
+  }
+
+  .medical-disclaimer { 
+    flex-direction: column; 
+    align-items: center; 
+    text-align: center; 
+    gap: 10px; 
+    padding: 16px; 
+    border-radius: 16px; 
+    box-sizing: border-box; /* Keeps disclaimer inside bounds */
+    width: 100%;
+  }
+  .medical-disclaimer p { font-size: 0.9rem; }
+}
+
+@media (max-width: 400px) {
+  /* Dynamic font scaling for the smallest phones */
+  .dict-title { font-size: clamp(1.6rem, 7vw, 2rem); } 
+  .dict-search-btn { padding: 12px 14px; font-size: 0.85rem; }
+  .dict-result-card { padding: 1.25rem 1rem; border-radius: 20px;}
+  .result-title-area h2 { font-size: 1.5rem; }
+}
+  
+  /* Shrunken button for mobile inline placement */
+  .dict-search-btn { 
+    width: auto;
+    min-width: unset;
+    padding: 12px 20px; 
+    margin-left: 5px; 
+    margin-top: 0; 
+    font-size: 0.95rem;
+  }
+
+  /* Mobile Dropdown Adjustments */
+  .autocomplete-dropdown {
+    width: 100%; 
+    top: calc(100% + 8px); 
+    border-radius: 16px;
+  }
+  .autocomplete-dropdown li { font-size: 0.95rem; padding: 12px 18px; }
 
   /* Compact Results Card */
   .dict-result-card { padding: 1.8rem 1.2rem; border-radius: 24px; }
@@ -532,29 +761,63 @@
   .result-icon-box { width: 64px; height: 64px; font-size: 2rem; border-radius: 18px; margin: 0 auto; }
   .result-title-area h2 { font-size: 1.8rem; }
   
-  /* Better badge alignment for mobile */
-  .type-badge { margin: 5px; }
-  .verdict-badge { display: block; margin: 12px auto 0 auto; width: fit-content; }
-  
   /* Stacked Grid & Info Blocks */
   .result-content-grid { grid-template-columns: 1fr; gap: 1rem; }
   .info-block { padding: 1.25rem; border-radius: 18px; }
   .info-block h3 { font-size: 1.05rem; }
-  .info-block h3 svg { font-size: 1.5rem; padding: 6px; }
-  .modern-list li { font-size: 0.95rem; }
+  .modern-list li { font-size: 0.95rem; padding-left: 30px; }
+  .modern-list li::before { font-size: 1.2rem; top: -3px; }
   
-  /* Action Buttons - Stacked for easy thumb tapping */
-  .result-action-bar { padding-top: 1.5rem; margin-top: 1.5rem; gap: 10px; flex-direction: column; }
-  .action-btn { width: 100%; justify-content: center; padding: 14px; font-size: 1rem; border-radius: 14px; }
+  /* Action Buttons - Smart Grid for Mobile */
+  .result-action-bar { 
+    padding-top: 1.5rem; 
+    margin-top: 1.5rem; 
+    gap: 10px; 
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 column layout */
+  }
+  /* Make the primary button take up the full width row */
+  .save-btn { grid-column: span 2; }
+  .action-btn { width: 100%; padding: 14px; font-size: 0.95rem; border-radius: 14px; }
   
+  /* Touch target active states */
+  .info-block:active, .dict-tab:active, .action-btn:active {
+      transform: scale(0.97) !important;
+      transition: transform 0.1s;
+  }
+
   .medical-disclaimer { flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 16px; border-radius: 16px; }
   .medical-disclaimer p { font-size: 0.9rem; }
 }
 
 @media (max-width: 400px) {
-  /* Extra tweaks for tiny screens (e.g., iPhone SE) */
-  .dict-title { font-size: 2rem; }
-  .dict-search-bar input { font-size: 0.95rem; }
+  .dict-title { font-size: 1.8rem; }
+  .dict-search-btn { padding: 12px 14px; font-size: 0.85rem; }
   .dict-result-card { padding: 1.25rem 1rem; border-radius: 20px;}
-  .result-title-area h2 { font-size: 1.6rem; }
+  .result-title-area h2 { font-size: 1.5rem; }
+}
+@media (max-width: 768px) {
+  /* --- ADD THESE TYPOGRAPHY FIXES --- */
+  .dict-title { 
+    font-size: 2.4rem; /* Shrinks the massive 4rem text */
+    line-height: 1.15; 
+    padding: 0 10px; 
+    word-break: break-word; /* Ensures long words wrap instead of bleeding off screen */
+  }
+
+  .dict-subtitle { 
+    font-size: 0.95rem; 
+    margin-bottom: 2rem; 
+    padding: 0 10px; 
+  }
+  /* ---------------------------------- */
+
+  /* Keep the wrapper and search bar fixes you already have below... */
+  .dictionary-wrapper { 
+    padding: 100px 15px 20px 15px; 
+    box-sizing: border-box;
+    width: 100%;
+    overflow-x: hidden;
+  }
+  /* ... rest of your mobile CSS ... */
 }
