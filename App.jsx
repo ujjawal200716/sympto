@@ -13,7 +13,7 @@ import Contactus from "./contactus.jsx";
 import Myprofile from "./myprofile.jsx";
 import Appointment from "./appointment.jsx";
 import SavedPages from "./saved.jsx";
-
+import Report1 from "./report.jsx";
 function App() {
   return (
     <BrowserRouter>
@@ -41,6 +41,7 @@ function App() {
         <Route path="/myprofile" element={<Myprofile />} />
         <Route path="/appointment" element={<Appointment />} />
         <Route path="/saved" element={<SavedPages />} />
+        <Route path="/report" element={<Report1 />} />
 
       </Routes>
     </BrowserRouter>
