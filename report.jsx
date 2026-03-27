@@ -94,7 +94,6 @@ const Report = () => {
           }
         })
       });
-
       if (response.ok) {
         setIsSaved(true);
         alert("✅ Assessment saved to your profile!");
